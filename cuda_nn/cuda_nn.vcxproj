@@ -78,9 +78,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <CudaCompile Include="kernel.cu" />
+    <CudaCompile Include="linear.cu" />
+    <CudaCompile Include="tensor.cu" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="layer.h" />
+    <ClInclude Include="linear.h" />
+    <ClInclude Include="tensor.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

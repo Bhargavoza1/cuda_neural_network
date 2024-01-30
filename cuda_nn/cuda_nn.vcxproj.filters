@@ -2,6 +2,12 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <CudaCompile Include="kernel.cu" />
+    <CudaCompile Include="linear.cu">
+      <Filter>layers</Filter>
+    </CudaCompile>
+    <CudaCompile Include="tensor.cu">
+      <Filter>utils</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="layers">
@@ -17,6 +23,12 @@
   <ItemGroup>
     <ClInclude Include="layer.h">
       <Filter>layers</Filter>
+    </ClInclude>
+    <ClInclude Include="linear.h">
+      <Filter>layers</Filter>
+    </ClInclude>
+    <ClInclude Include="tensor.h">
+      <Filter>utils</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
