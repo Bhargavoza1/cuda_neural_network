@@ -5,6 +5,9 @@
     <CudaCompile Include="linear.cu">
       <Filter>layers</Filter>
     </CudaCompile>
+    <CudaCompile Include="tensor_operations.h">
+      <Filter>utils</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="layers">

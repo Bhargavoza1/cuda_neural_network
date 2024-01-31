@@ -79,6 +79,7 @@
   <ItemGroup>
     <CudaCompile Include="kernel.cu" />
     <CudaCompile Include="linear.cu" />
+    <CudaCompile Include="tensor_operations.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="layer.h" />

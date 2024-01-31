@@ -12,7 +12,7 @@ namespace Hex{
 	__global__ void initTensorKernel(T* data, size_t size) {
 		int tid = blockIdx.x * blockDim.x + threadIdx.x;
 		if (tid < size) {
-			data[tid] = static_cast<T>(tid); // Just a simple initialization for demonstration
+			data[tid] = static_cast<T>(tid);  
 		}
 	}
 
@@ -23,7 +23,7 @@ namespace Hex{
             "Tensor only supports int, float, and double types");
         std::vector<size_t> shape;
         T* data;
-
+        bool isAllocatedOnGPU;
 
         void initializeGPUTensor(size_t size) {
             dim3 blockSize(256); // Adjust the block size based on your requirements
@@ -32,24 +32,45 @@ namespace Hex{
             cudaDeviceSynchronize();
         }
 
+        void initializeCPUTensor(size_t size) {
+            for (size_t i = 0; i < size; ++i) {
+                data[i] = static_cast<T>(i);   
+            }
+        }
+
     public:
-        Tensor(const std::vector<size_t>& shape) : shape(shape) {
+        Tensor(const std::vector<size_t>& shape, bool allocateOnGPU = true)
+            : shape(shape), isAllocatedOnGPU(allocateOnGPU) {
             size_t size = 1;
             for (size_t dim : shape) {
                 size *= dim;
             }
 
-            // Allocate memory using new[]
-            cudaMallocManaged(&data, size * sizeof(T));
+            if (allocateOnGPU) {
+                // Allocate memory on the GPU
+                cudaMallocManaged(&data, size * sizeof(T));
 
-            // Initialize GPU tensor data
-            initializeGPUTensor(size);
+                // Initialize GPU tensor data
+                initializeGPUTensor(size);
+            }
+            else {
+                // Allocate memory on the CPU
+                data = new T[size];
+
+                // Initialize CPU tensor data
+                initializeCPUTensor(size);
+            }
         }
 
-
         ~Tensor() {
-            // Deallocate memory using cudaFree
-            cudaFree(data);
+            if (isAllocatedOnGPU) {
+                // Deallocate memory on the GPU using cudaFree
+                cudaFree(data);
+            }
+            else {
+                // Deallocate memory on the CPU using delete[]
+                delete[] data;
+            }
         }
 
         T& operator()(const std::vector<size_t>& indices) {
