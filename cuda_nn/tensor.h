@@ -1,128 +1,141 @@
 // tensor.h
 
 #pragma once
-
+#include <cstdio> 
 #include <vector>
-#include <cuda_runtime.h>
+#include <iostream>
+#include <cuda_runtime.h> 
 
 namespace Hex{
 
-	// CUDA kernel to initialize tensor data
-	template <typename T>
-	__global__ void initTensorKernel(T* data, size_t size) {
-		int tid = blockIdx.x * blockDim.x + threadIdx.x;
-		if (tid < size) {
-			data[tid] = static_cast<T>(tid);  
-		}
-	}
+
 
     template <typename T>
     class Tensor {
     private:
-        static_assert(std::is_same<T, int>::value || std::is_same<T, float>::value || std::is_same<T, double>::value,
-            "Tensor only supports int, float, and double types");
-        std::vector<size_t> shape;
         T* data;
-        bool isAllocatedOnGPU;
-
-        void initializeGPUTensor(size_t size) {
-            dim3 blockSize(256); // Adjust the block size based on your requirements
-            dim3 gridSize(static_cast<unsigned int>((size + blockSize.x - 1) / blockSize.x));
-            initTensorKernel << <gridSize, blockSize >> > (data, size);
-            cudaDeviceSynchronize();
-        }
-
-        void initializeCPUTensor(size_t size) {
-            for (size_t i = 0; i < size; ++i) {
-                data[i] = static_cast<T>(i);   
-            }
-        }
+        std::vector<int> shape;
 
     public:
-        Tensor(const std::vector<size_t>& shape, bool allocateOnGPU = true)
-            : shape(shape), isAllocatedOnGPU(allocateOnGPU) {
-            size_t size = 1;
-            for (size_t dim : shape) {
+        // Constructor
+        Tensor(const std::vector<int>& shape) : shape(shape) {
+            int size = 1;
+            for (int dim : shape) {
                 size *= dim;
             }
-
-            if (allocateOnGPU) {
-                // Allocate memory on the GPU
-                cudaMallocManaged(&data, size * sizeof(T));
-
-                // Initialize GPU tensor data
-                initializeGPUTensor(size);
-            }
-            else {
-                // Allocate memory on the CPU
-                data = new T[size];
-
-                // Initialize CPU tensor data
-                initializeCPUTensor(size);
-            }
+            cudaMalloc((void**)&data, size * sizeof(T));
         }
 
+        // Destructor
         ~Tensor() {
-            if (isAllocatedOnGPU) {
-                // Deallocate memory on the GPU using cudaFree
-                cudaFree(data);
-            }
-            else {
-                // Deallocate memory on the CPU using delete[]
-                delete[] data;
-            }
+            cudaFree(data);
         }
 
-        T& operator()(const std::vector<size_t>& indices) {
-            size_t flat_index = 0;
-            size_t stride = 1;
+        // Copy constructor
+        Tensor(const Tensor& other) : shape(other.shape) {
+            int size = 1;
+            for (int dim : shape) {
+                size *= dim;
+            }
+            cudaMalloc((void**)&data, size * sizeof(T));
+            cudaMemcpy(data, other.data, size * sizeof(T), cudaMemcpyDeviceToDevice);
+        }
 
+        // Set element at index
+        void set(const std::vector<int>& indices, T value) {
+            int index = calculateIndex(indices);
+            cudaMemcpy(data + index, &value, sizeof(T), cudaMemcpyHostToDevice);
+        }
+
+        // Get element at index
+        T get(const std::vector<int>& indices) const {
+            int index = calculateIndex(indices);
+            T value;
+            cudaMemcpy(&value, data + index, sizeof(T), cudaMemcpyDeviceToHost);
+            return value;
+        }
+
+        // Print the tensor
+        void print() const {
+            std::cout << "Tensor (Shape: ";
             for (size_t i = 0; i < shape.size(); ++i) {
-                flat_index += indices[i] * stride;
-                stride *= shape[i];
+                std::cout << shape[i];
+                if (i < shape.size() - 1) {
+                    std::cout << "x";
+                }
             }
+            std::cout << ", Type: " << typeid(T).name() << "):" << std::endl;
 
-            return data[flat_index];
+            printHelper(data, shape, 0, {});
         }
 
- 
-
-        const std::vector<size_t>& getShape() const {
+        void setData(T* newData) {
+            data = newData;
+        }
+        // Getter for shape
+        std::vector<int> getShape() const {
             return shape;
         }
+
         const T* getData() const {
             return data;
         }
 
-        /**
-        * @brief Copy data from the GPU to the host (CPU) memory.
-        *
-        * This function uses cudaMemcpy to transfer data from the specified GPU memory
-        * location (src) to the specified host memory location (dst). The size parameter
-        * determines the number of elements to copy, each of size sizeof(T) bytes.
-        *
-        * @param dst Pointer to the destination host memory.
-        * @param src Pointer to the source GPU memory.
-        * @param size Number of elements to copy.
-        */
-        void tohost(T* dst, const T* src, size_t size) {
-            cudaMemcpy(dst, src, size * sizeof(T), cudaMemcpyDeviceToHost);
+        T* getData()   {
+            return data;
+        }
+    private:
+        // Helper function to calculate the flat index from indices
+        int calculateIndex(const std::vector<int>& indices) const {
+            int index = 0;
+            int stride = 1;
+            for (int i = shape.size() - 1; i >= 0; --i) {
+                index += indices[i] * stride;
+                stride *= shape[i];
+            }
+            return index;
         }
 
+        void printHelper(const T* data, const std::vector<int>& shape, int dimension, std::vector<int> indices) const {
+            int currentDimensionSize = shape[dimension];
 
-        /**
-         * @brief Copy data from the host (CPU) to the GPU memory.
-         *
-         * This function uses cudaMemcpy to transfer data from the specified host memory
-         * location (src) to the GPU memory location represented by the 'data' member.
-         * The size parameter determines the number of elements to copy, each of size
-         * sizeof(T) bytes.
-         *
-         * @param src Pointer to the source host memory.
-         * @param size Number of elements to copy.
-         */
-        void toDevice(const T* src, size_t size) {
-            cudaMemcpy(data, src, size * sizeof(T), cudaMemcpyHostToDevice);
+            std::cout << "[";
+
+            for (int i = 0; i < currentDimensionSize; ++i) {
+                indices.push_back(i);
+
+                if (dimension < shape.size() - 1) {
+                    // If not the last dimension, recursively print the next dimension
+                    printHelper(data, shape, dimension + 1, indices);
+                }
+                else {
+                    // If the last dimension, print the actual element
+                    std::cout << get(indices);
+                }
+
+                indices.pop_back();
+
+                if (i < currentDimensionSize - 1) {
+                    std::cout << ", ";
+                }
+            }
+
+            std::cout << "]";
+
+            if (dimension < shape.size() - 1) {
+                // If not the last dimension, add a new line after completing the inner block
+                std::cout << std::endl;
+            }
+        }
+
+        // Helper function to calculate indices from a flat index
+        std::vector<int> calculateIndices(int index) const {
+            std::vector<int> indices(shape.size(), 0);
+            for (int i = shape.size() - 1; i >= 0; --i) {
+                indices[i] = index % shape[i];
+                index /= shape[i];
+            }
+            return indices;
         }
     };
 }
