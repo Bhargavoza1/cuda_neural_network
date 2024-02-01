@@ -2,10 +2,13 @@
 #include <cuda_runtime.h>
 #include <iostream>
 #include <vector>
- 
+ #include <cassert>
+#include "Errorhelper.cpp"
 #include "Tensor.h"
 
 namespace Hex {
+
+ 
  
     template<class T, class U>
     __global__ void addKernel(const T* a, const U* b, typename std::common_type<T, U>::type* c, int size) {
@@ -17,6 +20,14 @@ namespace Hex {
 
     template<class T, class U>
     std::unique_ptr<Tensor<typename std::common_type<T, U>::type>> addTensor(const Tensor<T>& tensor1, const Tensor<U>& tensor2) {
+
+        if (tensor1.getShape() != tensor2.getShape()) {
+            std::cerr << "Error: Tensor shapes must be the same for addition. Shape of tensor1: "
+                << shapeToString(tensor1.getShape()) << ", Shape of tensor2: " << shapeToString(tensor2.getShape()) << std::endl;
+            std::terminate(); // or use exit(EXIT_FAILURE) if you prefer
+        }
+
+
         using CommonType = typename std::common_type<T, U>::type;
         std::vector<int> shape = tensor1.getShape();
         

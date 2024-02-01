@@ -31,6 +31,7 @@ namespace Hex{
 
         // Destructor
         ~Tensor() {
+            std::cout << "destructor called\n";
             cudaFree(data);
         }
 
@@ -87,6 +88,7 @@ namespace Hex{
         T* getData()   {
             return data;
         }
+
     private:
         // Helper function to calculate the flat index from indices
         int calculateIndex(const std::vector<int>& indices) const {
