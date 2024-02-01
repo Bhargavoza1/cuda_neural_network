@@ -3,7 +3,7 @@
 #include <stdexcept>
  
 #include"Tensor.h"
-#include "tensor_oprations.cu"
+#include "tensor_oprations.cuh"
 
 using namespace Hex;
 using namespace std;
@@ -41,7 +41,7 @@ int main() {
         }
 
         // Perform element-wise addition for 3D tensors
-        auto tensorC = Hex::addTensor(*tensorA, *tensorB);
+        auto tensorC =  addTensor(*tensorA, *tensorB);
 
         std::cout << "Tensor C (A + B):" << std::endl;
         printtensor(*tensorC);

@@ -84,6 +84,7 @@
     <ClInclude Include="layer.h" />
     <ClInclude Include="linear.h" />
     <ClInclude Include="Tensor.h" />
+    <ClInclude Include="tensor_oprations.cuh" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Errorhelper.cpp" />

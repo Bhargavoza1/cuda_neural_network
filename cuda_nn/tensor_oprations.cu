@@ -1,14 +1,13 @@
-#include <cuda.h>
+#pragma once
+
 #include <cuda_runtime.h>
-#include <iostream>
 #include <vector>
- #include <cassert>
-#include "Errorhelper.cpp"
+#include <cassert>
 #include "Tensor.h"
 
-namespace Hex {
+#include "Errorhelper.cpp"
 
- 
+namespace Hex {
  
     template<class T, class U>
     __global__ void addKernel(const T* a, const U* b, typename std::common_type<T, U>::type* c, int size) {
