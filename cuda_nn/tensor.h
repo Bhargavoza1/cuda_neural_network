@@ -13,6 +13,9 @@ namespace Hex{
     template <typename T>
     class Tensor {
     private:
+        static_assert(std::is_same<T, float>::value || std::is_same<T, int>::value || std::is_same<T, double>::value,
+            "Tensor class supports only float, int, or double types.");
+
         T* data;
         std::vector<int> shape;
 
@@ -31,15 +34,15 @@ namespace Hex{
             cudaFree(data);
         }
 
-        // Copy constructor
-        Tensor(const Tensor& other) : shape(other.shape) {
-            int size = 1;
-            for (int dim : shape) {
-                size *= dim;
-            }
-            cudaMalloc((void**)&data, size * sizeof(T));
-            cudaMemcpy(data, other.data, size * sizeof(T), cudaMemcpyDeviceToDevice);
-        }
+        //// Copy constructor
+        //Tensor(const Tensor& other) : shape(other.shape) {
+        //    int size = 1;
+        //    for (int dim : shape) {
+        //        size *= dim;
+        //    }
+        //    cudaMalloc((void**)&data, size * sizeof(T));
+        //    cudaMemcpy(data, other.data, size * sizeof(T), cudaMemcpyDeviceToDevice);
+        //}
 
         // Set element at index
         void set(const std::vector<int>& indices, T value) {
