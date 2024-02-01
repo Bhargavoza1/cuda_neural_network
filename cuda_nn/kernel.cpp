@@ -19,7 +19,7 @@ int main() {
     try {
         // Create tensors with different shapes [2, 3, 4] and [2, 3, 5]
         std::unique_ptr<Tensor<double>> tensorA(new Tensor<double>({ 2, 3, 4 }));
-        std::unique_ptr<Tensor<int>> tensorB(new Tensor<int>({ 2, 3, 2 }));  // Different shape
+        std::unique_ptr<Tensor<int>> tensorB(new Tensor<int>({ 2, 3, 4 }));  // Different shape
 
         // Initialize input data for 3D tensors
         for (int i = 0; i < 2; ++i) {

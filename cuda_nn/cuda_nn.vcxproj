@@ -87,6 +87,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Errorhelper.cpp" />
+    <ClCompile Include="Tensor.cu" />
     <ClCompile Include="tensor_oprations.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
