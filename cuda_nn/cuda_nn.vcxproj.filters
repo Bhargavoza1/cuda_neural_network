@@ -27,12 +27,16 @@
     <ClInclude Include="Tensor.h">
       <Filter>utils</Filter>
     </ClInclude>
+    <ClInclude Include="tensor_oprations.cuh" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="tensor_oprations.cu">
       <Filter>utils</Filter>
     </ClCompile>
     <ClCompile Include="Errorhelper.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Tensor.cu">
       <Filter>utils</Filter>
     </ClCompile>
   </ItemGroup>

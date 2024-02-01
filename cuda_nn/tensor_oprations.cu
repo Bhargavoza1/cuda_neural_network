@@ -2,7 +2,7 @@
 
 #include <cuda_runtime.h>
 #include <vector>
-#include <cassert>
+ 
 #include "Tensor.h"
 
 #include "Errorhelper.cpp"
@@ -23,7 +23,7 @@ namespace Hex {
         if (tensor1.getShape() != tensor2.getShape()) {
             std::cerr << "Error: Tensor shapes must be the same for addition. Shape of tensor1: "
                 << shapeToString(tensor1.getShape()) << ", Shape of tensor2: " << shapeToString(tensor2.getShape()) << std::endl;
-            std::terminate(); // or use exit(EXIT_FAILURE) if you prefer
+            exit(EXIT_FAILURE); // or use exit(EXIT_FAILURE) if you prefer
         }
 
 
@@ -52,4 +52,48 @@ namespace Hex {
  
         return result;
     }
+
+    template<typename T>
+    void initTensorOnGPU(Tensor<T>& tensor, float multiplier)
+    {
+        std::vector<int> shape = tensor.getShape();
+        int size = 1;
+        for (int dim : shape) {
+            size *= dim;
+        }
+        T* d_data;
+        cudaMalloc((void**)&d_data, size * sizeof(T));
+
+        // Launch CUDA kernel to initialize and multiply the tensor
+        int blockSize = 256;
+        int gridSize = (size + blockSize - 1) / blockSize;
+        initializeTensor << <gridSize, blockSize >> > (d_data, size, multiplier);
+
+        // Copy data back to the CPU if necessary
+        cudaMemcpy(tensor.getData(), d_data, size * sizeof(T), cudaMemcpyDeviceToHost);
+
+        // Free GPU memory
+        cudaFree(d_data);
+    }
+
+
+
+    // CUDA kernel for tensor initialization
+   // CUDA kernel for tensor initialization with multiplication
+    template <typename T>
+    __global__ void initializeTensor(T* data, int size, float multiplier) {
+        int index = blockIdx.x * blockDim.x + threadIdx.x;
+        if (index < size) {
+            // Your initialization logic here
+            T value = static_cast<T>(index)  ;
+
+            if (multiplier != 0) {
+                value *= multiplier;
+            }
+
+            data[index] = value;
+        }
+    }
+
+ 
 }

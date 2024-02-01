@@ -14,42 +14,23 @@ void printtensor(const Tensor<T>& tensor1) {
 }
 
 
-
 int main() {
-    try {
-        // Create tensors with different shapes [2, 3, 4] and [2, 3, 5]
-        std::unique_ptr<Tensor<double>> tensorA(new Tensor<double>({ 2, 3, 4 }));
-        std::unique_ptr<Tensor<int>> tensorB(new Tensor<int>({ 2, 3, 4 }));  // Different shape
+     
+    // Create tensors with shape [3, 2048, 1080]
+    std::unique_ptr<Tensor<double>> tensorA(new Tensor<double>({ 3, 2048, 1080 }));
+    std::unique_ptr<Tensor<int>> tensorB(new Tensor<int>({ 3, 2048, 1080 }));
 
-        // Initialize input data for 3D tensors
-        for (int i = 0; i < 2; ++i) {
-            for (int j = 0; j < 3; ++j) {
-                for (int k = 0; k < 4; ++k) {
-                    float val = static_cast<float>(i * 3 * 4 + j * 4 + k);
-                    tensorA->set({ i, j, k }, val * 0.2);
-                }
-            }
-        }
+    // Initialize tensors on GPU
+    initTensorOnGPU(*tensorA , 0.2);
+    initTensorOnGPU(*tensorB , 0.0);
+    std::cout << "tensor init done" << std::endl;
+    // Perform element-wise addition for 3D tensors
+    auto tensorC = Hex::addTensor(*tensorA, *tensorB);
 
-        for (int i = 0; i < 2; ++i) {
-            for (int j = 0; j < 3; ++j) {
-                for (int k = 0; k < 5; ++k) {  // Different size in the last dimension
-                    float val = static_cast<float>(i * 3 * 5 + j * 5 + k);
-                    tensorB->set({ i, j, k }, 2 * val);
-                }
-            }
-        }
 
-        // Perform element-wise addition for 3D tensors
-        auto tensorC =  addTensor(*tensorA, *tensorB);
-
-        std::cout << "Tensor C (A + B):" << std::endl;
-        printtensor(*tensorC);
-    }
-    catch (const std::runtime_error& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
-        // Handle the error as needed
-    }
+    // Print the result tensor
+    std::cout << "Tensor C (A + B):" << std::endl;
+    printtensor(*tensorC);
 
     return 0;
 }
