@@ -77,14 +77,13 @@ namespace Hex {
     }
 
 
-
-    // CUDA kernel for tensor initialization
+ 
    // CUDA kernel for tensor initialization with multiplication
     template <typename T>
     __global__ void initializeTensor(T* data, int size, float multiplier) {
         int index = blockIdx.x * blockDim.x + threadIdx.x;
         if (index < size) {
-            // Your initialization logic here
+           
             T value = static_cast<T>(index)  ;
 
             if (multiplier != 0) {
