@@ -38,17 +38,14 @@ namespace Hex {
             size *= dim;
         }
 
-        CommonType* resultData;
-        cudaMalloc((void**)&resultData, size * sizeof(CommonType));
-
         dim3 blockSize(256);
         dim3 gridSize((size + blockSize.x - 1) / blockSize.x);
-        addKernel<<<gridSize, blockSize>>> (tensor1.getData(), tensor2.getData(), resultData , size);
+        addKernel<<<gridSize, blockSize>>> (tensor1.getData(), tensor2.getData(), result->getData(), size);
         cudaDeviceSynchronize();
 
         // Update the data pointer in the result tensor
        
-        result->setData(resultData );
+        //result->setData(resultData);
  
         return result;
     }
@@ -61,19 +58,12 @@ namespace Hex {
         for (int dim : shape) {
             size *= dim;
         }
-        T* d_data;
-        cudaMalloc((void**)&d_data, size * sizeof(T));
-
+        
         // Launch CUDA kernel to initialize and multiply the tensor
         int blockSize = 256;
         int gridSize = (size + blockSize - 1) / blockSize;
-        initializeTensor << <gridSize, blockSize >> > (d_data, size, multiplier);
+        initializeTensor << <gridSize, blockSize >> > (tensor.getData(), size, multiplier);
 
-        // Copy data back to the CPU if necessary
-        cudaMemcpy(tensor.getData(), d_data, size * sizeof(T), cudaMemcpyDeviceToHost);
-
-        // Free GPU memory
-        cudaFree(d_data);
     }
 
 

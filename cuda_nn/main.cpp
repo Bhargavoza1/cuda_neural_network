@@ -30,7 +30,7 @@ int main() {
 
     // Print the result tensor
    // std::cout << "Tensor C (A + B):" << std::endl;
-   // printtensor(*tensorC);
+   //printtensor(*tensorC);
 
     return 0;
 }
