@@ -6,6 +6,7 @@
 #include <iostream>
 #include "Tensor.h"
 
+#include <cuda_runtime.h>
 namespace Hex {
 
 	template<class T, class U>

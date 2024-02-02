@@ -1,28 +1,36 @@
 #pragma once
 #include <vector>
-#include <iostream>
-#include <cuda_runtime.h>
 
 namespace Hex {
     template <typename T>
-    class Tensor {
-    private:
-        static_assert(std::is_same<T, float>::value || std::is_same<T, int>::value || std::is_same<T, double>::value,
-            "Tensor class supports only float, int, or double types.");
+    class ITensor {
+    public:
+        virtual ~ITensor() {}
+        virtual void set(const std::vector<int>& indices, T value) = 0;
+        virtual T get(const std::vector<int>& indices) const = 0;
+        virtual void print() const = 0;
+        virtual void setData(T* newData) = 0;
+        virtual std::vector<int> getShape() const = 0;
+        virtual const T* getData() const = 0;
+        virtual T* getData() = 0;
+    };
 
+    template <typename T>
+    class Tensor : public ITensor<T> {
+    private:
         T* data;
         std::vector<int> shape;
 
     public:
         Tensor(const std::vector<int>& shape);
-        ~Tensor();
-        void set(const std::vector<int>& indices, T value);
-        T get(const std::vector<int>& indices) const;
-        void print() const;
-        void setData(T* newData);
-        std::vector<int> getShape() const;
-        const T* getData() const;
-        T* getData();
+        ~Tensor() override;
+        void set(const std::vector<int>& indices, T value) override;
+        T get(const std::vector<int>& indices) const override;
+        void print() const override;
+        void setData(T* newData) override;
+        std::vector<int> getShape() const override;
+        const T* getData() const override;
+        T* getData() override;
 
     private:
         int calculateIndex(const std::vector<int>& indices) const;

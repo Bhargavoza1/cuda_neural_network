@@ -18,7 +18,7 @@ namespace Hex {
     // Destructor
     template <typename T>
     Tensor<T>::~Tensor() {
-        std::cout << "destructor called\n";
+        
         cudaFree(data);
     }
 

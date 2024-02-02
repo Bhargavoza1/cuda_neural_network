@@ -17,8 +17,8 @@ void printtensor(const Tensor<T>& tensor1) {
 int main() {
      
     // Create tensors with shape [3, 2048, 1080]
-    std::unique_ptr<Tensor<double>> tensorA(new Tensor<double>({ 3, 2048, 1080 }));
-    std::unique_ptr<Tensor<int>> tensorB(new Tensor<int>({ 3, 2048, 1080 }));
+    std::unique_ptr<Tensor<float>> tensorA(new Tensor<float>({300, 3, 2048, 1080 }));
+    std::unique_ptr<Tensor<int>> tensorB(new Tensor<int>({ 300,3, 2048, 1080 }));
 
     // Initialize tensors on GPU
     initTensorOnGPU(*tensorA , 0.2);
@@ -29,8 +29,8 @@ int main() {
 
 
     // Print the result tensor
-    std::cout << "Tensor C (A + B):" << std::endl;
-    printtensor(*tensorC);
+   // std::cout << "Tensor C (A + B):" << std::endl;
+   // printtensor(*tensorC);
 
     return 0;
 }

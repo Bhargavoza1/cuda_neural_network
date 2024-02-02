@@ -77,7 +77,7 @@
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <CudaCompile Include="kernel.cpp" />
+    <CudaCompile Include="main.cpp" />
     <CudaCompile Include="linear.cu" />
   </ItemGroup>
   <ItemGroup>

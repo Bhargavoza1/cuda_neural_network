@@ -2,11 +2,15 @@
 #include "layer.h"
 
 namespace Hex {
-	class linear : public layer
+	template<class T>
+	class linear : public layer<T>
 	{
-		void forward() override;
-		void backpropagation() override;
+
+	public:
+		Tensor<T>& forward(Tensor<T>& tensor) override;
+		Tensor<T>& backpropagation(Tensor<T>& tensor, float learning_rate = 0.0001f) override;
 	};
+	
 }
  
 
