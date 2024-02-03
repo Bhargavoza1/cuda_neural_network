@@ -43,6 +43,11 @@ namespace Hex {
         addKernel<<<gridSize, blockSize>>> (tensor1.getData(), tensor2.getData(), result->getData(), size);
         cudaDeviceSynchronize();
 
+        cudaError_t cudaError = cudaGetLastError();
+        if (cudaError != cudaSuccess) {
+            printf("CUDA error from add tensor: %s\n", cudaGetErrorString(cudaError));
+            exit(EXIT_FAILURE);  // or handle the error appropriately
+        }
         // Update the data pointer in the result tensor
        
         //result->setData(resultData);
@@ -63,7 +68,13 @@ namespace Hex {
         int blockSize = 256;
         int gridSize = (size + blockSize - 1) / blockSize;
         initializeTensor << <gridSize, blockSize >> > (tensor.getData(), size, multiplier);
+        cudaDeviceSynchronize();
 
+        cudaError_t cudaError = cudaGetLastError();
+        if (cudaError != cudaSuccess) {
+            printf("CUDA error from init: %s\n", cudaGetErrorString(cudaError));
+            exit(EXIT_FAILURE);  // or handle the error appropriately
+        }
     }
 
 

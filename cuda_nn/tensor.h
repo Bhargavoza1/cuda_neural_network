@@ -4,7 +4,7 @@
 namespace Hex {
     template <typename T>
     class ITensor {
-    public:
+    public: 
         virtual ~ITensor() {}
         virtual void set(const std::vector<int>& indices, T value) = 0;
         virtual T get(const std::vector<int>& indices) const = 0;
@@ -22,6 +22,7 @@ namespace Hex {
         std::vector<int> shape;
 
     public:
+        Tensor() : shape(std::vector<int>{}) {}
         Tensor(const std::vector<int>& shape);
         ~Tensor() override;
         void set(const std::vector<int>& indices, T value) override;

@@ -1,9 +1,12 @@
 #pragma once
 #include "Tensor.h"
 namespace Hex{
+
 	template <class T>
 	class layer
 	{
+	private:
+
 	public:
 		virtual	~layer() = 0;
 
@@ -13,4 +16,5 @@ namespace Hex{
 	};
 }
 
-
+template <class T>
+inline Hex::layer<T>::~layer() {}
