@@ -19,9 +19,9 @@ int main() {
     // memory get overloaded on {330, 3, 2048, 1080 }
     //std::unique_ptr<Tensor<int>> tensorA(new Tensor<int>({330, 3, 2048, 1080 }));
     //std::unique_ptr<Tensor<int>> tensorB(new Tensor<int>({ 330,3, 2048, 1080 }));
-    std::unique_ptr<Tensor<float>> tensorA(new Tensor<float>({30 , 3, 2048, 1080 }));
-    std::unique_ptr<Tensor<int>> tensorB(new Tensor<int>({ 30 ,3, 2048, 1080 }));
-    linear<float> linearLayer(10,5      );
+    std::unique_ptr<Tensor<float>> tensorA(new Tensor<float>({10,1 }));
+    std::unique_ptr<Tensor<int>> tensorB(new Tensor<int>({ 10,1 }));
+    linear<float> linearLayer(10,5   ,false   );
  
     
     // Initialize tensors on GPU
@@ -33,8 +33,20 @@ int main() {
 
   
     // Print the result tensor
-     std::cout << "Tensor C (A + B):" << std::endl;
+     std::cout << "input:" << std::endl;
+     printtensor(*tensorB);
+
+     std::cout << "weight" << std::endl;
+     printtensor(linearLayer.printW());
+
+     std::cout << "bias" << std::endl;
+     printtensor(linearLayer.printB());
+
+     // Print the result tensor
+     std::cout << "after liner calculation:" << std::endl;
      printtensor(linearLayer.forward(*tensorA));
+
+
 
     return 0;
 }

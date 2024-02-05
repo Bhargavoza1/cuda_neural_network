@@ -85,7 +85,7 @@ namespace Hex {
         int index = blockIdx.x * blockDim.x + threadIdx.x;
         if (index < size) {
            
-            T value = static_cast<T>(index)  ;
+            T value = static_cast<T>(index+1)  ;
 
             if (multiplier != 0) {
                 value *= multiplier;

@@ -13,6 +13,7 @@ namespace Hex {
         Tensor<T> bias;
         Tensor<T> gradients_w;
         Tensor<T> gradients_b;
+        Tensor<T> output;
 
     public:
         // Constructor
@@ -24,6 +25,11 @@ namespace Hex {
 
         // Override backpropagation method
         Tensor<T>& backpropagation(Tensor<T>& tensor, float learning_rate = 0.0001f) override;
+
+        Tensor<T>& printW();
+        Tensor<T>& printB();
+        Tensor<T>& printO();
+
 
     private:
         void init_weight_n_bias();
