@@ -7,6 +7,7 @@ namespace Hex {
     {
     private:
         bool _Isbias;
+        bool _bias_as_zero;
         float _w_b_range;
         Tensor<T> weights;
         Tensor<T> bias;
@@ -15,7 +16,7 @@ namespace Hex {
 
     public:
         // Constructor
-        linear(int input_size, int output_size, bool Isbias = true, float w_b_range = 0.5f);
+        linear(int input_size, int output_size, bool bias_as_zero = true , float w_b_range = 0.5f, bool Isbias = true);
 
 
         // Override forward method
@@ -25,8 +26,8 @@ namespace Hex {
         Tensor<T>& backpropagation(Tensor<T>& tensor, float learning_rate = 0.0001f) override;
 
     private:
-        void initweight();
-        void initbias();
+        void init_weight_n_bias();
+   
     };
 }
 

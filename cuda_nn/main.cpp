@@ -21,7 +21,8 @@ int main() {
     //std::unique_ptr<Tensor<int>> tensorB(new Tensor<int>({ 330,3, 2048, 1080 }));
     std::unique_ptr<Tensor<float>> tensorA(new Tensor<float>({30 , 3, 2048, 1080 }));
     std::unique_ptr<Tensor<int>> tensorB(new Tensor<int>({ 30 ,3, 2048, 1080 }));
-    linear<float> linearLayer(10,5    );
+    linear<float> linearLayer(10,5      );
+ 
     
     // Initialize tensors on GPU
     initTensorOnGPU(*tensorA , 0.0);
