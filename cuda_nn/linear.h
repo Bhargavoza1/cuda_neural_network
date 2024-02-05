@@ -23,6 +23,10 @@ namespace Hex {
 
         // Override backpropagation method
         Tensor<T>& backpropagation(Tensor<T>& tensor, float learning_rate = 0.0001f) override;
+
+    private:
+        void initweight();
+        void initbias();
     };
 }
 
