@@ -94,7 +94,7 @@ namespace Hex{
 	linear<T>::linear(int input_size, int output_size,bool bias_as_zero, float w_b_range, bool Isbias)
 		: _bias_as_zero(bias_as_zero), _w_b_range(w_b_range), _Isbias(Isbias),
 		weights(std::vector<int>{output_size , input_size  }),
-		bias(Isbias ? Tensor<T>(std::vector<int>{output_size,1}) : Tensor<T>()), 
+		bias(   std::vector<int>{output_size,1}) , 
 		output(std::vector<int>{output_size, 1  }),
 		input(std::vector<int>{input_size, 1  }),
 		input_error(std::vector<int>{input_size, 1  })
