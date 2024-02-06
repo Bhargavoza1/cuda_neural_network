@@ -7,7 +7,7 @@
 namespace Hex{
 
 	template<class T>
-	__global__ void initWeightKernel(T* weights, T* bias, int output_size, int input_size, bool bias_as_zero, float w_b_range, bool Isbias) {
+	__global__ void initWeightKernel(T* weights, T* bias, int output_size, int input_size, bool bias_as_zero, float w_b_range ) {
 		//int i = blockIdx.x * blockDim.x + threadIdx.x;
 		//int j = blockIdx.y * blockDim.y + threadIdx.y;
 
@@ -45,7 +45,7 @@ namespace Hex{
 		}
 
 		// Initialize bias if Isbias is true
-		if (Isbias && i < output_size && j == 0) {
+		if (  i < output_size && j == 0) {
 			if (bias_as_zero) {
 				bias[i] = static_cast<T>(0.0);
 			}
@@ -76,12 +76,12 @@ namespace Hex{
 				Y_value += W[row * W_y_dim + i] * X[i]; 
 				//printf("W[row * W_y_dim + i] %d\n", W[row * W_y_dim + i]);
 				 //	printf("W[row * W_x_dim + i] %d\n", W[i * W_x_dim + row]);
-				//Y_value += W[row * W_y_dim + i] * X[i * X_y_dim + col];
+				//Y_value += W[row * W_y_dim + i] * X[i * X_y_dim + col]; 
 			}
 	
 			// Add bias Y_value + b
 			Y_value += b[row];
-
+			
 			// Store the result in the output tensor
 			Y[row * Y_y_dim + col] = Y_value;
 		}
@@ -91,8 +91,8 @@ namespace Hex{
 
 
 	template<class T>
-	linear<T>::linear(int input_size, int output_size,bool bias_as_zero, float w_b_range, bool Isbias)
-		: _bias_as_zero(bias_as_zero), _w_b_range(w_b_range), _Isbias(Isbias),
+	linear<T>::linear(int input_size, int output_size,bool bias_as_zero, float w_b_range )
+		: _bias_as_zero(bias_as_zero), _w_b_range(w_b_range) ,
 		weights(std::vector<int>{output_size , input_size  }),
 		bias(   std::vector<int>{output_size,1}) , 
 		output(std::vector<int>{output_size, 1  }),
@@ -154,6 +154,7 @@ namespace Hex{
 				sum  += weights[i * w_y_dim + row] * input_gradients[i]; 
 			} 
 			input_error[row * input_y_dim + col] = sum; 
+			
 		}
 
 		if (row < w_x_dim && col < input_y_dim) {
@@ -199,7 +200,7 @@ namespace Hex{
 
 		// Launch the kernel to initialize weights and bias
 		initWeightKernel << <numBlocks, threadsPerBlock >> > (weights.getData(), bias.getData(), weights.getShape()[0],
-															 weights.getShape()[1], _bias_as_zero, _w_b_range, _Isbias);
+															 weights.getShape()[1], _bias_as_zero, _w_b_range );
 		cudaDeviceSynchronize();   
 	}
 
