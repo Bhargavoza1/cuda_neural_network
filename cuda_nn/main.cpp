@@ -43,17 +43,21 @@ int main() {
      printtensor(linearLayer.printB());
 
      // Print the result tensor
-     std::cout << "\nafter liner calculation:" << std::endl;
+     std::cout << "\nAFTER liner calculation:\n" << std::endl;
      auto a = linearLayer.forward(*tensorA);
      printtensor(a);
-
+     std::cout << "\nbias" << std::endl;
+     printtensor(linearLayer.printB());
      // Print the result tensor
      std::cout << "\nafter backward calculation:" << std::endl;
      auto b = linearLayer.backpropagation(a);
      printtensor(b);
+
+
      std::cout << "\nweight" << std::endl;
      printtensor(linearLayer.printW());
 
-
+     std::cout << "\nbias" << std::endl;
+     printtensor(linearLayer.printB());
     return 0;
 }

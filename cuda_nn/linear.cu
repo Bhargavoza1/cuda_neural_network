@@ -94,9 +94,7 @@ namespace Hex{
 	linear<T>::linear(int input_size, int output_size,bool bias_as_zero, float w_b_range, bool Isbias)
 		: _bias_as_zero(bias_as_zero), _w_b_range(w_b_range), _Isbias(Isbias),
 		weights(std::vector<int>{output_size , input_size  }),
-		bias(Isbias ? Tensor<T>(std::vector<int>{output_size,1}) : Tensor<T>()),
-		gradients_w(std::vector<int>{output_size, input_size}),
-		gradients_b(Isbias ? Tensor<T>(std::vector<int>{output_size, 1}) : Tensor<T>()),
+		bias(Isbias ? Tensor<T>(std::vector<int>{output_size,1}) : Tensor<T>()), 
 		output(std::vector<int>{output_size, 1  }),
 		input(std::vector<int>{input_size, 1  }),
 		input_error(std::vector<int>{input_size, 1  })
@@ -142,7 +140,7 @@ namespace Hex{
 	}
 
 	template<class T>
-	__global__ void backpropagationAndUpdateKernel(T* gradients_w, T* gradients_b, T* weights, T* bias,
+	__global__ void backpropagationAndUpdateKernel(T* weights, T* bias,
 		const T* input_gradients,const T* input_data, T* input_error,
 		float learning_rate, int w_x_dim, int w_y_dim,
 		int input_x_dim, int input_y_dim)
@@ -159,26 +157,14 @@ namespace Hex{
 		}
 
 		if (row < w_x_dim && col < input_y_dim) {
-		
 			T gw = 0;
-		
-		
 			
+			bias[row] -= learning_rate * input_gradients[row];
 			for (int i = 0; i < w_y_dim; ++i) {
-				gradients_w[row * w_y_dim + i] = gw  = input_gradients[row] * input_data[i];
-				 //printf("\nbefore %f ", weights[row * w_y_dim + i]);
+				 gw  = input_gradients[row] * input_data[i]; 
 				 weights[row * w_y_dim + i] -= learning_rate * gw;
-				  //printf("\nafter %f ", weights[row * w_y_dim + i]);
-				  
 			}
-		}
-
-		if (row < w_x_dim && col < input_y_dim)
-		{
-			T gb = 0;
-			gradients_b[row] = gb = bias[row];
-			//bias[row] -= learning_rate * input_gradients[row];
-			 printf("\n%f ", bias[row]);
+			
 		}
 	}
 
@@ -187,11 +173,11 @@ namespace Hex{
 	{
 		
 		dim3 threadsPerBlock(16, 16);
-		dim3 numBlocks((gradients_w.getShape()[1] + threadsPerBlock.x - 1) / threadsPerBlock.x,
-			(gradients_w.getShape()[0] + threadsPerBlock.y - 1) / threadsPerBlock.y);
+		dim3 numBlocks((weights.getShape()[1] + threadsPerBlock.x - 1) / threadsPerBlock.x,
+			(weights.getShape()[0] + threadsPerBlock.y - 1) / threadsPerBlock.y);
 
 		//std::cout << weights.getShape()[1] << "aaaX" << input_gradients.getShape()[1] << std::endl;
-		backpropagationAndUpdateKernel << <numBlocks, threadsPerBlock >> > (gradients_w.getData(), gradients_b.getData(),
+		backpropagationAndUpdateKernel << <numBlocks, threadsPerBlock >> > (
 			weights.getData(), bias.getData(),
 			input_gradients.getData(), input.getData(), input_error.getData(),
 			learning_rate, weights.getShape()[0], weights.getShape()[1],
@@ -222,7 +208,7 @@ namespace Hex{
 	template<class T>
 	Tensor<T>& linear<T>::printW()
 	{
-		return bias;
+		return weights;
 	}
 
 	template<class T>

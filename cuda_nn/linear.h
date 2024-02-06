@@ -10,9 +10,7 @@ namespace Hex {
         bool _bias_as_zero;
         float _w_b_range;
         Tensor<T> weights;
-        Tensor<T> bias;
-        Tensor<T> gradients_w;
-        Tensor<T> gradients_b;
+        Tensor<T> bias; 
         Tensor<T> output;
         Tensor<T> input;
         Tensor<T> input_error;
