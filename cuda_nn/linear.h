@@ -14,6 +14,8 @@ namespace Hex {
         Tensor<T> gradients_w;
         Tensor<T> gradients_b;
         Tensor<T> output;
+        Tensor<T> input;
+        Tensor<T> input_error;
 
     public:
         // Constructor
@@ -24,11 +26,11 @@ namespace Hex {
         Tensor<T>& forward(Tensor<T>& tensor) override;
 
         // Override backpropagation method
-        Tensor<T>& backpropagation(Tensor<T>& tensor, float learning_rate = 0.0001f) override;
+        Tensor<T>& backpropagation(Tensor<T>& tensor, float learning_rate = 0.001f) override;
 
         Tensor<T>& printW();
         Tensor<T>& printB();
-        Tensor<T>& printO();
+        //Tensor<T>& printO();
 
 
     private:

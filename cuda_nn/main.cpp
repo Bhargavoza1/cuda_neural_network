@@ -19,9 +19,9 @@ int main() {
     // memory get overloaded on {330, 3, 2048, 1080 }
     //std::unique_ptr<Tensor<int>> tensorA(new Tensor<int>({330, 3, 2048, 1080 }));
     //std::unique_ptr<Tensor<int>> tensorB(new Tensor<int>({ 330,3, 2048, 1080 }));
-    std::unique_ptr<Tensor<float>> tensorA(new Tensor<float>({10,1 }));
-    std::unique_ptr<Tensor<int>> tensorB(new Tensor<int>({ 10,1 }));
-    linear<float> linearLayer(10,5   ,false   );
+    std::unique_ptr<Tensor<float>> tensorA(new Tensor<float>({3,1 }));
+    std::unique_ptr<Tensor<int>> tensorB(new Tensor<int>({ 3,1 }));
+    linear<float> linearLayer(3,2   ,false   );
  
     
     // Initialize tensors on GPU
@@ -33,19 +33,26 @@ int main() {
 
   
     // Print the result tensor
-     std::cout << "input:" << std::endl;
+     std::cout << "\ninput:" << std::endl;
      printtensor(*tensorB);
 
-     std::cout << "weight" << std::endl;
+     std::cout << "\nweight" << std::endl;
      printtensor(linearLayer.printW());
 
-     std::cout << "bias" << std::endl;
+     std::cout << "\nbias" << std::endl;
      printtensor(linearLayer.printB());
 
      // Print the result tensor
-     std::cout << "after liner calculation:" << std::endl;
-     printtensor(linearLayer.forward(*tensorA));
+     std::cout << "\nafter liner calculation:" << std::endl;
+     auto a = linearLayer.forward(*tensorA);
+     printtensor(a);
 
+     // Print the result tensor
+     std::cout << "\nafter backward calculation:" << std::endl;
+     auto b = linearLayer.backpropagation(a);
+     printtensor(b);
+     std::cout << "\nweight" << std::endl;
+     printtensor(linearLayer.printW());
 
 
     return 0;
