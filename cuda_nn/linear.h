@@ -18,7 +18,7 @@ namespace Hex {
     public:
         // Constructor
         linear(int input_size, int output_size, bool bias_as_zero = true , float w_b_range = 0.5f );
-
+        ~linear();
 
         // Override forward method
         Tensor<T>& forward(Tensor<T>& tensor) override;

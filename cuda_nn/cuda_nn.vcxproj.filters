@@ -5,6 +5,9 @@
     <CudaCompile Include="linear.cu">
       <Filter>layers</Filter>
     </CudaCompile>
+    <CudaCompile Include="ReLU.cu">
+      <Filter>layers</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="layers">
@@ -29,6 +32,9 @@
     </ClInclude>
     <ClInclude Include="tensor_oprations.cuh">
       <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="ReLU.h">
+      <Filter>layers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

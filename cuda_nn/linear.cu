@@ -102,6 +102,11 @@ namespace Hex{
 		init_weight_n_bias();
 	}
 
+	template<class T>
+	linear<T>::~linear()
+	{
+	}
+
 
 	template<class T>
 	Tensor<T>& linear<T>::forward(Tensor<T>& tensor)
