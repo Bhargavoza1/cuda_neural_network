@@ -73,4 +73,5 @@ namespace Hex{
         cudaDeviceSynchronize(); 
         return derivative;
     }
+
 }

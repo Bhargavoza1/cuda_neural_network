@@ -1,9 +1,8 @@
 #pragma once
 #ifndef MSE_H
 #define MSE_H
-#include <cuda_runtime.h>
-#include <iostream>
-#include <vector>
+ 
+ 
 #include "Tensor.h"
 
 namespace Hex {

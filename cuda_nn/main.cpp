@@ -1,12 +1,13 @@
 ﻿#include <iostream>
 
 #include <stdexcept>
- 
+
 #include"Tensor.h"
-#include "tensor_oprations.cuh"
+#include "tensor_oprations.h"
 #include "linear.h"
 #include "ReLU.h"
 #include "Sigmoid.h"
+#include "MLP.h"
 using namespace Hex;
 using namespace std;
 
@@ -17,65 +18,25 @@ void printtensor(const Tensor<T>& tensor1) {
 
 
 int main() {
+
+
+   
+    int input_size = 4;        // Size of the input layer
+    int output_size = 1;        // Size of the output layer
+    int hiddenlayer = 1;        // Number of hidden layers
+    int h_l_dimension = 2;     // Dimension of hidden layers
+
      
-    // memory get overloaded on {330, 3, 2048, 1080 }
-    //std::unique_ptr<Tensor<int>> tensorA(new Tensor<int>({330, 3, 2048, 1080 }));
-    //std::unique_ptr<Tensor<int>> tensorB(new Tensor<int>({ 330,3, 2048, 1080 }));
-    std::unique_ptr<Tensor<float>> tensorA(new Tensor<float>({3,1 }));
-    std::unique_ptr<Tensor<int>> tensorB(new Tensor<int>({ 3,1 }));
-    linear<float> linearLayer(3,2   ,false   );
-    ReLU<float> relu;
-    Sigmoid<float> sigmoid;
-    
-    // Initialize tensors on GPU
-    initTensorOnGPU(*tensorA , 0.0);
-    initTensorOnGPU(*tensorB , 0.0);
-    std::cout << "tensor init done" << std::endl;
-    // Perform element-wise addition for 3D tensors
-    auto tensorC = Hex::addTensor(*tensorA, *tensorB);
+    MLP<float> mlp(input_size, output_size, hiddenlayer, h_l_dimension);
 
   
-    // Print the result tensor
-     std::cout << "\ninput:" << std::endl;
-     printtensor(*tensorB);
-
-     std::cout << "\nweight" << std::endl;
-     printtensor(linearLayer.printW());
-
-     std::cout << "\nbias" << std::endl;
-     printtensor(linearLayer.printB());
-
-     // Print the result tensor
-     std::cout << "\nAFTER liner calculation: " << std::endl;
-     auto a = linearLayer.forward(*tensorA );
-     printtensor(a);
+    Tensor<float> input_tensor({ input_size, 1 });
+    initTensorOnGPU(input_tensor , 0.0f);
  
+    Tensor<float> output_tensor = mlp.forward(input_tensor);
 
-
-     std::cout << "\nsigmoid" << std::endl;
-     auto active = sigmoid.forward(a);
-     printtensor(active);
-
-
-
-
-     // back propa
-
-     std::cout << "\nsigmoid backpropagation" << std::endl;
-     auto active2 = sigmoid.backpropagation(active);
-     printtensor(active2);
-
-     std::cout << "\nafter backward calculation:" << std::endl;
-     auto b = linearLayer.backpropagation(active2);
-     printtensor(b);
-
-
-     std::cout << "\nweight" << std::endl;
-     printtensor(linearLayer.printW());
-
-     std::cout << "\nbias" << std::endl;
-     printtensor(linearLayer.printB());
-
+   
+    output_tensor.print();
 
     return 0;
 }
