@@ -1,5 +1,5 @@
 #include "ReLU.h"
-#include "tensor_oprations.cuh"
+#include "tensor_oprations.h"
 namespace Hex {
     template<class T>
     ReLU<T>::ReLU()

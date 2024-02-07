@@ -36,7 +36,7 @@
     <ClInclude Include="Tensor.h">
       <Filter>utils</Filter>
     </ClInclude>
-    <ClInclude Include="tensor_oprations.cuh">
+    <ClInclude Include="tensor_oprations.h">
       <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="ReLU.h">
@@ -44,6 +44,9 @@
     </ClInclude>
     <ClInclude Include="Sigmoid.h">
       <Filter>layers</Filter>
+    </ClInclude>
+    <ClInclude Include="MSE.h">
+      <Filter>costs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
