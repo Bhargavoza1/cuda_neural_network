@@ -11,6 +11,9 @@
     <CudaCompile Include="Sigmoid.cu">
       <Filter>layers</Filter>
     </CudaCompile>
+    <CudaCompile Include="MSE.cu">
+      <Filter>costs</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="layers">

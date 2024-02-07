@@ -79,6 +79,7 @@
   <ItemGroup>
     <CudaCompile Include="main.cpp" />
     <CudaCompile Include="linear.cu" />
+    <CudaCompile Include="MSE.cu" />
     <CudaCompile Include="ReLU.cu" />
     <CudaCompile Include="Sigmoid.cu" />
   </ItemGroup>
