@@ -8,35 +8,35 @@ namespace Hex{
 
 	template<class T>
 	__global__ void initWeightKernel(T* weights, T* bias, int output_size, int input_size, bool bias_as_zero, float w_b_range ) {
-		//int i = blockIdx.x * blockDim.x + threadIdx.x;
-		//int j = blockIdx.y * blockDim.y + threadIdx.y;
-
-		//if (i < output_size && j < input_size) {
-		//	 Random initialization of weights within the specified range
-		//	curandState state;
-		//	curand_init(clock64(), i * input_size + j, 0, &state);
-
-		//	float float_weight = (2 * curand_uniform(&state) - 1) * w_b_range;
-		//	weights[i * input_size + j] = static_cast<T>(float_weight);
-		//}
-
-		// Initialize bias if Isbias is true
-		//if (Isbias && i < output_size && j == 0) {
-		//	if (bias_as_zero) {
-		//		 
-		//		bias[i] = static_cast<T>(0.0);
-		//	}
-		//	else {
-		//		curandState state_bias;
-		//		curand_init(clock64(), i, 0, &state_bias);
-
-		//		float float_bias = (2 * curand_uniform(&state_bias) - 1) * w_b_range;
-		//		bias[i] = static_cast<T>(float_bias);
-		//	}
-		//	
-		//}
-
 		int i = blockIdx.x * blockDim.x + threadIdx.x;
+		int j = blockIdx.y * blockDim.y + threadIdx.y;
+
+		if (i < output_size && j < input_size) {
+			//// Random initialization of weights within the specified range
+			curandState state;
+			curand_init(clock64(), i * input_size + j, 0, &state);
+
+			float float_weight = (2 * curand_uniform(&state) - 1) * w_b_range;
+			weights[i * input_size + j] = static_cast<T>(float_weight);
+		}
+
+		//// Initialize bias if Isbias is true
+		if (  i < output_size && j == 0) {
+			if (bias_as_zero) {
+				 
+				bias[i] = static_cast<T>(0.0);
+			}
+			else {
+				curandState state_bias;
+				curand_init(clock64(), i, 0, &state_bias);
+
+				float float_bias = (2 * curand_uniform(&state_bias) - 1) * w_b_range;
+				bias[i] = static_cast<T>(float_bias);
+			}
+			
+		}
+
+		/*int i = blockIdx.x * blockDim.x + threadIdx.x;
 		int j = blockIdx.y * blockDim.y + threadIdx.y;
 
 		if (i < output_size && j < input_size) {
@@ -44,7 +44,7 @@ namespace Hex{
 			weights[i * input_size + j] = static_cast<T>(i * input_size + j + 1);   
 		}
 
-		// Initialize bias if Isbias is true
+		 Initialize bias if Isbias is true
 		if (  i < output_size && j == 0) {
 			if (bias_as_zero) {
 				bias[i] = static_cast<T>(0.0);
@@ -53,7 +53,7 @@ namespace Hex{
 				 
 				bias[i] = static_cast<T>(i + 1);   
 			}
-		}
+		}*/
 	}
 
 	template<class T>

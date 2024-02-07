@@ -1,15 +1,15 @@
 #pragma once
 #include "layer.h"
-
+#include <iostream>
 namespace Hex{
 	template <class T>
 	class ReLU : public layer<T>
 	{
     private:
  
-        Tensor<T> output;
-        Tensor<T> input;
-        Tensor<T> input_error;
+        std::unique_ptr<Tensor<T>> output;
+        std::unique_ptr<Tensor<T>> input;
+        std::unique_ptr<Tensor<T>> input_error;
 
     public:
         // Constructor

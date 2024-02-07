@@ -5,6 +5,7 @@
 #include"Tensor.h"
 #include "tensor_oprations.cuh"
 #include "linear.h"
+#include "ReLU.h"
 using namespace Hex;
 using namespace std;
 
@@ -22,7 +23,7 @@ int main() {
     std::unique_ptr<Tensor<float>> tensorA(new Tensor<float>({3,1 }));
     std::unique_ptr<Tensor<int>> tensorB(new Tensor<int>({ 3,1 }));
     linear<float> linearLayer(3,2   ,false   );
- 
+    ReLU<float> relu;
     
     // Initialize tensors on GPU
     initTensorOnGPU(*tensorA , 0.0);
@@ -43,14 +44,27 @@ int main() {
      printtensor(linearLayer.printB());
 
      // Print the result tensor
-     std::cout << "\nAFTER liner calculation:\n" << std::endl;
-     auto a = linearLayer.forward(*tensorA);
+     std::cout << "\nAFTER liner calculation: " << std::endl;
+     auto a = linearLayer.forward(*tensorA );
      printtensor(a);
-     std::cout << "\nbias" << std::endl;
-     printtensor(linearLayer.printB());
-     // Print the result tensor
+ 
+
+
+     std::cout << "\nRELU" << std::endl;
+     auto active = relu.forward(a);
+     printtensor(active);
+
+
+
+
+     // back propa
+
+     std::cout << "\nRELU backpropagation" << std::endl;
+     auto active2 = relu.backpropagation(active);
+     printtensor(active2);
+
      std::cout << "\nafter backward calculation:" << std::endl;
-     auto b = linearLayer.backpropagation(a);
+     auto b = linearLayer.backpropagation(active2);
      printtensor(b);
 
 
@@ -59,5 +73,7 @@ int main() {
 
      std::cout << "\nbias" << std::endl;
      printtensor(linearLayer.printB());
+
+
     return 0;
 }
