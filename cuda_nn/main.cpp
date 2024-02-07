@@ -34,9 +34,11 @@ int main() {
     initTensorOnGPU(input_tensor , 0.0f);
  
     Tensor<float> output_tensor = mlp.forward(input_tensor);
+     mlp.backpropa(output_tensor , 0.001f);
+
 
    
-    output_tensor.print();
+    //DX_tensor.print();
 
     return 0;
 }

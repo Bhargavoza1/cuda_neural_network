@@ -21,10 +21,8 @@ namespace Hex
 	template<class T>
 	Tensor<T>& MLP<T>::forward(Tensor<T>& input_tensor)
 	{
-		X = input_tensor;
-		//X.print();
 
-		X = linear1->forward(X);
+		X = linear1->forward(input_tensor);
 		//X.print();
 		X = relu1->forward(X);
 
@@ -42,10 +40,32 @@ namespace Hex
 		//X.print();
 		return X;
 	}
+
 	template<class T>
-	Tensor<T>& MLP<T>::backpropagation(Tensor<T>& output_error, float learning_rate)
+	Tensor<T>& MLP<T>::backpropagation(Tensor<T>& output_error, float learning_rate = 0.001f) { return output_error; }
+
+	template<class T>
+	void MLP<T>::backpropa(Tensor<T>& output_error, float learning_rate = 0.001f)
 	{
-		return output_error;
+		// Calculate gradients for the output layer
+		X= sigmoid1->backpropagation(output_error, learning_rate);
+		//X.print();
+		X = linear3->backpropagation(X, learning_rate);
+		//X.print();
+	 
+		for (int i = 0; i < _hiddenlayer; ++i) {
+			X = relu2->backpropagation(X, learning_rate);
+			//X.print();
+			X = linear2->backpropagation(X, learning_rate);
+			//X.print();
+		}
+		//X.print();
+		// Backpropagate through the first hidden layer
+		X = relu1->backpropagation(X, learning_rate);
+		//X.print();
+		X = linear1->backpropagation(X, learning_rate);
+		//X.print();
+		 
 	}
 
 

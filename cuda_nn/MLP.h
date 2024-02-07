@@ -30,6 +30,8 @@ namespace Hex {
 
         // Override backpropagation method
         Tensor<T>& backpropagation(Tensor<T>& output_error, float learning_rate = 0.001f) override;
+
+        void backpropa(Tensor<T>& output_error, float learning_rate = 0.001f)  ;
 	};
 }
 
