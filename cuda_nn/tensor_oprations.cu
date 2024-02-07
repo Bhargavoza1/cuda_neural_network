@@ -96,31 +96,49 @@ namespace Hex {
     }
 
 
-    template <typename T>
-    std::unique_ptr<Tensor<T>> slice(int index, Tensor<T> tensor)   {
-        // Check if the index is within bounds
-        if (index < 0 || index >= tensor.getShape()[0]) {
-            throw std::out_of_range("Index out of bounds");
-        }
-        std::vector<int> shape = tensor.getShape();
-        std::vector<int> sliced_shape(shape.begin() + 1, shape.end());
+    //template <typename T>
+    //std::unique_ptr<Tensor<T>>  sliceFirstIndex(int firstIndex, Tensor<T> tensor) {
+    //    if (firstIndex < 0 || firstIndex >= tensor.getShape()[0]) {
+    //        throw std::out_of_range("Index out of range");
+    //    }
+    //    std::vector<int> shape = tensor.getShape();
+    //    std::vector<int> newShape(shape.begin() + 1, shape.end()); // New shape without the first dimension
+    //    std::unique_ptr<Tensor<T>> slicedTensor(new Tensor<T>(newShape));
+
+    //    // Calculate offset for the first index
+    //    int offset = firstIndex * shape[1] * shape[2]; // Assuming the shape is nxnxn
+
+    //    // Copy data from original tensor to sliced tensor
+    //    cudaMemcpy(slicedTensor->getData(), tensor.getData() + offset, newShape[0] * newShape[1] * sizeof(T), cudaMemcpyDeviceToDevice);
+
+    //    return slicedTensor;
+    //}
+
+    //template <typename T>
+    //std::unique_ptr<Tensor<T>> slice(int index, Tensor<T> tensor)   {
+    //    // Check if the index is within bounds
+    //    if (index < 0 || index >= tensor.getShape()[0]) {
+    //        throw std::out_of_range("Index out of bounds");
+    //    }
+    //    std::vector<int> shape = tensor.getShape();
+    //    std::vector<int> sliced_shape(shape.begin() + 1, shape.end());
   
-        std::unique_ptr<Tensor<T>> sliced_tensor(new Tensor<T>(sliced_shape));
+    //    std::unique_ptr<Tensor<T>> sliced_tensor(new Tensor<T>(sliced_shape));
 
-        for (int i = 0; i < sliced_shape[0]; ++i) {
-            std::vector<int> original_indices = { index, i };
-            std::vector<int> sliced_indices = { i };
-            for (size_t j = 1; j < shape.size(); ++j) {
-                original_indices.push_back(0);
-                sliced_indices.push_back(j - 1);
-            }
+    //    for (int i = 0; i < sliced_shape[0]; ++i) {
+    //        std::vector<int> original_indices = { index, i };
+    //        std::vector<int> sliced_indices = { i };
+    //        for (size_t j = 1; j < shape.size(); ++j) {
+    //            original_indices.push_back(0);
+    //            sliced_indices.push_back(j - 1);
+    //        }
 
-            T value = tensor.get(original_indices);
-            sliced_tensor->set(sliced_indices, value);
-        }
+    //        T value = tensor.get(original_indices);
+    //        sliced_tensor->set(sliced_indices, value);
+    //    }
 
-        return sliced_tensor;
-    }
+    //    return sliced_tensor;
+    //}
  
 
     template<typename T>
