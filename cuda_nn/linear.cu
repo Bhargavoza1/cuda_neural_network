@@ -109,9 +109,9 @@ namespace Hex{
 
 
 	template<class T>
-	Tensor<T>& linear<T>::forward(Tensor<T>& tensor)
+	Tensor<T>& linear<T>::forward(Tensor<T>& input_tensor)
 	{
-		input = tensor;
+		input = input_tensor;
 		if (weights.getShape()[1] != input.getShape()[0]) {
 			std::cerr << "Error: Tensor shapes must be the same for addition. Shape of tensor1: "
 				<< weights.getShape()[1] << ", Shape of tensor2: " << input.getShape()[0] << std::endl;
@@ -146,7 +146,7 @@ namespace Hex{
 
 	template<class T>
 	__global__ void backpropagationAndUpdateKernel(T* weights, T* bias,
-		const T* input_gradients,const T* input_data, T* input_error,
+		const T* output_error,const T* input_data, T* input_error,
 		float learning_rate, int w_x_dim, int w_y_dim,
 		int input_x_dim, int input_y_dim)
 	{
@@ -156,7 +156,7 @@ namespace Hex{
 		if (row < w_y_dim && col < input_y_dim) {
 			T sum = 0;
 			for (int i = 0; i < w_x_dim; ++i) {
-				sum  += weights[i * w_y_dim + row] * input_gradients[i]; 
+				sum  += weights[i * w_y_dim + row] * output_error[i]; 
 			} 
 			input_error[row * input_y_dim + col] = sum; 
 			
@@ -165,9 +165,9 @@ namespace Hex{
 		if (row < w_x_dim && col < input_y_dim) {
 			T gw = 0;
 			
-			bias[row] -= learning_rate * input_gradients[row];
+			bias[row] -= learning_rate * output_error[row];
 			for (int i = 0; i < w_y_dim; ++i) {
-				 gw  = input_gradients[row] * input_data[i]; 
+				 gw  = output_error[row] * input_data[i]; 
 				 weights[row * w_y_dim + i] -= learning_rate * gw;
 			}
 			
@@ -175,19 +175,19 @@ namespace Hex{
 	}
 
 	template<class T>
-	Tensor<T>& linear<T>::backpropagation(Tensor<T>& input_gradients, float learning_rate)
+	Tensor<T>& linear<T>::backpropagation(Tensor<T>& output_error, float learning_rate)
 	{
 		
 		dim3 threadsPerBlock(16, 16);
 		dim3 numBlocks((weights.getShape()[1] + threadsPerBlock.x - 1) / threadsPerBlock.x,
 			(weights.getShape()[0] + threadsPerBlock.y - 1) / threadsPerBlock.y);
 
-		//std::cout << weights.getShape()[1] << "aaaX" << input_gradients.getShape()[1] << std::endl;
+		//std::cout << weights.getShape()[1] << "aaaX" << output_error.getShape()[1] << std::endl;
 		backpropagationAndUpdateKernel << <numBlocks, threadsPerBlock >> > (
 			weights.getData(), bias.getData(),
-			input_gradients.getData(), input.getData(), input_error.getData(),
+			output_error.getData(), input.getData(), input_error.getData(),
 			learning_rate, weights.getShape()[0], weights.getShape()[1],
-			input_gradients.getShape()[0], input_gradients.getShape()[1]);
+			output_error.getShape()[0], output_error.getShape()[1]);
 		cudaDeviceSynchronize();
 
 		return input_error;
