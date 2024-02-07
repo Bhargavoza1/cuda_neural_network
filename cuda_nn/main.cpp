@@ -6,6 +6,7 @@
 #include "tensor_oprations.cuh"
 #include "linear.h"
 #include "ReLU.h"
+#include "Sigmoid.h"
 using namespace Hex;
 using namespace std;
 
@@ -24,6 +25,7 @@ int main() {
     std::unique_ptr<Tensor<int>> tensorB(new Tensor<int>({ 3,1 }));
     linear<float> linearLayer(3,2   ,false   );
     ReLU<float> relu;
+    Sigmoid<float> sigmoid;
     
     // Initialize tensors on GPU
     initTensorOnGPU(*tensorA , 0.0);
@@ -50,8 +52,8 @@ int main() {
  
 
 
-     std::cout << "\nRELU" << std::endl;
-     auto active = relu.forward(a);
+     std::cout << "\nsigmoid" << std::endl;
+     auto active = sigmoid.forward(a);
      printtensor(active);
 
 
@@ -59,8 +61,8 @@ int main() {
 
      // back propa
 
-     std::cout << "\nRELU backpropagation" << std::endl;
-     auto active2 = relu.backpropagation(active);
+     std::cout << "\nsigmoid backpropagation" << std::endl;
+     auto active2 = sigmoid.backpropagation(active);
      printtensor(active2);
 
      std::cout << "\nafter backward calculation:" << std::endl;

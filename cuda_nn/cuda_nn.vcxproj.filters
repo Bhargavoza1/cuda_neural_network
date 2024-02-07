@@ -8,6 +8,9 @@
     <CudaCompile Include="ReLU.cu">
       <Filter>layers</Filter>
     </CudaCompile>
+    <CudaCompile Include="Sigmoid.cu">
+      <Filter>layers</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="layers">
@@ -34,6 +37,9 @@
       <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="ReLU.h">
+      <Filter>layers</Filter>
+    </ClInclude>
+    <ClInclude Include="Sigmoid.h">
       <Filter>layers</Filter>
     </ClInclude>
   </ItemGroup>
