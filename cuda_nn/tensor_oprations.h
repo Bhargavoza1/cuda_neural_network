@@ -13,7 +13,11 @@ namespace Hex {
 
 	template <typename T>
 	void initTensorOnGPU(Tensor<T>& tensor, float multiplier);
+	template <typename T>
+	std::unique_ptr<Tensor<T>> slice(int index, Tensor<T> tensor);
 
+	template <typename T>
+	std::unique_ptr<Tensor<T>> transpose(Tensor<T>& tensor);
 }
 
 #include "tensor_oprations.cu"

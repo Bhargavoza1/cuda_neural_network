@@ -42,10 +42,10 @@ namespace Hex
 	}
 
 	template<class T>
-	Tensor<T>& MLP<T>::backpropagation(Tensor<T>& output_error, float learning_rate = 0.001f) { return output_error; }
+	Tensor<T>& MLP<T>::backpropagation(Tensor<T>& output_error, float learning_rate  ) { return output_error; }
 
 	template<class T>
-	void MLP<T>::backpropa(Tensor<T>& output_error, float learning_rate = 0.001f)
+	void MLP<T>::backpropa(Tensor<T>& output_error, float learning_rate  )
 	{
 		// Calculate gradients for the output layer
 		X= sigmoid1->backpropagation(output_error, learning_rate);

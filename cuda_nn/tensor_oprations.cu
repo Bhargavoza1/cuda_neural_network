@@ -95,5 +95,61 @@ namespace Hex {
         }
     }
 
+
+    template <typename T>
+    std::unique_ptr<Tensor<T>> slice(int index, Tensor<T> tensor)   {
+        // Check if the index is within bounds
+        if (index < 0 || index >= tensor.getShape()[0]) {
+            throw std::out_of_range("Index out of bounds");
+        }
+        std::vector<int> shape = tensor.getShape();
+        std::vector<int> sliced_shape(shape.begin() + 1, shape.end());
+  
+        std::unique_ptr<Tensor<T>> sliced_tensor(new Tensor<T>(sliced_shape));
+
+        for (int i = 0; i < sliced_shape[0]; ++i) {
+            std::vector<int> original_indices = { index, i };
+            std::vector<int> sliced_indices = { i };
+            for (size_t j = 1; j < shape.size(); ++j) {
+                original_indices.push_back(0);
+                sliced_indices.push_back(j - 1);
+            }
+
+            T value = tensor.get(original_indices);
+            sliced_tensor->set(sliced_indices, value);
+        }
+
+        return sliced_tensor;
+    }
  
+
+    template<typename T>
+    __global__ void transpose_kernel(const T* input, T* output, int rows, int cols) {
+        int tid_x = blockIdx.x * blockDim.x + threadIdx.x;
+        int tid_y = blockIdx.y * blockDim.y + threadIdx.y;
+
+        if (tid_x < cols && tid_y < rows) {
+            output[tid_x * rows + tid_y] = input[tid_y * cols + tid_x];
+        }
+    }
+
+    template <typename T>
+    std::unique_ptr<Tensor<T>>  transpose(Tensor<T>& tensor) {
+        // Get the shape of the original tensor
+        std::vector<int> original_shape = tensor.getShape();
+        std::cout << original_shape[1] << " asdsad " << endl;
+
+        // Swap the dimensions
+        std::vector<int> transposed_shape(original_shape.rbegin(), original_shape.rend());
+
+        std::unique_ptr<Tensor<T>> transposed_tensor(new Tensor<T>(transposed_shape));
+
+        dim3 threadsPerBlock(16, 16); // 16x16 threads per block
+        dim3 numBlocks((original_shape[0] + threadsPerBlock.x - 1) / threadsPerBlock.x,
+            (original_shape[1] + threadsPerBlock.y - 1) / threadsPerBlock.y); // Adjust grid dimensions
+
+        transpose_kernel << <numBlocks, threadsPerBlock >> > (tensor.getData(), transposed_tensor->getData(), original_shape[0], original_shape[1]);
+
+        return transposed_tensor;
+    }
 }
