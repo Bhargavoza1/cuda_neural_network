@@ -17,7 +17,7 @@ namespace Hex {
 
     public:
         // Constructor
-        linear(int input_size, int output_size, bool bias_as_zero = true , float w_b_range = 0.5f );
+        linear(int input_size, int output_size, bool bias_as_zero = false , float w_b_range = 0.5f );
         ~linear();
 
         // Override forward method

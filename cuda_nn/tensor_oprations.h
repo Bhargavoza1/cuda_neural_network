@@ -18,7 +18,7 @@ namespace Hex {
 	//std::unique_ptr<Tensor<T>> slice(int index, Tensor<T> tensor);
 
 	template <typename T>
-	std::unique_ptr<Tensor<T>> transpose(Tensor<T>& tensor);
+	std::unique_ptr<Tensor<T>> transpose(const Tensor<T>& tensor);
 
 	template <typename T>
 	std::unique_ptr<Tensor<T>>  sliceFirstIndex(int firstIndex, const Tensor<T>& tensor);

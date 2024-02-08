@@ -18,23 +18,31 @@ void printtensor(const Tensor<T>& tensor1) {
 
  
 template<typename T>
-void predictAndPrintResults(const MLP<T>& model, const Tensor<T>& input_data, const Tensor<T>& target_data) {
+void predictAndPrintResults( MLP<T>& model, const Tensor<T>& input_data, const Tensor<T>& target_data) {
     std::vector<int> input_shape = input_data.getShape();
     std::vector<int> target_shape = target_data.getShape();
 
     // Assuming num_samples is the first dimension of the input_data and target_data tensors
     int num_samples = input_shape[0];
-   
+    std::unique_ptr<Tensor<float>> sliced_tensor  ;
+    std::unique_ptr<Tensor<float>> transpose_tensor  ;
+    Tensor<float> inpurt_data ;
     for (int sample_index = 0; sample_index < num_samples; ++sample_index) {
          
-        std::unique_ptr<Tensor<T>> sliced_tensor = Hex::sliceFirstIndex(sample_index, input_data) ;
-      
-        
-       
-
-        //// Print the sliced tensor
-        std::cout << "Sliced tensor at index " << sample_index << ":" << std::endl;
-        sliced_tensor->print();
+        sliced_tensor = Hex::sliceFirstIndex(sample_index, input_data) ;
+        transpose_tensor = Hex::transpose(*sliced_tensor);
+        inpurt_data = *transpose_tensor;
+        //inpurt_data.print();
+        auto a =  model.forward(inpurt_data); 
+        model.backpropa(a);
+        std::cout << "end of cycle";
+        std::cout << std::endl;
+        std::cout << std::endl;
+        std::cout << std::endl;
+        std::cout << std::endl;
+        ////// Print the sliced tensor
+        //std::cout << "Sliced tensor at index " << sample_index << ":" << std::endl;
+        //sliced_tensor->print();
  
     }
 }
@@ -61,7 +69,7 @@ int main() {
         {{1, 0}},   // Class 0
         {{0, 1}},   // Class 1
         {{0, 1}},   // Class 1
-        {{1, 0}}    // Class 0
+         {{1, 0}}  // Class 0
     };
 
     // Create a Tensor for x_train
@@ -82,14 +90,22 @@ int main() {
 
     
     predictAndPrintResults(mlp, *x_tensor, *y_tensor);
-    // Print tensors
-    std::cout << "x_train:" << std::endl;
-    x_tensor->print();
+    //// Print tensors
+    //std::cout << "x_train:" << std::endl;
+    //x_tensor->print();
 
-    std::cout << "y_train:" << std::endl;
-    y_tensor->print();
+    //std::cout << "y_train:" << std::endl;
+    //y_tensor->print();
 
- 
+    //std::unique_ptr<Tensor<float>> sliced_tensor = Hex::sliceFirstIndex(1, *x_tensor);
+    //std::unique_ptr<Tensor<float>> transpose_tensor = Hex::transpose(*sliced_tensor);
+    //Tensor<float> inpurt_data = *transpose_tensor;
+    //inpurt_data.print();
+
+    //std::unique_ptr<Tensor<float>> x_2(new Tensor<float>({2,1}));
+    //initTensorOnGPU(*x_2 ,0.0f);
+    //x_2->print();
+    // mlp.forward(inpurt_data);
 
 
     // Get the sliced tensor at index 0

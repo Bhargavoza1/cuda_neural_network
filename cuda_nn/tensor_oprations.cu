@@ -152,10 +152,10 @@ namespace Hex {
     }
 
     template <typename T>
-    std::unique_ptr<Tensor<T>>  transpose(Tensor<T>& tensor) {
+    std::unique_ptr<Tensor<T>>  transpose(const Tensor<T>& tensor) {
         // Get the shape of the original tensor
         std::vector<int> original_shape = tensor.getShape();
-        std::cout << original_shape[1] << " asdsad " << endl;
+      
 
         // Swap the dimensions
         std::vector<int> transposed_shape(original_shape.rbegin(), original_shape.rend());
@@ -166,7 +166,7 @@ namespace Hex {
         dim3 numBlocks((original_shape[0] + threadsPerBlock.x - 1) / threadsPerBlock.x,
             (original_shape[1] + threadsPerBlock.y - 1) / threadsPerBlock.y); // Adjust grid dimensions
 
-        transpose_kernel << <numBlocks, threadsPerBlock >> > (tensor.getData(), transposed_tensor->getData(), original_shape[0], original_shape[1]);
+        transpose_kernel<<<numBlocks, threadsPerBlock>>>(tensor.getData(), transposed_tensor->getData(), original_shape[0], original_shape[1]);
 
         return transposed_tensor;
     }
