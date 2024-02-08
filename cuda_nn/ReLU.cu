@@ -42,8 +42,8 @@ namespace Hex {
         cudaDeviceSynchronize();
         cudaError_t cudaError = cudaGetLastError();
         if (cudaError != cudaSuccess) {
-            printf("CUDA error from add tensor rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr: %s\n", cudaGetErrorString(cudaError));
-            //exit(EXIT_FAILURE);  // or handle the error appropriately
+            printf("error from relu forward method : %s\n", cudaGetErrorString(cudaError));
+             exit(EXIT_FAILURE);  // or handle the error appropriately
         }
         //std::cout << std::endl;
         //std::cout << std::endl;
@@ -82,6 +82,12 @@ namespace Hex {
 
         // Synchronize to make sure the kernel has finished
         cudaDeviceSynchronize();
+
+        cudaError_t cudaError = cudaGetLastError();
+        if (cudaError != cudaSuccess) {
+            printf("error from relu backword method : %s\n", cudaGetErrorString(cudaError));
+            exit(EXIT_FAILURE);  // or handle the error appropriately
+        }
         //std::cout << std::endl;
         //std::cout << std::endl;
         return *input_error;

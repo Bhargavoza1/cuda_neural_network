@@ -49,18 +49,25 @@ namespace Hex {
         for (int dim : shape) {
             size *= dim;
         }
-        //std::cout << "dbug strat of sigmoid" << std::endl;
-        //std::cout << "intpu" << std::endl;
-        //input.print();
-   
-        //std::cout << "dbug end of sigmoid" << std::endl;
+      /*  std::cout << "dbug strat of sigmoid" << std::endl;
+        std::cout << "intpu" << std::endl;
+        input.print();
+   */
+        
         sigmoid_forward_kernel << <(size + 255) / 256, 256 >> > (input.getData(), output->getData(), size);
         cudaDeviceSynchronize();
         cudaError_t cudaError = cudaGetLastError();
         if (cudaError != cudaSuccess) {
-            printf("CUDA error from add tensor sssssssssssssssssssssss: %s\n", cudaGetErrorString(cudaError));
-            //exit(EXIT_FAILURE);  // or handle the error appropriately
+            printf("error from sigmoid forward method : %s\n", cudaGetErrorString(cudaError));
+             exit(EXIT_FAILURE);  // or handle the error appropriately
         }
+
+        //std::cout << "output" << std::endl;
+        //output->print();
+        //std::cout << "dbug end of sigmoid" << std::endl;
+        //std::cout <<   std::endl;
+        //std::cout <<   std::endl;
+        //std::cout <<   std::endl;
         return *output;
     }
 
@@ -81,7 +88,11 @@ namespace Hex {
         //std::cout << "back dbug end of sigmoid" << std::endl;
         sigmoid_backward_kernel << <(size + 255) / 256, 256 >> > (input.getData(), output_error.getData(), input_error->getData(), size);
         cudaDeviceSynchronize();
-
+        cudaError_t cudaError = cudaGetLastError();
+        if (cudaError != cudaSuccess) {
+            printf("error from sigmoid backword method : %s\n", cudaGetErrorString(cudaError));
+            exit(EXIT_FAILURE);  // or handle the error appropriately
+        }
         return *input_error;
     }
     // Explicit instantiation of the template class for supported types

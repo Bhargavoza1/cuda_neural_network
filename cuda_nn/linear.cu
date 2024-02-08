@@ -117,13 +117,14 @@ namespace Hex{
 				<< weights.getShape()[1] << ", Shape of tensor2: " << input.getShape()[0] << std::endl;
 			throw std::runtime_error("Tensor shape mismatch");
 		}
+		//std::cout << "dbug strat of linear" << std::endl;
+		//std::cout << "weight" << std::endl;
+		//weights.print();
 
-		// Ensure dimensions match
-		//assert(tensor.getShape()[1] == weights.getShape()[0]);
-
-		// Allocate memory for the output tensor
-		//std::cout << weights.getShape()[0] << "X" << tensor.getShape()[1] << std::endl;
-		 
+		//std::cout << "intpu" << std::endl;
+		//input.print();
+		//std::cout << "bias" << std::endl;
+		//bias.print();
 
 		dim3 threadsPerBlock(256);
 		dim3 numBlocks((output.getShape()[0] + threadsPerBlock.x - 1) / threadsPerBlock.x,
@@ -134,13 +135,19 @@ namespace Hex{
 			weights.getShape()[0], weights.getShape()[1] ,
 			input.getShape()[0], input.getShape()[1]);
 		cudaDeviceSynchronize();
- ;
+	/*	std::cout << "output" << std::endl;
+		output.print();*/
+		 
 		cudaError_t cudaError = cudaGetLastError();
-		if (cudaError != cudaSuccess) {
-			printf("CUDA error from add tensor aaaaaaaaaaaaaaaaaaa: %s\n", cudaGetErrorString(cudaError));
-			//exit(EXIT_FAILURE);  // or handle the error appropriately
+		if (cudaError == cudaErrorInvalidValue) {
+			printf("error from liner forward method : %s\n", cudaGetErrorString(cudaError));
+			 exit(EXIT_FAILURE);  // or handle the error appropriately
 		}
-
+	
+		//std::cout << "dbug end of linear" << std::endl;
+		//std::cout << std::endl;
+		//std::cout << std::endl;
+		//std::cout << std::endl;
 		return output;
 	}
 
@@ -181,15 +188,18 @@ namespace Hex{
 		dim3 threadsPerBlock(16, 16);
 		dim3 numBlocks((weights.getShape()[1] + threadsPerBlock.x - 1) / threadsPerBlock.x,
 			(weights.getShape()[0] + threadsPerBlock.y - 1) / threadsPerBlock.y);
-
-		//std::cout << weights.getShape()[1] << "aaaX" << output_error.getShape()[1] << std::endl;
+		 
 		backpropagationAndUpdateKernel << <numBlocks, threadsPerBlock >> > (
 			weights.getData(), bias.getData(),
 			output_error.getData(), input.getData(), input_error.getData(),
 			learning_rate, weights.getShape()[0], weights.getShape()[1],
 			output_error.getShape()[0], output_error.getShape()[1]);
 		cudaDeviceSynchronize();
-
+		cudaError_t cudaError = cudaGetLastError();
+		if (cudaError != cudaSuccess) {
+			printf("error from liner backword method : %s\n", cudaGetErrorString(cudaError));
+			exit(EXIT_FAILURE);  // or handle the error appropriately
+		}
 		return input_error;
 
 

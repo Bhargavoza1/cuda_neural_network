@@ -51,7 +51,7 @@ namespace Hex {
         std::cout << ", Type: " << typeid(T).name() << "):" << std::endl;
 
         printHelper(data, shape, 0, {});
-        std::cout << std::endl;
+        //std::cout << std::endl;
     }
 
     template <typename T>

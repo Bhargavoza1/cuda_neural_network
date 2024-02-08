@@ -27,23 +27,39 @@ void predictAndPrintResults( MLP<T>& model, const Tensor<T>& input_data, const T
     std::unique_ptr<Tensor<float>> sliced_tensor  ;
     std::unique_ptr<Tensor<float>> transpose_tensor  ;
     Tensor<float> inpurt_data ;
+    Tensor<T>* predicted_output;
     for (int sample_index = 0; sample_index < num_samples; ++sample_index) {
          
         sliced_tensor = Hex::sliceFirstIndex(sample_index, input_data) ;
         transpose_tensor = Hex::transpose(*sliced_tensor);
         inpurt_data = *transpose_tensor;
-        //inpurt_data.print();
-        auto a =  model.forward(inpurt_data); 
-        model.backpropa(a);
-        std::cout << "end of cycle";
-        std::cout << std::endl;
-        std::cout << std::endl;
+       
+        predicted_output =  &model.forward(inpurt_data);
+
+        // Printing the predicted output
+        std::cout << "Predicted output:" << std::endl;
+        predicted_output->print();
+ 
+        // Determine the actual output from the target_data
+        int actual_output = (target_data.get({ sample_index, 0, 0 }) == 1) ? 0 : 1;
+ 
+        // Print additional information
+        if (predicted_output->get({ 0, 0 }) >= 0.5) {
+            std::cout << "1st input for XOR: "<< inpurt_data.get({0,0}) <<" 2nd input for XOR: " << inpurt_data.get({ 0,1 }) << 
+              " Neural Network output is 0, actual output is: " << actual_output << std::endl;
+        }
+        else {
+            std::cout << "1st input for XOR: " << inpurt_data.get({ 0,0 }) << " 2nd input for XOR: " << inpurt_data.get({ 0,1 }) <<
+                " Neural Network output is 1, actual output is: " << actual_output << std::endl;
+        }
+
+        std::cout << "end of cycle" << std::endl;
         std::cout << std::endl;
         std::cout << std::endl;
         ////// Print the sliced tensor
         //std::cout << "Sliced tensor at index " << sample_index << ":" << std::endl;
         //sliced_tensor->print();
- 
+        
     }
 }
 int main() {
