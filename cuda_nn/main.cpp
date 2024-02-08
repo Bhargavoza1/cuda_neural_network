@@ -8,6 +8,7 @@
 #include "ReLU.h"
 #include "Sigmoid.h"
 #include "MLP.h"
+#include "MSE.h"
 using namespace Hex;
 using namespace std;
 
@@ -24,9 +25,9 @@ void predictAndPrintResults( MLP<T>& model, const Tensor<T>& input_data, const T
 
     // Assuming num_samples is the first dimension of the input_data and target_data tensors
     int num_samples = input_shape[0];
-    std::unique_ptr<Tensor<float>> sliced_tensor  ;
-    std::unique_ptr<Tensor<float>> transpose_tensor  ;
-    Tensor<float> inpurt_data ;
+    std::unique_ptr<Tensor<T>> sliced_tensor  ;
+    std::unique_ptr<Tensor<T>> transpose_tensor  ;
+    Tensor<T> inpurt_data ;
     Tensor<T>* predicted_output;
     for (int sample_index = 0; sample_index < num_samples; ++sample_index) {
          
@@ -55,13 +56,75 @@ void predictAndPrintResults( MLP<T>& model, const Tensor<T>& input_data, const T
 
         std::cout << "end of cycle" << std::endl;
         std::cout << std::endl;
-        std::cout << std::endl;
+     
         ////// Print the sliced tensor
         //std::cout << "Sliced tensor at index " << sample_index << ":" << std::endl;
         //sliced_tensor->print();
         
     }
 }
+
+template<typename T>
+void trainNeuralNetwork(MLP<T>& model, const Tensor<T>& input_data, const Tensor<T>& target_data, int num_epochs, T learning_rate) {
+    // Get the number of samples
+    std::vector<int> input_shape = input_data.getShape();
+    std::vector<int> target_shape = target_data.getShape();
+
+    int num_samples = input_shape[0];
+    std::unique_ptr<Tensor<T>> input_slicing;
+    std::unique_ptr<Tensor<T>> input_transpose;
+    Tensor<T> sampled_input_data;
+    
+    std::unique_ptr<Tensor<T>> Target_slicing;
+    std::unique_ptr<Tensor<T>> Target_transpose;
+    Tensor<T> sampled_target_data;
+    
+    Tensor<T>* predicted_output;
+
+    std::unique_ptr<Tensor<T>> up_error;
+    Tensor<T> error;
+
+    std::unique_ptr<Tensor<T>> up_output_error;
+    Tensor<T> output_error;
+  
+
+
+    
+    // Training loop
+    for (int epoch = 0; epoch < num_epochs; ++epoch) {
+      
+        T total_error = 0;
+        for (int sample_index = 0; sample_index < num_samples; ++sample_index) {
+            
+            input_slicing = Hex::sliceFirstIndex(sample_index, input_data);
+            input_transpose = Hex::transpose(*input_slicing);
+            sampled_input_data = *input_transpose;
+            
+            Target_slicing = Hex::sliceFirstIndex(sample_index, target_data);
+            Target_transpose = Hex::transpose(*Target_slicing);
+            sampled_target_data = *Target_transpose;
+          
+            predicted_output = &model.forward(sampled_input_data);
+            //predicted_output->print();
+            up_error = Hex::mse(sampled_target_data, *predicted_output);
+            error = *up_error;
+           // std::cout << error.get({ 0 }) << endl;
+            total_error += error.get({0});  
+
+            up_output_error = Hex::mse_derivative(sampled_target_data, *predicted_output);
+            output_error = *up_output_error;
+           // output_error.print();
+            // Backward propagation
+            model.backpropa(output_error, learning_rate);
+        }
+        std::cout << total_error;
+        // Calculate the average error on all samples
+        T average_error = (total_error / num_samples)  ;
+        std::cout << "Epoch " << (epoch + 1) << "/" << num_epochs << "   Mean Squared Error: " << average_error << std::endl;
+    }
+}
+
+
 int main() {
     
     // Define the parameters for your MLP
@@ -104,30 +167,9 @@ int main() {
         y_tensor->set({ i, 0, 1 }, y_train[i][0][1]);
     }
 
-    
-    predictAndPrintResults(mlp, *x_tensor, *y_tensor);
-    //// Print tensors
-    //std::cout << "x_train:" << std::endl;
-    //x_tensor->print();
-
-    //std::cout << "y_train:" << std::endl;
-    //y_tensor->print();
-
-    //std::unique_ptr<Tensor<float>> sliced_tensor = Hex::sliceFirstIndex(1, *x_tensor);
-    //std::unique_ptr<Tensor<float>> transpose_tensor = Hex::transpose(*sliced_tensor);
-    //Tensor<float> inpurt_data = *transpose_tensor;
-    //inpurt_data.print();
-
-    //std::unique_ptr<Tensor<float>> x_2(new Tensor<float>({2,1}));
-    //initTensorOnGPU(*x_2 ,0.0f);
-    //x_2->print();
-    // mlp.forward(inpurt_data);
-
-
-    // Get the sliced tensor at index 0
-
+     trainNeuralNetwork(mlp, *x_tensor, *y_tensor, 1000, 0.001f);
+   predictAndPrintResults(mlp, *x_tensor, *y_tensor);
  
-
     
 
     return 0;
