@@ -21,20 +21,32 @@ namespace Hex {
     template<class T>
     Tensor<T>& ReLU<T>::forward(Tensor<T>& input_tensor)
     {
-        input = std::make_unique<Tensor<T>>(input_tensor);
+        input =  input_tensor ;
         output.reset(new Tensor<T>(input_tensor.getShape()));
         
-    
-        std::vector<int> shape = input->getShape();
+ /*       std::cout << "dbug strat of relu" << std::endl;
+        std::cout << "intpu" << std::endl;
+        input.print();
+        std::cout << "output" << std::endl;
+        output->print();
+        std::cout << "dbug end of relu" << std::endl;*/
+
+        std::vector<int> shape = input.getShape();
         int size = 1;
         for (int dim : shape) {
             size *= dim;
         }
  
-        relu_forward_kernel << <(size + 255) / 256, 256 >> > (input->getData(), output->getData(), size);
+        relu_forward_kernel << <(size + 255) / 256, 256 >> > (input.getData(), output->getData(), size);
  
         cudaDeviceSynchronize();
-
+        cudaError_t cudaError = cudaGetLastError();
+        if (cudaError != cudaSuccess) {
+            printf("CUDA error from add tensor rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr: %s\n", cudaGetErrorString(cudaError));
+            //exit(EXIT_FAILURE);  // or handle the error appropriately
+        }
+        //std::cout << std::endl;
+        //std::cout << std::endl;
         return *output;
     }
 
@@ -52,7 +64,12 @@ namespace Hex {
     {
         // Create a new tensor to hold the gradients
         input_error.reset(new Tensor<T>(output_error.getShape()));
-
+   /*     std::cout << "dbug strat of relu backword" << std::endl;
+        std::cout << "intpu" << std::endl;
+        input.print();
+ 
+        std::cout << "dbug end of relu" << std::endl;*/
+     
   
         std::vector<int> shape = output_error.getShape();
         int size = 1;
@@ -61,11 +78,12 @@ namespace Hex {
         }
 
         // Call CUDA kernel to compute gradients
-        relu_backward_kernel << <(size + 255) / 256, 256 >> > (input->getData(), output_error.getData(), input_error->getData(), size);
+        relu_backward_kernel << <(size + 255) / 256, 256 >> > (input.getData(), output_error.getData(), input_error->getData(), size);
 
         // Synchronize to make sure the kernel has finished
         cudaDeviceSynchronize();
-
+        //std::cout << std::endl;
+        //std::cout << std::endl;
         return *input_error;
     }
 

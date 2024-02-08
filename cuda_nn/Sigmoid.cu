@@ -41,18 +41,26 @@ namespace Hex {
     // Update forward method with sigmoid computation
     template<class T>
     Tensor<T>& Sigmoid<T>::forward(Tensor<T>& input_tensor) {
-        input = std::make_unique<Tensor<T>>(input_tensor);
+        input= input_tensor;
         output.reset(new Tensor<T>(input_tensor.getShape()));
 
-        std::vector<int> shape = input->getShape();
+        std::vector<int> shape = input.getShape();
         int size = 1;
         for (int dim : shape) {
             size *= dim;
         }
-
-        sigmoid_forward_kernel << <(size + 255) / 256, 256 >> > (input->getData(), output->getData(), size);
+        //std::cout << "dbug strat of sigmoid" << std::endl;
+        //std::cout << "intpu" << std::endl;
+        //input.print();
+   
+        //std::cout << "dbug end of sigmoid" << std::endl;
+        sigmoid_forward_kernel << <(size + 255) / 256, 256 >> > (input.getData(), output->getData(), size);
         cudaDeviceSynchronize();
-
+        cudaError_t cudaError = cudaGetLastError();
+        if (cudaError != cudaSuccess) {
+            printf("CUDA error from add tensor sssssssssssssssssssssss: %s\n", cudaGetErrorString(cudaError));
+            //exit(EXIT_FAILURE);  // or handle the error appropriately
+        }
         return *output;
     }
 
@@ -66,8 +74,12 @@ namespace Hex {
         for (int dim : shape) {
             size *= dim;
         }
+        //std::cout << "back dbug strat of sigmoid" << std::endl;
+        //std::cout << "intpu" << std::endl;
+        //input.print();
 
-        sigmoid_backward_kernel << <(size + 255) / 256, 256 >> > (input->getData(), output_error.getData(), input_error->getData(), size);
+        //std::cout << "back dbug end of sigmoid" << std::endl;
+        sigmoid_backward_kernel << <(size + 255) / 256, 256 >> > (input.getData(), output_error.getData(), input_error->getData(), size);
         cudaDeviceSynchronize();
 
         return *input_error;

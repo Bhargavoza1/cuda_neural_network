@@ -137,8 +137,8 @@ namespace Hex{
  ;
 		cudaError_t cudaError = cudaGetLastError();
 		if (cudaError != cudaSuccess) {
-			printf("CUDA error from add tensor: %s\n", cudaGetErrorString(cudaError));
-			exit(EXIT_FAILURE);  // or handle the error appropriately
+			printf("CUDA error from add tensor aaaaaaaaaaaaaaaaaaa: %s\n", cudaGetErrorString(cudaError));
+			//exit(EXIT_FAILURE);  // or handle the error appropriately
 		}
 
 		return output;

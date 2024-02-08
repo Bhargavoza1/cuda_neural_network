@@ -7,8 +7,8 @@ namespace Hex{
 	{
     private:
  
+        Tensor<T>  input;
         std::unique_ptr<Tensor<T>> output;
-        std::unique_ptr<Tensor<T>> input;
         std::unique_ptr<Tensor<T>> input_error;
 
     public:
