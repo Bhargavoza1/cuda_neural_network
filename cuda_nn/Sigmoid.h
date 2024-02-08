@@ -1,7 +1,7 @@
 #pragma once
 #include "layer.h"
 #include <iostream>
-#include <cmath>
+ 
 
 namespace Hex {
     template <class T>

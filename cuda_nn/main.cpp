@@ -1,12 +1,10 @@
 ﻿#include <iostream>
 
-#include <stdexcept>
+ 
 #include <cuda_runtime.h>
 #include"Tensor.h"
 #include "tensor_oprations.h"
-#include "linear.h"
-#include "ReLU.h"
-#include "Sigmoid.h"
+ 
 #include "MLP.h"
 #include "MSE.h"
 using namespace Hex;
@@ -78,8 +76,7 @@ void trainNeuralNetwork(MLP<T>& model, const Tensor<T>& input_data, const Tensor
     std::unique_ptr<Tensor<T>> Target_transpose;
     Tensor<T> sampled_target_data;
     
-    Tensor<T>* predicted_output;
-    Tensor<T>* back_output;
+    Tensor<T>* predicted_output; 
 
     std::unique_ptr<Tensor<T>> up_error;
     Tensor<T> error;
@@ -138,14 +135,14 @@ int main() {
     
 
     // Define your input data
-    std::vector<std::vector<std::vector<int>>> x_train = {
+    std::vector<std::vector<std::vector<float>>> x_train = {
         {{0, 0}},
         {{0, 1}},
         {{1, 0}},
         {{1, 1}}
     };
 
-    std::vector<std::vector<std::vector<int>>> y_train = {
+    std::vector<std::vector<std::vector<float>>> y_train = {
         {{1, 0}},   // Class 0
         {{0, 1}},   // Class 1
         {{0, 1}},   // Class 1

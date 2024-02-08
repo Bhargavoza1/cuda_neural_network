@@ -1,5 +1,5 @@
 #include "MLP.h"
-#include <iostream>
+ 
  
 namespace Hex
 {

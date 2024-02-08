@@ -1,6 +1,5 @@
 #include "Sigmoid.h"
-#include <cuda_runtime.h>
-#include <math_functions.h>
+#include <cuda_runtime.h> 
 #include <iostream>
 namespace Hex {
     template<class T>

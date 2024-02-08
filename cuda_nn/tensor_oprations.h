@@ -3,7 +3,7 @@
 #ifndef TENSOROP_H
 #define TENSOROP_H
 
-#include <iostream>
+ 
 #include "Tensor.h"
 
 namespace Hex {
