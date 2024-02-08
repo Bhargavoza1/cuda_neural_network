@@ -168,7 +168,7 @@ int main() {
         y_tensor->set({ i, 0, 1 }, y_train[i][0][1]);
     }
 
-    trainNeuralNetwork(*mlp, *x_tensor, *y_tensor, 5000, 0.15f); 
+    trainNeuralNetwork(*mlp, *x_tensor, *y_tensor, 1000, 0.15f); 
     predictAndPrintResults(*mlp, *x_tensor, *y_tensor);
  
     

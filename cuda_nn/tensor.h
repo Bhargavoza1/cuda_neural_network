@@ -33,6 +33,7 @@ namespace Hex {
         const T* getData() const override;
         T* getData() override;
 
+        void cudafree();
     private:
         int calculateIndex(const std::vector<int>& indices) const;
         void printHelper(const T* data, const std::vector<int>& shape, int dimension, std::vector<int> indices) const;

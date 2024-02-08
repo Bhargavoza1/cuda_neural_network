@@ -7,8 +7,10 @@ namespace Hex {
     Sigmoid<T>::Sigmoid() {}
 
     template<class T>
-    Sigmoid<T>::~Sigmoid() {}
-
+    Sigmoid<T>::~Sigmoid() {
+        output->cudafree(); input_error->cudafree();
+    }
+    
     template <typename T>
     __device__ T sigmoid(T x) {
         return static_cast<T>(1) / (static_cast<T>(1) + expf(-x));

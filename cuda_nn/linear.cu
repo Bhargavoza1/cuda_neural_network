@@ -105,6 +105,9 @@ namespace Hex{
 	template<class T>
 	linear<T>::~linear()
 	{
+		output.cudafree();
+		input.cudafree();
+		input_error.cudafree();
 	}
 
 

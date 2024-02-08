@@ -19,8 +19,11 @@ namespace Hex {
     template <typename T>
     Tensor<T>::~Tensor() {
         
-        cudaFree(data);
+       
     }
+
+    template <typename T>
+    void Tensor<T>::cudafree(){ cudaFree(data); }
 
     // Set element at index
     template <typename T>

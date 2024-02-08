@@ -8,6 +8,8 @@ namespace Hex {
     template<class T>
     ReLU<T>::~ReLU()
     {
+        output->cudafree();
+        input_error->cudafree();
     }
 
     template <typename T>
