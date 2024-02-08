@@ -19,6 +19,9 @@ namespace Hex {
 
 	template <typename T>
 	std::unique_ptr<Tensor<T>> transpose(Tensor<T>& tensor);
+
+	template <typename T>
+	std::unique_ptr<Tensor<T>>  sliceFirstIndex(int firstIndex, const Tensor<T>& tensor);
 }
 
 #include "tensor_oprations.cu"

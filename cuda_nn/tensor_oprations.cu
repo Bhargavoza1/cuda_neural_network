@@ -96,23 +96,23 @@ namespace Hex {
     }
 
 
-    //template <typename T>
-    //std::unique_ptr<Tensor<T>>  sliceFirstIndex(int firstIndex, Tensor<T> tensor) {
-    //    if (firstIndex < 0 || firstIndex >= tensor.getShape()[0]) {
-    //        throw std::out_of_range("Index out of range");
-    //    }
-    //    std::vector<int> shape = tensor.getShape();
-    //    std::vector<int> newShape(shape.begin() + 1, shape.end()); // New shape without the first dimension
-    //    std::unique_ptr<Tensor<T>> slicedTensor(new Tensor<T>(newShape));
+    template <typename T>
+    std::unique_ptr<Tensor<T>>  sliceFirstIndex(int firstIndex, const Tensor<T>& tensor) {
+        if (firstIndex < 0 || firstIndex >= tensor.getShape()[0]) {
+            throw std::out_of_range("Index out of range");
+        }
+        std::vector<int> shape = tensor.getShape();
+        std::vector<int> newShape(shape.begin() + 1, shape.end()); // New shape without the first dimension
+        std::unique_ptr<Tensor<T>> slicedTensor(new Tensor<T>(newShape));
 
-    //    // Calculate offset for the first index
-    //    int offset = firstIndex * shape[1] * shape[2]; // Assuming the shape is nxnxn
+        // Calculate offset for the first index
+        int offset = firstIndex * shape[1] * shape[2]; // Assuming the shape is nxnxn
 
-    //    // Copy data from original tensor to sliced tensor
-    //    cudaMemcpy(slicedTensor->getData(), tensor.getData() + offset, newShape[0] * newShape[1] * sizeof(T), cudaMemcpyDeviceToDevice);
+        // Copy data from original tensor to sliced tensor
+        cudaMemcpy(slicedTensor->getData(), tensor.getData() + offset, newShape[0] * newShape[1] * sizeof(T), cudaMemcpyDeviceToDevice);
 
-    //    return slicedTensor;
-    //}
+        return slicedTensor;
+    }
 
     //template <typename T>
     //std::unique_ptr<Tensor<T>> slice(int index, Tensor<T> tensor)   {
