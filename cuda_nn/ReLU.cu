@@ -24,12 +24,10 @@ namespace Hex {
         input =  input_tensor ;
         output.reset(new Tensor<T>(input_tensor.getShape()));
         
- /*       std::cout << "dbug strat of relu" << std::endl;
-        std::cout << "intpu" << std::endl;
-        input.print();
-        std::cout << "output" << std::endl;
-        output->print();
-        std::cout << "dbug end of relu" << std::endl;*/
+        //std::cout << "dbug strat of relu" << std::endl;
+        //std::cout << "intpu" << std::endl;
+        //input.print();
+ 
 
         std::vector<int> shape = input.getShape();
         int size = 1;
@@ -38,7 +36,9 @@ namespace Hex {
         }
  
         relu_forward_kernel << <(size + 255) / 256, 256 >> > (input.getData(), output->getData(), size);
- 
+        //std::cout << "output" << std::endl;
+        //output->print();
+        //std::cout << "dbug end of relu" << std::endl;
         cudaDeviceSynchronize();
         cudaError_t cudaError = cudaGetLastError();
         if (cudaError != cudaSuccess) {

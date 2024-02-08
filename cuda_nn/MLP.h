@@ -13,12 +13,12 @@ namespace Hex {
         int _hiddenlayer;
         Tensor<T> X;
        
-        std::unique_ptr<linear<T>> linear1;
-        std::unique_ptr<ReLU<T>> relu1;
-        std::unique_ptr<linear<T>> linear2;
-        std::unique_ptr<ReLU<T>> relu2;
-        std::unique_ptr<linear<T>> linear3;
-        std::unique_ptr<Sigmoid<T>> sigmoid1;
+        linear<T>  linear1;
+        ReLU<T>  relu1;
+        linear<T>  linear2;
+        ReLU<T>  relu2;
+        linear<T>  linear3;
+        Sigmoid<T>  sigmoid1;
 
 	public:
         // Constructor

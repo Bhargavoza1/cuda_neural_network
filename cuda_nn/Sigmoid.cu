@@ -88,11 +88,16 @@ namespace Hex {
         //std::cout << "back dbug end of sigmoid" << std::endl;
         sigmoid_backward_kernel << <(size + 255) / 256, 256 >> > (input.getData(), output_error.getData(), input_error->getData(), size);
         cudaDeviceSynchronize();
+        //std::cout << "output" << std::endl;
+        //output->print();
+        //std::cout << "dbug end of relu" << std::endl;
         cudaError_t cudaError = cudaGetLastError();
         if (cudaError != cudaSuccess) {
             printf("error from sigmoid backword method : %s\n", cudaGetErrorString(cudaError));
             exit(EXIT_FAILURE);  // or handle the error appropriately
         }
+/*        std::cout << std::endl;
+        std::cout << std::endl;*/   
         return *input_error;
     }
     // Explicit instantiation of the template class for supported types

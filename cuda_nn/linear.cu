@@ -98,7 +98,7 @@ namespace Hex{
 		output(std::vector<int>{output_size, 1  }),
 		input(std::vector<int>{input_size, 1  }),
 		input_error(std::vector<int>{input_size, 1  })
-	{
+	{ 
 		init_weight_n_bias();
 	}
 
@@ -135,13 +135,13 @@ namespace Hex{
 			weights.getShape()[0], weights.getShape()[1] ,
 			input.getShape()[0], input.getShape()[1]);
 		cudaDeviceSynchronize();
-	/*	std::cout << "output" << std::endl;
-		output.print();*/
+/*	 	std::cout << "output" << std::endl;
+		output.print();*/ 
 		 
 		cudaError_t cudaError = cudaGetLastError();
 		if (cudaError == cudaErrorInvalidValue) {
-			printf("error from liner forward method : %s\n", cudaGetErrorString(cudaError));
-			 exit(EXIT_FAILURE);  // or handle the error appropriately
+			printf("error from liner forward method aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa: %s\n", cudaGetErrorString(cudaError));
+			//  exit(EXIT_FAILURE);  // or handle the error appropriately
 		}
 	
 		//std::cout << "dbug end of linear" << std::endl;
@@ -175,7 +175,8 @@ namespace Hex{
 			bias[row] -= learning_rate * output_error[row];
 			for (int i = 0; i < w_y_dim; ++i) {
 				 gw  = output_error[row] * input_data[i]; 
-				 weights[row * w_y_dim + i] -= learning_rate * gw;
+				 weights[row * w_y_dim + i] = weights[row * w_y_dim + i] - learning_rate * gw;
+				// printf("weight from kernalaaaaaaaaaaaaa %f \n", weights[row * w_y_dim + i]);
 			}
 			
 		}

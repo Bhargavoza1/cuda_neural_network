@@ -17,6 +17,7 @@ namespace Hex {
 
     public:
         // Constructor
+       // linear() {};
         linear(int input_size, int output_size, bool bias_as_zero = false , float w_b_range = 0.5f );
         ~linear();
 
