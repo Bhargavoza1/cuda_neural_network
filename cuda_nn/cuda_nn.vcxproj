@@ -78,27 +78,508 @@
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <CudaCompile Include="costs\MSE.cu">
+      <CompileOut>C:\Users\Bhargav\Desktop\Learning_cuda_with_NN - Copy\cuda_nn\x64\Debug\%(Filename)%(Extension).obj</CompileOut>
+      <UseHostInclude>true</UseHostInclude>
+      <Keep>false</Keep>
+      <KeepDir>x64\Debug</KeepDir>
+      <GenerateRelocatableDeviceCode>false</GenerateRelocatableDeviceCode>
+      <ExtensibleWholeProgramCompilation>false</ExtensibleWholeProgramCompilation>
+      <NvccCompilation>compile</NvccCompilation>
+      <CudaRuntime>Static</CudaRuntime>
+      <TargetMachinePlatform>64</TargetMachinePlatform>
+      <InterleaveSourceInPTX>false</InterleaveSourceInPTX>
+      <CodeGeneration>compute_89,sm_89</CodeGeneration>
+      <EnableVirtualArchInFatbin>true</EnableVirtualArchInFatbin>
+      <GPUDebugInfo>true</GPUDebugInfo>
+      <GenerateLineInfo>false</GenerateLineInfo>
+      <MaxRegCount>0</MaxRegCount>
+      <PtxAsOptionV>false</PtxAsOptionV>
+      <SplitCompile>Default</SplitCompile>
+      <UseHostDefines>true</UseHostDefines>
+      <Emulation>false</Emulation>
+      <HostDebugInfo>true</HostDebugInfo>
+      <FastMath>false</FastMath>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>InheritFromHost</Optimization>
+      <Runtime>InheritFromHost</Runtime>
+      <RuntimeChecks>InheritFromHost</RuntimeChecks>
+      <TypeInfo>InheritFromHost</TypeInfo>
+      <Warning>InheritFromHost</Warning>
+      <VCBinDir>C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\bin\HostX64\x64</VCBinDir>
+      <BaseCommandLineTemplate>-ccbin "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\bin\HostX64\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions]</BaseCommandLineTemplate>
+      <BuildCommandLineTemplate>--use-local-env</BuildCommandLineTemplate>
+      <BuildDynamicCommandLineTemplate>[CodeGeneration]</BuildDynamicCommandLineTemplate>
+      <CleanCommandLineTemplate>-clean</CleanCommandLineTemplate>
+      <HostCommandLineTemplate>-Xcompiler "/EHsc [Warning] /nologo [Optimization] /FS [DebugInformationFormat] [RuntimeChecks] [Runtime] [TypeInfo]" -Xcompiler "/Fd[ProgramDataBaseFileName]"</HostCommandLineTemplate>
+      <DriverApiCommandLineTemplate>-ccbin "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\bin\HostX64\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions] [Defines] [CompileOut] "%(FullPath)"</DriverApiCommandLineTemplate>
+      <RuntimeApiCommandLineTemplate>-ccbin "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\bin\HostX64\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions] [HostDebugInfo] [Emulation] [Defines] -Xcompiler "/EHsc [Warning] /nologo [Optimization] /FS [DebugInformationFormat] [RuntimeChecks] [Runtime] [TypeInfo]" -Xcompiler "/Fd[ProgramDataBaseFileName]" [CompileOut] "%(FullPath)"</RuntimeApiCommandLineTemplate>
+      <CommandLineTemplate>
+# (Approximate command-line.  Settings inherited from host are not visible below.)
+# (Please see the output window after a build for the full command-line)
+
+# Driver API (NVCC Compilation Type is .cubin, .gpu, or .ptx)
+set CUDAFE_FLAGS=--sdk_dir "C:\Program Files (x86)\Windows Kits\10\"
+"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.3\bin\nvcc.exe" --use-local-env -ccbin "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\bin\HostX64\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions] [Defines] [CompileOut] "%(FullPath)"
+
+# Runtime API (NVCC Compilation Type is hybrid object or .c file)
+set CUDAFE_FLAGS=--sdk_dir "C:\Program Files (x86)\Windows Kits\10\"
+"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.3\bin\nvcc.exe" --use-local-env -ccbin "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\bin\HostX64\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions] [HostDebugInfo] [Emulation] [Defines] -Xcompiler "/EHsc [Warning] /nologo [Optimization] /FS [DebugInformationFormat] [RuntimeChecks] [Runtime] [TypeInfo]" -Xcompiler "/Fd[ProgramDataBaseFileName]" [CompileOut] "%(FullPath)"
+            </CommandLineTemplate>
+      <ExecutionDescription>Compiling CUDA source file %(Identity)...</ExecutionDescription>
+      <ExclusionDescription>Skipping CUDA source file %(Identity) (excluded from build).</ExclusionDescription>
+      <PropsCacheOutputFile>%(Filename)%(Extension).cache</PropsCacheOutputFile>
+      <PropsCacheOutputPath>x64\Debug\%(Filename)%(Extension).cache</PropsCacheOutputPath>
+      <CudaCompileCoreProject>C:\Users\Bhargav\Desktop\Learning_cuda_with_NN - Copy\cuda_nn\cuda_nn.vcxproj</CudaCompileCoreProject>
+    </CudaCompile>
+    <CudaCompile Include="layers\linear.cu">
+      <CompileOut>C:\Users\Bhargav\Desktop\Learning_cuda_with_NN - Copy\cuda_nn\x64\Debug\%(Filename)%(Extension).obj</CompileOut>
+      <UseHostInclude>true</UseHostInclude>
+      <Keep>false</Keep>
+      <KeepDir>x64\Debug</KeepDir>
+      <GenerateRelocatableDeviceCode>false</GenerateRelocatableDeviceCode>
+      <ExtensibleWholeProgramCompilation>false</ExtensibleWholeProgramCompilation>
+      <NvccCompilation>compile</NvccCompilation>
+      <CudaRuntime>Static</CudaRuntime>
+      <TargetMachinePlatform>64</TargetMachinePlatform>
+      <InterleaveSourceInPTX>false</InterleaveSourceInPTX>
+      <CodeGeneration>compute_89,sm_89</CodeGeneration>
+      <EnableVirtualArchInFatbin>true</EnableVirtualArchInFatbin>
+      <GPUDebugInfo>true</GPUDebugInfo>
+      <GenerateLineInfo>false</GenerateLineInfo>
+      <MaxRegCount>0</MaxRegCount>
+      <PtxAsOptionV>false</PtxAsOptionV>
+      <SplitCompile>Default</SplitCompile>
+      <UseHostDefines>true</UseHostDefines>
+      <Emulation>false</Emulation>
+      <HostDebugInfo>true</HostDebugInfo>
+      <FastMath>false</FastMath>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>InheritFromHost</Optimization>
+      <Runtime>InheritFromHost</Runtime>
+      <RuntimeChecks>InheritFromHost</RuntimeChecks>
+      <TypeInfo>InheritFromHost</TypeInfo>
+      <Warning>InheritFromHost</Warning>
+      <VCBinDir>C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\bin\HostX64\x64</VCBinDir>
+      <BaseCommandLineTemplate>-ccbin "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\bin\HostX64\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions]</BaseCommandLineTemplate>
+      <BuildCommandLineTemplate>--use-local-env</BuildCommandLineTemplate>
+      <BuildDynamicCommandLineTemplate>[CodeGeneration]</BuildDynamicCommandLineTemplate>
+      <CleanCommandLineTemplate>-clean</CleanCommandLineTemplate>
+      <HostCommandLineTemplate>-Xcompiler "/EHsc [Warning] /nologo [Optimization] /FS [DebugInformationFormat] [RuntimeChecks] [Runtime] [TypeInfo]" -Xcompiler "/Fd[ProgramDataBaseFileName]"</HostCommandLineTemplate>
+      <DriverApiCommandLineTemplate>-ccbin "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\bin\HostX64\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions] [Defines] [CompileOut] "%(FullPath)"</DriverApiCommandLineTemplate>
+      <RuntimeApiCommandLineTemplate>-ccbin "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\bin\HostX64\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions] [HostDebugInfo] [Emulation] [Defines] -Xcompiler "/EHsc [Warning] /nologo [Optimization] /FS [DebugInformationFormat] [RuntimeChecks] [Runtime] [TypeInfo]" -Xcompiler "/Fd[ProgramDataBaseFileName]" [CompileOut] "%(FullPath)"</RuntimeApiCommandLineTemplate>
+      <CommandLineTemplate>
+# (Approximate command-line.  Settings inherited from host are not visible below.)
+# (Please see the output window after a build for the full command-line)
+
+# Driver API (NVCC Compilation Type is .cubin, .gpu, or .ptx)
+set CUDAFE_FLAGS=--sdk_dir "C:\Program Files (x86)\Windows Kits\10\"
+"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.3\bin\nvcc.exe" --use-local-env -ccbin "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\bin\HostX64\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions] [Defines] [CompileOut] "%(FullPath)"
+
+# Runtime API (NVCC Compilation Type is hybrid object or .c file)
+set CUDAFE_FLAGS=--sdk_dir "C:\Program Files (x86)\Windows Kits\10\"
+"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.3\bin\nvcc.exe" --use-local-env -ccbin "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\bin\HostX64\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions] [HostDebugInfo] [Emulation] [Defines] -Xcompiler "/EHsc [Warning] /nologo [Optimization] /FS [DebugInformationFormat] [RuntimeChecks] [Runtime] [TypeInfo]" -Xcompiler "/Fd[ProgramDataBaseFileName]" [CompileOut] "%(FullPath)"
+            </CommandLineTemplate>
+      <ExecutionDescription>Compiling CUDA source file %(Identity)...</ExecutionDescription>
+      <ExclusionDescription>Skipping CUDA source file %(Identity) (excluded from build).</ExclusionDescription>
+      <PropsCacheOutputFile>%(Filename)%(Extension).cache</PropsCacheOutputFile>
+      <PropsCacheOutputPath>x64\Debug\%(Filename)%(Extension).cache</PropsCacheOutputPath>
+      <CudaCompileCoreProject>C:\Users\Bhargav\Desktop\Learning_cuda_with_NN - Copy\cuda_nn\cuda_nn.vcxproj</CudaCompileCoreProject>
+    </CudaCompile>
+    <CudaCompile Include="layers\ReLU.cu">
+      <CompileOut>C:\Users\Bhargav\Desktop\Learning_cuda_with_NN - Copy\cuda_nn\x64\Debug\%(Filename)%(Extension).obj</CompileOut>
+      <UseHostInclude>true</UseHostInclude>
+      <Keep>false</Keep>
+      <KeepDir>x64\Debug</KeepDir>
+      <GenerateRelocatableDeviceCode>false</GenerateRelocatableDeviceCode>
+      <ExtensibleWholeProgramCompilation>false</ExtensibleWholeProgramCompilation>
+      <NvccCompilation>compile</NvccCompilation>
+      <CudaRuntime>Static</CudaRuntime>
+      <TargetMachinePlatform>64</TargetMachinePlatform>
+      <InterleaveSourceInPTX>false</InterleaveSourceInPTX>
+      <CodeGeneration>compute_89,sm_89</CodeGeneration>
+      <EnableVirtualArchInFatbin>true</EnableVirtualArchInFatbin>
+      <GPUDebugInfo>true</GPUDebugInfo>
+      <GenerateLineInfo>false</GenerateLineInfo>
+      <MaxRegCount>0</MaxRegCount>
+      <PtxAsOptionV>false</PtxAsOptionV>
+      <SplitCompile>Default</SplitCompile>
+      <UseHostDefines>true</UseHostDefines>
+      <Emulation>false</Emulation>
+      <HostDebugInfo>true</HostDebugInfo>
+      <FastMath>false</FastMath>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>InheritFromHost</Optimization>
+      <Runtime>InheritFromHost</Runtime>
+      <RuntimeChecks>InheritFromHost</RuntimeChecks>
+      <TypeInfo>InheritFromHost</TypeInfo>
+      <Warning>InheritFromHost</Warning>
+      <VCBinDir>C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\bin\HostX64\x64</VCBinDir>
+      <BaseCommandLineTemplate>-ccbin "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\bin\HostX64\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions]</BaseCommandLineTemplate>
+      <BuildCommandLineTemplate>--use-local-env</BuildCommandLineTemplate>
+      <BuildDynamicCommandLineTemplate>[CodeGeneration]</BuildDynamicCommandLineTemplate>
+      <CleanCommandLineTemplate>-clean</CleanCommandLineTemplate>
+      <HostCommandLineTemplate>-Xcompiler "/EHsc [Warning] /nologo [Optimization] /FS [DebugInformationFormat] [RuntimeChecks] [Runtime] [TypeInfo]" -Xcompiler "/Fd[ProgramDataBaseFileName]"</HostCommandLineTemplate>
+      <DriverApiCommandLineTemplate>-ccbin "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\bin\HostX64\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions] [Defines] [CompileOut] "%(FullPath)"</DriverApiCommandLineTemplate>
+      <RuntimeApiCommandLineTemplate>-ccbin "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\bin\HostX64\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions] [HostDebugInfo] [Emulation] [Defines] -Xcompiler "/EHsc [Warning] /nologo [Optimization] /FS [DebugInformationFormat] [RuntimeChecks] [Runtime] [TypeInfo]" -Xcompiler "/Fd[ProgramDataBaseFileName]" [CompileOut] "%(FullPath)"</RuntimeApiCommandLineTemplate>
+      <CommandLineTemplate>
+# (Approximate command-line.  Settings inherited from host are not visible below.)
+# (Please see the output window after a build for the full command-line)
+
+# Driver API (NVCC Compilation Type is .cubin, .gpu, or .ptx)
+set CUDAFE_FLAGS=--sdk_dir "C:\Program Files (x86)\Windows Kits\10\"
+"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.3\bin\nvcc.exe" --use-local-env -ccbin "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\bin\HostX64\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions] [Defines] [CompileOut] "%(FullPath)"
+
+# Runtime API (NVCC Compilation Type is hybrid object or .c file)
+set CUDAFE_FLAGS=--sdk_dir "C:\Program Files (x86)\Windows Kits\10\"
+"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.3\bin\nvcc.exe" --use-local-env -ccbin "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\bin\HostX64\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions] [HostDebugInfo] [Emulation] [Defines] -Xcompiler "/EHsc [Warning] /nologo [Optimization] /FS [DebugInformationFormat] [RuntimeChecks] [Runtime] [TypeInfo]" -Xcompiler "/Fd[ProgramDataBaseFileName]" [CompileOut] "%(FullPath)"
+            </CommandLineTemplate>
+      <ExecutionDescription>Compiling CUDA source file %(Identity)...</ExecutionDescription>
+      <ExclusionDescription>Skipping CUDA source file %(Identity) (excluded from build).</ExclusionDescription>
+      <PropsCacheOutputFile>%(Filename)%(Extension).cache</PropsCacheOutputFile>
+      <PropsCacheOutputPath>x64\Debug\%(Filename)%(Extension).cache</PropsCacheOutputPath>
+      <CudaCompileCoreProject>C:\Users\Bhargav\Desktop\Learning_cuda_with_NN - Copy\cuda_nn\cuda_nn.vcxproj</CudaCompileCoreProject>
+    </CudaCompile>
+    <CudaCompile Include="layers\Sigmoid.cu">
+      <CompileOut>C:\Users\Bhargav\Desktop\Learning_cuda_with_NN - Copy\cuda_nn\x64\Debug\%(Filename)%(Extension).obj</CompileOut>
+      <UseHostInclude>true</UseHostInclude>
+      <Keep>false</Keep>
+      <KeepDir>x64\Debug</KeepDir>
+      <GenerateRelocatableDeviceCode>false</GenerateRelocatableDeviceCode>
+      <ExtensibleWholeProgramCompilation>false</ExtensibleWholeProgramCompilation>
+      <NvccCompilation>compile</NvccCompilation>
+      <CudaRuntime>Static</CudaRuntime>
+      <TargetMachinePlatform>64</TargetMachinePlatform>
+      <InterleaveSourceInPTX>false</InterleaveSourceInPTX>
+      <CodeGeneration>compute_89,sm_89</CodeGeneration>
+      <EnableVirtualArchInFatbin>true</EnableVirtualArchInFatbin>
+      <GPUDebugInfo>true</GPUDebugInfo>
+      <GenerateLineInfo>false</GenerateLineInfo>
+      <MaxRegCount>0</MaxRegCount>
+      <PtxAsOptionV>false</PtxAsOptionV>
+      <SplitCompile>Default</SplitCompile>
+      <UseHostDefines>true</UseHostDefines>
+      <Emulation>false</Emulation>
+      <HostDebugInfo>true</HostDebugInfo>
+      <FastMath>false</FastMath>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>InheritFromHost</Optimization>
+      <Runtime>InheritFromHost</Runtime>
+      <RuntimeChecks>InheritFromHost</RuntimeChecks>
+      <TypeInfo>InheritFromHost</TypeInfo>
+      <Warning>InheritFromHost</Warning>
+      <VCBinDir>C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\bin\HostX64\x64</VCBinDir>
+      <BaseCommandLineTemplate>-ccbin "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\bin\HostX64\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions]</BaseCommandLineTemplate>
+      <BuildCommandLineTemplate>--use-local-env</BuildCommandLineTemplate>
+      <BuildDynamicCommandLineTemplate>[CodeGeneration]</BuildDynamicCommandLineTemplate>
+      <CleanCommandLineTemplate>-clean</CleanCommandLineTemplate>
+      <HostCommandLineTemplate>-Xcompiler "/EHsc [Warning] /nologo [Optimization] /FS [DebugInformationFormat] [RuntimeChecks] [Runtime] [TypeInfo]" -Xcompiler "/Fd[ProgramDataBaseFileName]"</HostCommandLineTemplate>
+      <DriverApiCommandLineTemplate>-ccbin "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\bin\HostX64\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions] [Defines] [CompileOut] "%(FullPath)"</DriverApiCommandLineTemplate>
+      <RuntimeApiCommandLineTemplate>-ccbin "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\bin\HostX64\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions] [HostDebugInfo] [Emulation] [Defines] -Xcompiler "/EHsc [Warning] /nologo [Optimization] /FS [DebugInformationFormat] [RuntimeChecks] [Runtime] [TypeInfo]" -Xcompiler "/Fd[ProgramDataBaseFileName]" [CompileOut] "%(FullPath)"</RuntimeApiCommandLineTemplate>
+      <CommandLineTemplate>
+# (Approximate command-line.  Settings inherited from host are not visible below.)
+# (Please see the output window after a build for the full command-line)
+
+# Driver API (NVCC Compilation Type is .cubin, .gpu, or .ptx)
+set CUDAFE_FLAGS=--sdk_dir "C:\Program Files (x86)\Windows Kits\10\"
+"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.3\bin\nvcc.exe" --use-local-env -ccbin "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\bin\HostX64\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions] [Defines] [CompileOut] "%(FullPath)"
+
+# Runtime API (NVCC Compilation Type is hybrid object or .c file)
+set CUDAFE_FLAGS=--sdk_dir "C:\Program Files (x86)\Windows Kits\10\"
+"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.3\bin\nvcc.exe" --use-local-env -ccbin "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\bin\HostX64\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions] [HostDebugInfo] [Emulation] [Defines] -Xcompiler "/EHsc [Warning] /nologo [Optimization] /FS [DebugInformationFormat] [RuntimeChecks] [Runtime] [TypeInfo]" -Xcompiler "/Fd[ProgramDataBaseFileName]" [CompileOut] "%(FullPath)"
+            </CommandLineTemplate>
+      <ExecutionDescription>Compiling CUDA source file %(Identity)...</ExecutionDescription>
+      <ExclusionDescription>Skipping CUDA source file %(Identity) (excluded from build).</ExclusionDescription>
+      <PropsCacheOutputFile>%(Filename)%(Extension).cache</PropsCacheOutputFile>
+      <PropsCacheOutputPath>x64\Debug\%(Filename)%(Extension).cache</PropsCacheOutputPath>
+      <CudaCompileCoreProject>C:\Users\Bhargav\Desktop\Learning_cuda_with_NN - Copy\cuda_nn\cuda_nn.vcxproj</CudaCompileCoreProject>
+    </CudaCompile>
     <CudaCompile Include="main.cpp" />
-    <CudaCompile Include="linear.cu" />
-    <CudaCompile Include="MLP.cpp" />
-    <CudaCompile Include="MSE.cu" />
-    <CudaCompile Include="ReLU.cu" />
-    <CudaCompile Include="Sigmoid.cu" />
+    <CudaCompile Include="models\MLP.cpp">
+      <CompileOut>C:\Users\Bhargav\Desktop\Learning_cuda_with_NN - Copy\cuda_nn\x64\Debug\%(Filename)%(Extension).obj</CompileOut>
+      <UseHostInclude>true</UseHostInclude>
+      <Keep>false</Keep>
+      <KeepDir>x64\Debug</KeepDir>
+      <GenerateRelocatableDeviceCode>false</GenerateRelocatableDeviceCode>
+      <ExtensibleWholeProgramCompilation>false</ExtensibleWholeProgramCompilation>
+      <NvccCompilation>compile</NvccCompilation>
+      <CudaRuntime>Static</CudaRuntime>
+      <TargetMachinePlatform>64</TargetMachinePlatform>
+      <InterleaveSourceInPTX>false</InterleaveSourceInPTX>
+      <CodeGeneration>compute_89,sm_89</CodeGeneration>
+      <EnableVirtualArchInFatbin>true</EnableVirtualArchInFatbin>
+      <GPUDebugInfo>true</GPUDebugInfo>
+      <GenerateLineInfo>false</GenerateLineInfo>
+      <MaxRegCount>0</MaxRegCount>
+      <PtxAsOptionV>false</PtxAsOptionV>
+      <SplitCompile>Default</SplitCompile>
+      <UseHostDefines>true</UseHostDefines>
+      <Emulation>false</Emulation>
+      <HostDebugInfo>true</HostDebugInfo>
+      <FastMath>false</FastMath>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>InheritFromHost</Optimization>
+      <Runtime>InheritFromHost</Runtime>
+      <RuntimeChecks>InheritFromHost</RuntimeChecks>
+      <TypeInfo>InheritFromHost</TypeInfo>
+      <Warning>InheritFromHost</Warning>
+      <VCBinDir>C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\bin\HostX64\x64</VCBinDir>
+      <BaseCommandLineTemplate>-ccbin "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\bin\HostX64\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions]</BaseCommandLineTemplate>
+      <BuildCommandLineTemplate>--use-local-env</BuildCommandLineTemplate>
+      <BuildDynamicCommandLineTemplate>[CodeGeneration]</BuildDynamicCommandLineTemplate>
+      <CleanCommandLineTemplate>-clean</CleanCommandLineTemplate>
+      <HostCommandLineTemplate>-Xcompiler "/EHsc [Warning] /nologo [Optimization] /FS [DebugInformationFormat] [RuntimeChecks] [Runtime] [TypeInfo]" -Xcompiler "/Fd[ProgramDataBaseFileName]"</HostCommandLineTemplate>
+      <DriverApiCommandLineTemplate>-ccbin "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\bin\HostX64\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions] [Defines] [CompileOut] "%(FullPath)"</DriverApiCommandLineTemplate>
+      <RuntimeApiCommandLineTemplate>-ccbin "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\bin\HostX64\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions] [HostDebugInfo] [Emulation] [Defines] -Xcompiler "/EHsc [Warning] /nologo [Optimization] /FS [DebugInformationFormat] [RuntimeChecks] [Runtime] [TypeInfo]" -Xcompiler "/Fd[ProgramDataBaseFileName]" [CompileOut] "%(FullPath)"</RuntimeApiCommandLineTemplate>
+      <CommandLineTemplate>
+# (Approximate command-line.  Settings inherited from host are not visible below.)
+# (Please see the output window after a build for the full command-line)
+
+# Driver API (NVCC Compilation Type is .cubin, .gpu, or .ptx)
+set CUDAFE_FLAGS=--sdk_dir "C:\Program Files (x86)\Windows Kits\10\"
+"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.3\bin\nvcc.exe" --use-local-env -ccbin "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\bin\HostX64\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions] [Defines] [CompileOut] "%(FullPath)"
+
+# Runtime API (NVCC Compilation Type is hybrid object or .c file)
+set CUDAFE_FLAGS=--sdk_dir "C:\Program Files (x86)\Windows Kits\10\"
+"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.3\bin\nvcc.exe" --use-local-env -ccbin "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\bin\HostX64\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions] [HostDebugInfo] [Emulation] [Defines] -Xcompiler "/EHsc [Warning] /nologo [Optimization] /FS [DebugInformationFormat] [RuntimeChecks] [Runtime] [TypeInfo]" -Xcompiler "/Fd[ProgramDataBaseFileName]" [CompileOut] "%(FullPath)"
+            </CommandLineTemplate>
+      <ExecutionDescription>Compiling CUDA source file %(Identity)...</ExecutionDescription>
+      <ExclusionDescription>Skipping CUDA source file %(Identity) (excluded from build).</ExclusionDescription>
+      <PropsCacheOutputFile>%(Filename)%(Extension).cache</PropsCacheOutputFile>
+      <PropsCacheOutputPath>x64\Debug\%(Filename)%(Extension).cache</PropsCacheOutputPath>
+      <CudaCompileCoreProject>C:\Users\Bhargav\Desktop\Learning_cuda_with_NN - Copy\cuda_nn\cuda_nn.vcxproj</CudaCompileCoreProject>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="layer.h" />
-    <ClInclude Include="linear.h" />
-    <ClInclude Include="MLP.h" />
-    <ClInclude Include="MSE.h" />
-    <ClInclude Include="ReLU.h" />
-    <ClInclude Include="Sigmoid.h" />
-    <ClInclude Include="Tensor.h" />
-    <ClInclude Include="tensor_oprations.h" />
+    <ClInclude Include="costs\MSE.h" />
+    <ClInclude Include="layers\layer.h" />
+    <ClInclude Include="layers\linear.h" />
+    <ClInclude Include="layers\ReLU.h" />
+    <ClInclude Include="layers\Sigmoid.h" />
+    <ClInclude Include="models\MLP.h" />
+    <ClInclude Include="utils\Tensor.h" />
+    <ClInclude Include="utils\tensor_oprations.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Errorhelper.cpp" />
-    <ClCompile Include="Tensor.cu" />
-    <ClCompile Include="tensor_oprations.cu" />
+    <ClCompile Include="utils\Errorhelper.cpp">
+      <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <Optimization>Disabled</Optimization>
+      <SupportJustMyCode>true</SupportJustMyCode>
+      <AssemblerOutput>NoListing</AssemblerOutput>
+      <AssemblerListingLocation>x64\Debug\</AssemblerListingLocation>
+      <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
+      <BrowseInformation>false</BrowseInformation>
+      <BrowseInformationFile>x64\Debug\</BrowseInformationFile>
+      <CompileAs>Default</CompileAs>
+      <ConformanceMode>Default</ConformanceMode>
+      <DiagnosticsFormat>Column</DiagnosticsFormat>
+      <DisableLanguageExtensions>false</DisableLanguageExtensions>
+      <ErrorReporting>Prompt</ErrorReporting>
+      <ExpandAttributedSource>false</ExpandAttributedSource>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <EnableASAN>false</EnableASAN>
+      <EnableFuzzer>false</EnableFuzzer>
+      <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+      <GenerateModuleDependencies>false</GenerateModuleDependencies>
+      <GenerateSourceDependencies>false</GenerateSourceDependencies>
+      <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
+      <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
+      <LanguageStandard>Default</LanguageStandard>
+      <LanguageStandard_C>Default</LanguageStandard_C>
+      <MinimalRebuild>false</MinimalRebuild>
+      <ModuleDependenciesFile>x64\Debug\</ModuleDependenciesFile>
+      <ModuleOutputFile>x64\Debug\</ModuleOutputFile>
+      <OmitDefaultLibName>false</OmitDefaultLibName>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <ObjectFileName>x64\Debug\</ObjectFileName>
+      <CallingConvention>Cdecl</CallingConvention>
+      <ProgramDataBaseFileName>x64\Debug\vc143.pdb</ProgramDataBaseFileName>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>x64\Debug\cuda_nn.pch</PrecompiledHeaderOutputFile>
+      <PreprocessToFile>false</PreprocessToFile>
+      <PreprocessKeepComments>false</PreprocessKeepComments>
+      <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
+      <RemoveUnreferencedCodeData>true</RemoveUnreferencedCodeData>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+      <ShowIncludes>false</ShowIncludes>
+      <SourceDependenciesFile>x64\Debug\</SourceDependenciesFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <SmallerTypeCheck>false</SmallerTypeCheck>
+      <SpectreMitigation>false</SpectreMitigation>
+      <StructMemberAlignment>Default</StructMemberAlignment>
+      <TrackerLogDirectory>x64\Debug\cuda_nn.tlog\</TrackerLogDirectory>
+      <TranslateIncludes>false</TranslateIncludes>
+      <MinimalRebuildFromTracking>true</MinimalRebuildFromTracking>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <UseFullPaths>true</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <XMLDocumentationFileName>x64\Debug\</XMLDocumentationFileName>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <IntelJCCErratum>false</IntelJCCErratum>
+      <TreatAngleIncludeAsExternal>false</TreatAngleIncludeAsExternal>
+      <ExternalWarningLevel>InheritWarningLevel</ExternalWarningLevel>
+      <TreatExternalTemplatesAsInternal>true</TreatExternalTemplatesAsInternal>
+      <DisableAnalyzeExternal>false</DisableAnalyzeExternal>
+      <PreprocessorDefinitions>WIN32;WIN64;_DEBUG;_CONSOLE;_MBCS;</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.3\include</AdditionalIncludeDirectories>
+      <LinkCompiled>true</LinkCompiled>
+    </ClCompile>
+    <ClCompile Include="utils\Tensor.cu">
+      <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <Optimization>Disabled</Optimization>
+      <SupportJustMyCode>true</SupportJustMyCode>
+      <AssemblerOutput>NoListing</AssemblerOutput>
+      <AssemblerListingLocation>x64\Debug\</AssemblerListingLocation>
+      <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
+      <BrowseInformation>false</BrowseInformation>
+      <BrowseInformationFile>x64\Debug\</BrowseInformationFile>
+      <CompileAs>Default</CompileAs>
+      <ConformanceMode>Default</ConformanceMode>
+      <DiagnosticsFormat>Column</DiagnosticsFormat>
+      <DisableLanguageExtensions>false</DisableLanguageExtensions>
+      <ErrorReporting>Prompt</ErrorReporting>
+      <ExpandAttributedSource>false</ExpandAttributedSource>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <EnableASAN>false</EnableASAN>
+      <EnableFuzzer>false</EnableFuzzer>
+      <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+      <GenerateModuleDependencies>false</GenerateModuleDependencies>
+      <GenerateSourceDependencies>false</GenerateSourceDependencies>
+      <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
+      <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
+      <LanguageStandard>Default</LanguageStandard>
+      <LanguageStandard_C>Default</LanguageStandard_C>
+      <MinimalRebuild>false</MinimalRebuild>
+      <ModuleDependenciesFile>x64\Debug\</ModuleDependenciesFile>
+      <ModuleOutputFile>x64\Debug\</ModuleOutputFile>
+      <OmitDefaultLibName>false</OmitDefaultLibName>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <ObjectFileName>x64\Debug\</ObjectFileName>
+      <CallingConvention>Cdecl</CallingConvention>
+      <ProgramDataBaseFileName>x64\Debug\vc143.pdb</ProgramDataBaseFileName>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>x64\Debug\cuda_nn.pch</PrecompiledHeaderOutputFile>
+      <PreprocessToFile>false</PreprocessToFile>
+      <PreprocessKeepComments>false</PreprocessKeepComments>
+      <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
+      <RemoveUnreferencedCodeData>true</RemoveUnreferencedCodeData>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+      <ShowIncludes>false</ShowIncludes>
+      <SourceDependenciesFile>x64\Debug\</SourceDependenciesFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <SmallerTypeCheck>false</SmallerTypeCheck>
+      <SpectreMitigation>false</SpectreMitigation>
+      <StructMemberAlignment>Default</StructMemberAlignment>
+      <TrackerLogDirectory>x64\Debug\cuda_nn.tlog\</TrackerLogDirectory>
+      <TranslateIncludes>false</TranslateIncludes>
+      <MinimalRebuildFromTracking>true</MinimalRebuildFromTracking>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <UseFullPaths>true</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <XMLDocumentationFileName>x64\Debug\</XMLDocumentationFileName>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <IntelJCCErratum>false</IntelJCCErratum>
+      <TreatAngleIncludeAsExternal>false</TreatAngleIncludeAsExternal>
+      <ExternalWarningLevel>InheritWarningLevel</ExternalWarningLevel>
+      <TreatExternalTemplatesAsInternal>true</TreatExternalTemplatesAsInternal>
+      <DisableAnalyzeExternal>false</DisableAnalyzeExternal>
+      <PreprocessorDefinitions>WIN32;WIN64;_DEBUG;_CONSOLE;_MBCS;</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.3\include</AdditionalIncludeDirectories>
+      <LinkCompiled>true</LinkCompiled>
+    </ClCompile>
+    <ClCompile Include="utils\tensor_oprations.cu">
+      <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <Optimization>Disabled</Optimization>
+      <SupportJustMyCode>true</SupportJustMyCode>
+      <AssemblerOutput>NoListing</AssemblerOutput>
+      <AssemblerListingLocation>x64\Debug\</AssemblerListingLocation>
+      <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
+      <BrowseInformation>false</BrowseInformation>
+      <BrowseInformationFile>x64\Debug\</BrowseInformationFile>
+      <CompileAs>Default</CompileAs>
+      <ConformanceMode>Default</ConformanceMode>
+      <DiagnosticsFormat>Column</DiagnosticsFormat>
+      <DisableLanguageExtensions>false</DisableLanguageExtensions>
+      <ErrorReporting>Prompt</ErrorReporting>
+      <ExpandAttributedSource>false</ExpandAttributedSource>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <EnableASAN>false</EnableASAN>
+      <EnableFuzzer>false</EnableFuzzer>
+      <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+      <GenerateModuleDependencies>false</GenerateModuleDependencies>
+      <GenerateSourceDependencies>false</GenerateSourceDependencies>
+      <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
+      <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
+      <LanguageStandard>Default</LanguageStandard>
+      <LanguageStandard_C>Default</LanguageStandard_C>
+      <MinimalRebuild>false</MinimalRebuild>
+      <ModuleDependenciesFile>x64\Debug\</ModuleDependenciesFile>
+      <ModuleOutputFile>x64\Debug\</ModuleOutputFile>
+      <OmitDefaultLibName>false</OmitDefaultLibName>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <ObjectFileName>x64\Debug\</ObjectFileName>
+      <CallingConvention>Cdecl</CallingConvention>
+      <ProgramDataBaseFileName>x64\Debug\vc143.pdb</ProgramDataBaseFileName>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>x64\Debug\cuda_nn.pch</PrecompiledHeaderOutputFile>
+      <PreprocessToFile>false</PreprocessToFile>
+      <PreprocessKeepComments>false</PreprocessKeepComments>
+      <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
+      <RemoveUnreferencedCodeData>true</RemoveUnreferencedCodeData>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+      <ShowIncludes>false</ShowIncludes>
+      <SourceDependenciesFile>x64\Debug\</SourceDependenciesFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <SmallerTypeCheck>false</SmallerTypeCheck>
+      <SpectreMitigation>false</SpectreMitigation>
+      <StructMemberAlignment>Default</StructMemberAlignment>
+      <TrackerLogDirectory>x64\Debug\cuda_nn.tlog\</TrackerLogDirectory>
+      <TranslateIncludes>false</TranslateIncludes>
+      <MinimalRebuildFromTracking>true</MinimalRebuildFromTracking>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <UseFullPaths>true</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <XMLDocumentationFileName>x64\Debug\</XMLDocumentationFileName>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <IntelJCCErratum>false</IntelJCCErratum>
+      <TreatAngleIncludeAsExternal>false</TreatAngleIncludeAsExternal>
+      <ExternalWarningLevel>InheritWarningLevel</ExternalWarningLevel>
+      <TreatExternalTemplatesAsInternal>true</TreatExternalTemplatesAsInternal>
+      <DisableAnalyzeExternal>false</DisableAnalyzeExternal>
+      <PreprocessorDefinitions>WIN32;WIN64;_DEBUG;_CONSOLE;_MBCS;</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.3\include</AdditionalIncludeDirectories>
+      <LinkCompiled>true</LinkCompiled>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="CMakeLists.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

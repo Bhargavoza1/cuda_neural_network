@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Bhargav\Desktop\Learning_cuda_with_NN - Copy\cuda_nn\build\CMakeFiles\c80d3a26368d5d5e6e5707c1a757521a\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\Bhargav\Desktop\Learning_cuda_with_NN - Copy\cuda_nn\costs\CMakeLists.txt">
+      <Filter>Buildsystem Input Files\costs</Filter>
+    </None>
+    <None Include="C:\Users\Bhargav\Desktop\Learning_cuda_with_NN - Copy\cuda_nn\layers\CMakeLists.txt">
+      <Filter>Buildsystem Input Files\layers</Filter>
+    </None>
+    <None Include="C:\Users\Bhargav\Desktop\Learning_cuda_with_NN - Copy\cuda_nn\models\CMakeLists.txt">
+      <Filter>Buildsystem Input Files\models</Filter>
+    </None>
+    <None Include="C:\Users\Bhargav\Desktop\Learning_cuda_with_NN - Copy\cuda_nn\utils\CMakeLists.txt">
+      <Filter>Buildsystem Input Files\utils</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{99F1371F-3503-380F-A31F-A444F87030F0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Buildsystem Input Files\costs">
+      <UniqueIdentifier>{AC4DB1D1-2144-3B9C-92D3-133A0D5CF392}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Buildsystem Input Files\layers">
+      <UniqueIdentifier>{ECBC3688-E8BF-31FF-A9CE-E5F80717244E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Buildsystem Input Files\models">
+      <UniqueIdentifier>{F4FFFB81-551C-3F6E-85F3-579FB75F0D6E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Buildsystem Input Files\utils">
+      <UniqueIdentifier>{55595BD9-EC37-3EFA-A8AE-3E8D30CF2157}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

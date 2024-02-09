@@ -1,0 +1,7 @@
+C:/Users/Bhargav/Desktop/Learning_cuda_with_NN - Copy/cuda_nn/build/CMakeFiles/YourExecutableName.dir
+C:/Users/Bhargav/Desktop/Learning_cuda_with_NN - Copy/cuda_nn/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/Bhargav/Desktop/Learning_cuda_with_NN - Copy/cuda_nn/build/CMakeFiles/ZERO_CHECK.dir
+C:/Users/Bhargav/Desktop/Learning_cuda_with_NN - Copy/cuda_nn/build/costs/CMakeFiles/CostFunctions.dir
+C:/Users/Bhargav/Desktop/Learning_cuda_with_NN - Copy/cuda_nn/build/layers/CMakeFiles/Layers.dir
+C:/Users/Bhargav/Desktop/Learning_cuda_with_NN - Copy/cuda_nn/build/models/CMakeFiles/Models.dir
+C:/Users/Bhargav/Desktop/Learning_cuda_with_NN - Copy/cuda_nn/build/utils/CMakeFiles/Utils.dir

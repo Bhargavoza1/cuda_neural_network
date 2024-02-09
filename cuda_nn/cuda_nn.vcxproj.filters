@@ -2,19 +2,19 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <CudaCompile Include="main.cpp" />
-    <CudaCompile Include="linear.cu">
-      <Filter>layers</Filter>
-    </CudaCompile>
-    <CudaCompile Include="ReLU.cu">
-      <Filter>layers</Filter>
-    </CudaCompile>
-    <CudaCompile Include="Sigmoid.cu">
-      <Filter>layers</Filter>
-    </CudaCompile>
-    <CudaCompile Include="MSE.cu">
+    <CudaCompile Include="costs\MSE.cu">
       <Filter>costs</Filter>
     </CudaCompile>
-    <CudaCompile Include="MLP.cpp">
+    <CudaCompile Include="layers\linear.cu">
+      <Filter>layers</Filter>
+    </CudaCompile>
+    <CudaCompile Include="layers\ReLU.cu">
+      <Filter>layers</Filter>
+    </CudaCompile>
+    <CudaCompile Include="layers\Sigmoid.cu">
+      <Filter>layers</Filter>
+    </CudaCompile>
+    <CudaCompile Include="models\MLP.cpp">
       <Filter>models</Filter>
     </CudaCompile>
   </ItemGroup>
@@ -33,39 +33,39 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="layer.h">
-      <Filter>layers</Filter>
-    </ClInclude>
-    <ClInclude Include="linear.h">
-      <Filter>layers</Filter>
-    </ClInclude>
-    <ClInclude Include="Tensor.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="tensor_oprations.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="ReLU.h">
-      <Filter>layers</Filter>
-    </ClInclude>
-    <ClInclude Include="Sigmoid.h">
-      <Filter>layers</Filter>
-    </ClInclude>
-    <ClInclude Include="MSE.h">
+    <ClInclude Include="costs\MSE.h">
       <Filter>costs</Filter>
     </ClInclude>
-    <ClInclude Include="MLP.h">
+    <ClInclude Include="layers\layer.h">
+      <Filter>layers</Filter>
+    </ClInclude>
+    <ClInclude Include="layers\linear.h">
+      <Filter>layers</Filter>
+    </ClInclude>
+    <ClInclude Include="layers\ReLU.h">
+      <Filter>layers</Filter>
+    </ClInclude>
+    <ClInclude Include="layers\Sigmoid.h">
+      <Filter>layers</Filter>
+    </ClInclude>
+    <ClInclude Include="models\MLP.h">
       <Filter>models</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\Tensor.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\tensor_oprations.h">
+      <Filter>utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="tensor_oprations.cu">
+    <ClCompile Include="utils\Errorhelper.cpp">
       <Filter>utils</Filter>
     </ClCompile>
-    <ClCompile Include="Errorhelper.cpp">
+    <ClCompile Include="utils\Tensor.cu">
       <Filter>utils</Filter>
     </ClCompile>
-    <ClCompile Include="Tensor.cu">
+    <ClCompile Include="utils\tensor_oprations.cu">
       <Filter>utils</Filter>
     </ClCompile>
   </ItemGroup>

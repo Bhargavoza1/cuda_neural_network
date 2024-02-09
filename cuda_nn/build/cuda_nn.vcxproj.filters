@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\Bhargav\Desktop\Learning_cuda_with_NN - Copy\cuda_nn\utils\Errorhelper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Bhargav\Desktop\Learning_cuda_with_NN - Copy\cuda_nn\models\MLP.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Bhargav\Desktop\Learning_cuda_with_NN - Copy\cuda_nn\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Bhargav\Desktop\Learning_cuda_with_NN - Copy\cuda_nn\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\Bhargav\Desktop\Learning_cuda_with_NN - Copy\cuda_nn\utils\Tensor.cu">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\Bhargav\Desktop\Learning_cuda_with_NN - Copy\cuda_nn\utils\tensor_oprations.cu">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\Bhargav\Desktop\Learning_cuda_with_NN - Copy\cuda_nn\layers\linear.cu">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\Bhargav\Desktop\Learning_cuda_with_NN - Copy\cuda_nn\layers\ReLU.cu">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\Bhargav\Desktop\Learning_cuda_with_NN - Copy\cuda_nn\layers\Sigmoid.cu">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="C:\Users\Bhargav\Desktop\Learning_cuda_with_NN - Copy\cuda_nn\costs\MSE.cu">
+      <Filter>Source Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{7F48A831-7D3B-395B-9B6A-AD1F6E5DF66C}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

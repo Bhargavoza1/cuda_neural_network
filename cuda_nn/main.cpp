@@ -2,11 +2,12 @@
 
  
 #include <cuda_runtime.h>
-#include"Tensor.h"
-#include "tensor_oprations.h"
+#include"utils/Tensor.h"
+#include "utils/tensor_oprations.h"
  
-#include "MLP.h"
-#include "MSE.h"
+#include "models/MLP.h"
+#include "costs/MSE.h"
+
 using namespace Hex;
 using namespace std;
 
