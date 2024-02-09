@@ -79,7 +79,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <CudaCompile Include="costs\MSE.cu">
-      <CompileOut>C:\Users\Bhargav\Desktop\Learning_cuda_with_NN - Copy\cuda_nn\x64\Debug\%(Filename)%(Extension).obj</CompileOut>
+      <CompileOut>C:\Users\Bhargav\Desktop\Learning_cuda_with_NN\cuda_nn\x64\Debug\%(Filename)%(Extension).obj</CompileOut>
       <UseHostInclude>true</UseHostInclude>
       <Keep>false</Keep>
       <KeepDir>x64\Debug</KeepDir>
@@ -130,10 +130,10 @@ set CUDAFE_FLAGS=--sdk_dir "C:\Program Files (x86)\Windows Kits\10\"
       <ExclusionDescription>Skipping CUDA source file %(Identity) (excluded from build).</ExclusionDescription>
       <PropsCacheOutputFile>%(Filename)%(Extension).cache</PropsCacheOutputFile>
       <PropsCacheOutputPath>x64\Debug\%(Filename)%(Extension).cache</PropsCacheOutputPath>
-      <CudaCompileCoreProject>C:\Users\Bhargav\Desktop\Learning_cuda_with_NN - Copy\cuda_nn\cuda_nn.vcxproj</CudaCompileCoreProject>
+      <CudaCompileCoreProject>C:\Users\Bhargav\Desktop\Learning_cuda_with_NN\cuda_nn\cuda_nn.vcxproj</CudaCompileCoreProject>
     </CudaCompile>
     <CudaCompile Include="layers\linear.cu">
-      <CompileOut>C:\Users\Bhargav\Desktop\Learning_cuda_with_NN - Copy\cuda_nn\x64\Debug\%(Filename)%(Extension).obj</CompileOut>
+      <CompileOut>C:\Users\Bhargav\Desktop\Learning_cuda_with_NN\cuda_nn\x64\Debug\%(Filename)%(Extension).obj</CompileOut>
       <UseHostInclude>true</UseHostInclude>
       <Keep>false</Keep>
       <KeepDir>x64\Debug</KeepDir>
@@ -184,10 +184,10 @@ set CUDAFE_FLAGS=--sdk_dir "C:\Program Files (x86)\Windows Kits\10\"
       <ExclusionDescription>Skipping CUDA source file %(Identity) (excluded from build).</ExclusionDescription>
       <PropsCacheOutputFile>%(Filename)%(Extension).cache</PropsCacheOutputFile>
       <PropsCacheOutputPath>x64\Debug\%(Filename)%(Extension).cache</PropsCacheOutputPath>
-      <CudaCompileCoreProject>C:\Users\Bhargav\Desktop\Learning_cuda_with_NN - Copy\cuda_nn\cuda_nn.vcxproj</CudaCompileCoreProject>
+      <CudaCompileCoreProject>C:\Users\Bhargav\Desktop\Learning_cuda_with_NN\cuda_nn\cuda_nn.vcxproj</CudaCompileCoreProject>
     </CudaCompile>
     <CudaCompile Include="layers\ReLU.cu">
-      <CompileOut>C:\Users\Bhargav\Desktop\Learning_cuda_with_NN - Copy\cuda_nn\x64\Debug\%(Filename)%(Extension).obj</CompileOut>
+      <CompileOut>C:\Users\Bhargav\Desktop\Learning_cuda_with_NN\cuda_nn\x64\Debug\%(Filename)%(Extension).obj</CompileOut>
       <UseHostInclude>true</UseHostInclude>
       <Keep>false</Keep>
       <KeepDir>x64\Debug</KeepDir>
@@ -238,10 +238,10 @@ set CUDAFE_FLAGS=--sdk_dir "C:\Program Files (x86)\Windows Kits\10\"
       <ExclusionDescription>Skipping CUDA source file %(Identity) (excluded from build).</ExclusionDescription>
       <PropsCacheOutputFile>%(Filename)%(Extension).cache</PropsCacheOutputFile>
       <PropsCacheOutputPath>x64\Debug\%(Filename)%(Extension).cache</PropsCacheOutputPath>
-      <CudaCompileCoreProject>C:\Users\Bhargav\Desktop\Learning_cuda_with_NN - Copy\cuda_nn\cuda_nn.vcxproj</CudaCompileCoreProject>
+      <CudaCompileCoreProject>C:\Users\Bhargav\Desktop\Learning_cuda_with_NN\cuda_nn\cuda_nn.vcxproj</CudaCompileCoreProject>
     </CudaCompile>
     <CudaCompile Include="layers\Sigmoid.cu">
-      <CompileOut>C:\Users\Bhargav\Desktop\Learning_cuda_with_NN - Copy\cuda_nn\x64\Debug\%(Filename)%(Extension).obj</CompileOut>
+      <CompileOut>C:\Users\Bhargav\Desktop\Learning_cuda_with_NN\cuda_nn\x64\Debug\%(Filename)%(Extension).obj</CompileOut>
       <UseHostInclude>true</UseHostInclude>
       <Keep>false</Keep>
       <KeepDir>x64\Debug</KeepDir>
@@ -292,11 +292,11 @@ set CUDAFE_FLAGS=--sdk_dir "C:\Program Files (x86)\Windows Kits\10\"
       <ExclusionDescription>Skipping CUDA source file %(Identity) (excluded from build).</ExclusionDescription>
       <PropsCacheOutputFile>%(Filename)%(Extension).cache</PropsCacheOutputFile>
       <PropsCacheOutputPath>x64\Debug\%(Filename)%(Extension).cache</PropsCacheOutputPath>
-      <CudaCompileCoreProject>C:\Users\Bhargav\Desktop\Learning_cuda_with_NN - Copy\cuda_nn\cuda_nn.vcxproj</CudaCompileCoreProject>
+      <CudaCompileCoreProject>C:\Users\Bhargav\Desktop\Learning_cuda_with_NN\cuda_nn\cuda_nn.vcxproj</CudaCompileCoreProject>
     </CudaCompile>
     <CudaCompile Include="main.cpp" />
     <CudaCompile Include="models\MLP.cpp">
-      <CompileOut>C:\Users\Bhargav\Desktop\Learning_cuda_with_NN - Copy\cuda_nn\x64\Debug\%(Filename)%(Extension).obj</CompileOut>
+      <CompileOut>C:\Users\Bhargav\Desktop\Learning_cuda_with_NN\cuda_nn\x64\Debug\%(Filename)%(Extension).obj</CompileOut>
       <UseHostInclude>true</UseHostInclude>
       <Keep>false</Keep>
       <KeepDir>x64\Debug</KeepDir>
@@ -347,7 +347,7 @@ set CUDAFE_FLAGS=--sdk_dir "C:\Program Files (x86)\Windows Kits\10\"
       <ExclusionDescription>Skipping CUDA source file %(Identity) (excluded from build).</ExclusionDescription>
       <PropsCacheOutputFile>%(Filename)%(Extension).cache</PropsCacheOutputFile>
       <PropsCacheOutputPath>x64\Debug\%(Filename)%(Extension).cache</PropsCacheOutputPath>
-      <CudaCompileCoreProject>C:\Users\Bhargav\Desktop\Learning_cuda_with_NN - Copy\cuda_nn\cuda_nn.vcxproj</CudaCompileCoreProject>
+      <CudaCompileCoreProject>C:\Users\Bhargav\Desktop\Learning_cuda_with_NN\cuda_nn\cuda_nn.vcxproj</CudaCompileCoreProject>
     </CudaCompile>
   </ItemGroup>
   <ItemGroup>
