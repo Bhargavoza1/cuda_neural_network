@@ -77,6 +77,48 @@ namespace Hex
     //    }
     //}
 
+
+#define MAX_KERNEL_SIZE 5
+
+    __global__ void convolutionforward(float* input, float* output, float* weight, float* bias,
+        int batch_size, int in_channels, int in_height, int in_width,
+        int out_channels, int kernel_size, int padding) {
+        int idx = blockIdx.x * blockDim.x + threadIdx.x;
+        int idy = blockIdx.y * blockDim.y + threadIdx.y;
+        int idz = blockIdx.z * blockDim.z + threadIdx.z;
+
+        if (idx < in_width && idy < in_height && idz < batch_size) {
+            for (int k = 0; k < out_channels; ++k) {
+                float sum = 0.0f;
+                for (int c = 0; c < in_channels; ++c) {
+                    for (int i = 0; i < kernel_size; ++i) {
+                        for (int j = 0; j < kernel_size; ++j) {
+                            int x_index = idx + j - padding;
+                            int y_index = idy + i - padding;
+                            if (x_index >= 0 && x_index < in_width && y_index >= 0 && y_index < in_height) {
+                                int input_index = idz * in_channels * in_height * in_width +
+                                    c * in_height * in_width +
+                                    y_index * in_width +
+                                    x_index;
+                                int weight_index = k * in_channels * kernel_size * kernel_size +
+                                    c * kernel_size * kernel_size +
+                                    i * kernel_size +
+                                    j;
+                                sum += input[input_index] * weight[weight_index];
+                            }
+                        }
+                    }
+                }
+                int output_index = idz * out_channels * in_height * in_width +
+                    k * in_height * in_width +
+                    idy * in_width +
+                    idx;
+                output[output_index] = sum + bias[k];
+            }
+        }
+    }
+
+
     template<class T>
     Tensor<T>& CNN2D<T>::forward(Tensor<T>& input_tensor)
     {
@@ -98,7 +140,7 @@ namespace Hex
         cnn2d_W_B_init<<<gridSize, blockSize>>>(weights.getData(), bias.getData(), _out_channels, _in_channels, _kernel_size, _w_b_range);
         cudaDeviceSynchronize();
         weights.print();
-       bias.print();
+        bias.print();
     }
 
     template class CNN2D<float>;
