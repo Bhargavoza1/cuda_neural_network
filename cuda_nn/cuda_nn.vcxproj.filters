@@ -17,6 +17,9 @@
     <CudaCompile Include="models\MLP.cpp">
       <Filter>models</Filter>
     </CudaCompile>
+    <CudaCompile Include="CNN2D.cu">
+      <Filter>layers</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="layers">
@@ -70,9 +73,6 @@
     </ClCompile>
     <ClCompile Include="utils\tensor_oprations.cu">
       <Filter>utils</Filter>
-    </ClCompile>
-    <ClCompile Include="layers\CNN2D.cu">
-      <Filter>layers</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

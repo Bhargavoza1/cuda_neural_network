@@ -78,6 +78,7 @@
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <CudaCompile Include="layers\CNN2D.cu" />
     <CudaCompile Include="costs\MSE.cu">
       <CompileOut>C:\Users\Bhargav\Desktop\Learning_cuda_with_NN\cuda_nn\x64\Debug\%(Filename)%(Extension).obj</CompileOut>
       <UseHostInclude>true</UseHostInclude>
@@ -362,7 +363,6 @@ set CUDAFE_FLAGS=--sdk_dir "C:\Program Files (x86)\Windows Kits\10\"
     <ClInclude Include="utils\tensor_oprations.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="layers\CNN2D.cu" />
     <ClCompile Include="utils\Errorhelper.cpp">
       <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
