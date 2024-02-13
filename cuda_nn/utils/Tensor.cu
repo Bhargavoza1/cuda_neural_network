@@ -23,7 +23,7 @@ namespace Hex {
     }
 
     template <typename T>
-    void Tensor<T>::cudafree(){ cudaFree(data); }
+    void Tensor<T>::cudafree() { if (this != nullptr) { cudaFree(data); } }
 
     // Set element at index
     template <typename T>
