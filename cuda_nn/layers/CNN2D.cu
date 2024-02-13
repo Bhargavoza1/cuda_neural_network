@@ -2,6 +2,13 @@
 #include <cuda_runtime.h>
 #include <curand_kernel.h>
 #include <iostream>
+
+//Output size = ((input size - kernel size + 2 * padding) / stride) + 1
+//
+// 
+//
+//input size = (Output size - 1) * stride + kernel size - 2 * padding
+
 namespace Hex
 {
     template<class T>
@@ -31,14 +38,14 @@ namespace Hex
         if (row < out_channels && col < in_channels * kernel_size * kernel_size) {
             int index = row * (in_channels * kernel_size * kernel_size) + col;
  
-            weights[index] = static_cast<T>(index + 1);
+            weights[index] = static_cast<T>(index  );
         }
 
         if (row < out_channels && col == 0) {
             curandState state;
             curand_init(clock64(), row, 0, &state);  
 
-            bias[row] = static_cast<T>(row + 1);  
+            bias[row] = static_cast<T>(row  );  
         }
 
         
@@ -92,8 +99,8 @@ namespace Hex
                 for (int c = 0; c < in_channels; ++c) {
                     for (int i = 0; i < kernel_size; ++i) {
                         for (int j = 0; j < kernel_size; ++j) {
-                            int x_index = idx + j - 0;
-                            int y_index = idy + i - 0; 
+                            int x_index = idx + j - padding;
+                            int y_index = idy + i - padding;
                             if (x_index >= 0 && x_index < in_width && y_index >= 0 && y_index < in_height) {
                                 int input_index = idz * in_channels * in_height * in_width +
                                     c * in_height * in_width +
@@ -113,7 +120,8 @@ namespace Hex
                     k * in_height * in_width +
                     idy * in_width +
                     idx;
-                output[output_index] = sum + bias[k];
+               // output[output_index] = sum + bias[k];
+                output[output_index] = sum  ;
             }
         }
     }
@@ -138,7 +146,8 @@ namespace Hex
             weights.getData(), bias.getData(),
             _batch_size, _in_channels, _in_height, _in_width,
             _out_channels, _kernel_size, _padding);
-        //output.print();
+        std::cout << "weights" << std::endl;
+        weights.print();
         return output; 
     }
 
