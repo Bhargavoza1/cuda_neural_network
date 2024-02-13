@@ -17,7 +17,7 @@
     <CudaCompile Include="models\MLP.cpp">
       <Filter>models</Filter>
     </CudaCompile>
-    <CudaCompile Include="CNN2D.cu">
+    <CudaCompile Include="layers\CNN2D.cu">
       <Filter>layers</Filter>
     </CudaCompile>
   </ItemGroup>

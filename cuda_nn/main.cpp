@@ -122,7 +122,7 @@ void trainNeuralNetwork(MLP<T>& model, const Tensor<T>& input_data, const Tensor
     std::cout << std::endl;
 }
 
-
+#include "layers/CNN2D.h"
 int main() {
     
     // Define the parameters for your MLP
@@ -166,10 +166,10 @@ int main() {
         y_tensor->set({ i, 0, 1 }, y_train[i][0][1]);
     }
 
-    trainNeuralNetwork(*mlp, *x_tensor, *y_tensor, 1000, 0.15f); 
-    predictAndPrintResults(*mlp, *x_tensor, *y_tensor);
+   // trainNeuralNetwork(*mlp, *x_tensor, *y_tensor, 1000, 0.15f); 
+  //  predictAndPrintResults(*mlp, *x_tensor, *y_tensor);
  
-    
+    CNN2D<float> convo({1,3,3},{1,3},3);
 
     return 0;
  
