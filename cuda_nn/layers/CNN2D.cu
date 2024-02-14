@@ -69,10 +69,10 @@ namespace Hex
         _batch_size(batch_width_height[0]), _in_channels(in_out_channels[0]), _out_channels(in_out_channels[1]), _kernel_size(kernel_size),
         _padding(padding), _stride(stride), _w_b_range(w_b_range),
         weights(std::vector<int>{_out_channels, _in_channels, _kernel_size, _kernel_size  }),
-        bias(std::vector<int>{_out_channels}),
+        bias(std::vector<int>{_out_channels})
        // output(std::vector<int>{_batch_size, _out_channels, batch_width_height[2], batch_width_height[3] }),
-        input(std::vector<int>{_batch_size, _in_channels, batch_width_height[2], batch_width_height[3] }),
-        input_error(std::vector<int>{_batch_size, _in_channels, batch_width_height[2], batch_width_height[3]  })
+      //  input(std::vector<int>{_batch_size, _in_channels, batch_width_height[2], batch_width_height[3] }),
+       // input_error(std::vector<int>{_batch_size, _in_channels, batch_width_height[2], batch_width_height[3]  })
     {
         init_weight_n_bias();
     }
@@ -228,6 +228,9 @@ namespace Hex
         int _out_height = output_error.getShape()[3];
         int _in_width = (_out_width - 1) * _stride - 2 * _padding + _kernel_size;
         int _in_height = (_out_height - 1) * _stride - 2 * _padding + _kernel_size; 
+
+
+        input_error.reset(new Tensor<T>({ _batch_size , _in_channels ,_in_width , _in_height }));
         dim3 threadsPerBlock(8 ,8, 8);
         dim3 numBlocks(_batch_size * _out_channels,
             (_in_width + threadsPerBlock.x - 1) / threadsPerBlock.x,
@@ -236,7 +239,7 @@ namespace Hex
  
         
         convolutionBackwardInputError << <numBlocks, threadsPerBlock >> > ( output_error.getData(), input.getData() ,
-            weights.getData(), bias.getData() , input_error.getData(), _batch_size, _in_channels, _in_width, _in_height,
+            weights.getData(), bias.getData() , input_error->getData(), _batch_size, _in_channels, _in_width, _in_height,
             _out_channels, _kernel_size, _padding, _stride, _out_width, _out_height, learning_rate);
 
         cudaDeviceSynchronize();
@@ -245,7 +248,7 @@ namespace Hex
         //    printf("error from liner backword method : %s\n", cudaGetErrorString(cudaError));
         //    exit(EXIT_FAILURE);  // or handle the error appropriately
         //}
-        return input_error;
+        return *input_error;
     }
 
 

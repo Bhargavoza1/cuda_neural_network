@@ -87,7 +87,7 @@ namespace Hex {
             curandState state;
             curand_init(clock64(), index, 0, &state); // Initialize random number generator for each thread
 
-            data[index] = curand_uniform(&state) * (2 * 127.f) - 127.f;
+            data[index] = curand_uniform(&state) * (2 * 0.5f) - 0.5f;
             //T value = static_cast<T>(index+1)  ;
 
             //if (multiplier != 0) {

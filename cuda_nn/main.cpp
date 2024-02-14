@@ -169,7 +169,7 @@ int main() {
    // trainNeuralNetwork(*mlp, *x_tensor, *y_tensor, 1000, 0.15f); 
   //  predictAndPrintResults(*mlp, *x_tensor, *y_tensor);
  
-    std::vector<int> shape = {1 ,1,30,30 };
+    std::vector<int> shape = {1 ,1,10,10 };
     Hex::Tensor<float> tensor(shape);
 
     // Assign sequential values starting from 1
@@ -194,9 +194,12 @@ int main() {
 
      std::cout << "predicted_output" << endl;
    
-      // predicted_output->print();
-    // std::cout << "after back propagation of predicted_output" << endl;
-       error_output->print();
+        predicted_output->print();
+     std::cout << "after back propagation of predicted_output" << endl;
+     std::cout   << endl;
+     std::cout   << endl;
+     std::cout   << endl;
+        error_output->print();
     return 0;
  
    
