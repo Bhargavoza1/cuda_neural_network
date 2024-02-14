@@ -194,8 +194,8 @@ int main() {
      std::cout << "predicted_output" << endl;
    
  predicted_output->print();
-  ///  std::cout << "after back propagation of predicted_output" << endl;
-   // error_output->print();
+     std::cout << "after back propagation of predicted_output" << endl;
+     error_output->print();
     return 0;
  
    

@@ -1,5 +1,5 @@
 #include "ReLU.h"
- 
+#include <cuda_runtime.h>
 namespace Hex {
     template<class T>
     ReLU<T>::ReLU()
