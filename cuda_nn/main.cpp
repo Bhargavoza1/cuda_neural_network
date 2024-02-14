@@ -178,24 +178,24 @@ int main() {
         for (int f = 0; f < shape[1]; ++f) {
             for (int i = 0; i < shape[2]; ++i) {
                 for (int j = 0; j < shape[3]; ++j) {
-                    tensor.set({0, 0, i, j }, value);
+                    tensor.set({k, f, i, j }, value);
                     value += 1.0f;
                 }
             }
         }
     }
  
-        std::cout << "input tensor" << endl;
-        tensor.print();
+        //std::cout << "input tensor" << endl;
+        //tensor.print();
     CNN2D<float> convo({1,1,3,3},{1,1},3);
     Tensor<float>* predicted_output = &convo.forward(tensor);
      Tensor<float>* error_output = &convo.backpropagation(*predicted_output);
 
-    //std::cout << "predicted_output" << endl;
+     std::cout << "predicted_output" << endl;
    
-      predicted_output->print();
-    //std::cout << "after back propagation of predicted_output" << endl;
-    ////error_output->print();
+ predicted_output->print();
+  ///  std::cout << "after back propagation of predicted_output" << endl;
+   // error_output->print();
     return 0;
  
    
