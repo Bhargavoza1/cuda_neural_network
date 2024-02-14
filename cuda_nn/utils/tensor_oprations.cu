@@ -77,21 +77,24 @@ namespace Hex {
         }
     }
 
-
+#include <curand_kernel.h>
  
    // CUDA kernel for tensor initialization with multiplication
     template <typename T>
     __global__ void initializeTensor(T* data, int size, float multiplier) {
         int index = blockIdx.x * blockDim.x + threadIdx.x;
         if (index < size) {
-           
-            T value = static_cast<T>(index+1)  ;
+            curandState state;
+            curand_init(clock64(), index, 0, &state); // Initialize random number generator for each thread
 
-            if (multiplier != 0) {
-                value *= multiplier;
-            }
+            data[index] = curand_uniform(&state) * (2 * 127.f) - 127.f;
+            //T value = static_cast<T>(index+1)  ;
 
-            data[index] = value;
+            //if (multiplier != 0) {
+            //    value *= multiplier;
+            //}
+
+            //data[index] = value;
         }
     }
 

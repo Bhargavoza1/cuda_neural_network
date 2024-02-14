@@ -13,26 +13,26 @@ namespace Hex
 {
     template<class T>
     __global__ void cnn2d_W_B_init(T* weights, T* bias, int out_channels, int in_channels, int kernel_size, float w_b_range) {
-        //int row = blockIdx.y * blockDim.y + threadIdx.y;
-        //int col = blockIdx.x * blockDim.x + threadIdx.x;
-
-        //if (row < out_channels && col < in_channels * kernel_size * kernel_size) {
-        //    int index = row * (in_channels * kernel_size * kernel_size) + col;
-        //    curandState state;
-        //    curand_init(clock64(), index, 0, &state); // Initialize random number generator for each thread
-
-        //    weights[index] = curand_uniform(&state) * (2 * w_b_range) - w_b_range; // Generate random number in range [-w_b_range, w_b_range]
-        //}
-
-        //if (row < out_channels && col == 0) {
-        //    curandState state;
-        //    curand_init(clock64(), row, 0, &state); // Initialize random number generator for each thread
-
-        //    bias[row] = curand_uniform(&state) * (2 * w_b_range) - w_b_range; // Generate random number in range [-w_b_range, w_b_range]
-        //}
-
-
         int row = blockIdx.y * blockDim.y + threadIdx.y;
+        int col = blockIdx.x * blockDim.x + threadIdx.x;
+
+        if (row < out_channels && col < in_channels * kernel_size * kernel_size) {
+            int index = row * (in_channels * kernel_size * kernel_size) + col;
+            curandState state;
+            curand_init(clock64(), index, 0, &state); // Initialize random number generator for each thread
+
+            weights[index] = curand_uniform(&state) * (2 * w_b_range) - w_b_range; // Generate random number in range [-w_b_range, w_b_range]
+        }
+
+        if (row < out_channels && col == 0) {
+            curandState state;
+            curand_init(clock64(), row, 0, &state); // Initialize random number generator for each thread
+
+            bias[row] = curand_uniform(&state) * (2 * w_b_range) - w_b_range; // Generate random number in range [-w_b_range, w_b_range]
+        }
+
+
+ /*       int row = blockIdx.y * blockDim.y + threadIdx.y;
         int col = blockIdx.x * blockDim.x + threadIdx.x;
 
         if (row < out_channels && col < in_channels * kernel_size * kernel_size) {
@@ -46,7 +46,7 @@ namespace Hex
             curand_init(clock64(), row, 0, &state);  
 
             bias[row] = static_cast<T>(row +1 );  
-        }
+        }*/
 
         
     }
@@ -94,7 +94,7 @@ namespace Hex
         int channel_idx = blockIdx.x % out_channels;
         int output_row = blockIdx.y * blockDim.y + threadIdx.x;
         int output_col = blockIdx.z * blockDim.z + threadIdx.y;
-
+      
         if (batch_idx < batch_size && channel_idx < out_channels && output_row < out_width && output_col < out_height) {
             int input_row_start = output_row * stride - padding;
             int input_col_start = output_col * stride - padding;
@@ -108,13 +108,17 @@ namespace Hex
                         if (input_row >= 0 && input_row < in_height && input_col >= 0 && input_col < in_width) {
                             int input_idx = (batch_idx * in_channels * in_height * in_width) + (c * in_height * in_width) + (input_row * in_width) + input_col;
                             int weight_idx = (channel_idx * in_channels * kernel_size * kernel_size) + (c * kernel_size * kernel_size) + (i * kernel_size) + j;
+                          
                             value += input[input_idx] * weight[weight_idx];
+                          //  printf("(%dx%dx%dx%d  \n", batch_idx , c, output_row, output_col);
                         }
                     }
                 }
             }
+           // printf("(%f  \n", value);
             int output_idx = (batch_idx * out_channels * out_height * out_width) + (channel_idx * out_height * out_width) + (output_row * out_width) + output_col;
-            output[output_idx] = value + bias[channel_idx]; 
+            output[output_idx] = value  ; 
+            //printf("(%dx%dx%dx%d)  \n", batch_idx ,  channel_idx  , output_row , output_col);
         }
     }
 
@@ -132,29 +136,31 @@ namespace Hex
         int  _batch_size = input.getShape()[0];
         int  _in_width = input.getShape()[2];
         int  _in_height = input.getShape()[3];
-        
+      
         int _out_width = ((_in_width - _kernel_size + 2 * _padding) / _stride) + 1;
         int _out_height = ((_in_height - _kernel_size + 2 * _padding) / _stride) + 1;
-        output.reset(new Tensor<T>({ _batch_size , _out_channels ,_out_width , _out_height }));
 
-        dim3 threadsPerBlock(16,16);
+        //std::cout << _in_width << _in_height << _out_width << _out_height;
+        output.reset(new Tensor<T>({ _batch_size , _out_channels ,_out_width , _out_height }));
+        //input.print();
+        dim3 threadsPerBlock(8,8,8);
         dim3 numBlocks(_batch_size * _out_channels ,
             (_in_width + threadsPerBlock.x - 1) / threadsPerBlock.x,
-            (_in_height + threadsPerBlock.y - 1) / threadsPerBlock.y
-             );
-
+            (_in_height + threadsPerBlock.y - 1) / threadsPerBlock.y);
+ 
         convolutionforward << <numBlocks, threadsPerBlock >> > (input_tensor.getData(), 
             weights.getData(), bias.getData(), output->getData(),
             _batch_size, _in_channels, _in_width, _in_height,
             _out_channels, _kernel_size, _padding, _stride, _out_width , _out_height);
         cudaDeviceSynchronize();
-        //cudaError_t cudaError = cudaGetLastError();
-        //if (cudaError != cudaSuccess) {
-        //    printf("error from liner backword method : %s\n", cudaGetErrorString(cudaError));
-        //    exit(EXIT_FAILURE);  // or handle the error appropriately
-        //}
+        cudaError_t cudaError = cudaGetLastError();
+        if (cudaError != cudaSuccess) {
+            printf("error from liner backword method : %s\n", cudaGetErrorString(cudaError));
+            exit(EXIT_FAILURE);  // or handle the error appropriately
+        }
         //std::cout << "weights" << std::endl;
-        //weights.print();
+        // weights.print();
+      //  output->print();
         return *output; 
     }
 
@@ -222,7 +228,7 @@ namespace Hex
         int _out_height = output_error.getShape()[3];
         int _in_width = (_out_width - 1) * _stride - 2 * _padding + _kernel_size;
         int _in_height = (_out_height - 1) * _stride - 2 * _padding + _kernel_size; 
-        dim3 threadsPerBlock(16, 16);
+        dim3 threadsPerBlock(8 ,8, 8);
         dim3 numBlocks(_batch_size * _out_channels,
             (_in_width + threadsPerBlock.x - 1) / threadsPerBlock.x,
             (_in_height + threadsPerBlock.y - 1) / threadsPerBlock.y
