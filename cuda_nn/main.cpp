@@ -169,33 +169,34 @@ int main() {
    // trainNeuralNetwork(*mlp, *x_tensor, *y_tensor, 1000, 0.15f); 
   //  predictAndPrintResults(*mlp, *x_tensor, *y_tensor);
  
-    std::vector<int> shape = { 1,1, 3, 3 };
+    std::vector<int> shape = { 1,3,5,30 };
     Hex::Tensor<float> tensor(shape);
 
     // Assign sequential values starting from 1
-    float value = 0.0f;
-    for (int k = 0; k < shape[0]; ++k) {
-        for (int f = 0; f < shape[1]; ++f) {
-            for (int i = 0; i < shape[2]; ++i) {
-                for (int j = 0; j < shape[3]; ++j) {
-                    tensor.set({k, f, i, j }, value);
-                    value += 1.0f;
-                }
-            }
-        }
-    }
- 
+    //float value = 0.0f;
+    //for (int k = 0; k < shape[0]; ++k) {
+    //    for (int f = 0; f < shape[1]; ++f) {
+    //        for (int i = 0; i < shape[2]; ++i) {
+    //            for (int j = 0; j < shape[3]; ++j) {
+    //                tensor.set({k, f, i, j }, value);
+    //                value += 1.0f;
+    //            }
+    //        }
+    //    }
+    //}
+    initTensorOnGPU(tensor , 0.0f);
+    //tensor.print();
         //std::cout << "input tensor" << endl;
         //tensor.print();
-    CNN2D<float> convo({1,1,3,3},{1,1},3);
+    CNN2D<float> convo({1,3,30,30},{3,1},3 );
     Tensor<float>* predicted_output = &convo.forward(tensor);
-     Tensor<float>* error_output = &convo.backpropagation(*predicted_output);
+    // Tensor<float>* error_output = &convo.backpropagation(*predicted_output);
 
      std::cout << "predicted_output" << endl;
    
- predicted_output->print();
+      predicted_output->print();
      std::cout << "after back propagation of predicted_output" << endl;
-     error_output->print();
+     //error_output->print();
     return 0;
  
    

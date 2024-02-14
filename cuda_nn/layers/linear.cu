@@ -143,8 +143,8 @@ namespace Hex{
 		 
 		cudaError_t cudaError = cudaGetLastError();
 		if (cudaError == cudaErrorInvalidValue) {
-			printf("error from liner forward method aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa: %s\n", cudaGetErrorString(cudaError));
-			//  exit(EXIT_FAILURE);  // or handle the error appropriately
+			printf("error from liner forward method: %s\n", cudaGetErrorString(cudaError));
+			  exit(EXIT_FAILURE);  // or handle the error appropriately
 		}
 	
 		//std::cout << "dbug end of linear" << std::endl;
