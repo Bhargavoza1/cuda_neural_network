@@ -1,14 +1,23 @@
 #pragma once
 #include "layer.h"
+#include <iostream>
+#include <memory>
 namespace Hex {
 	template <class T>
 	class MaxPool2d : public layer<T>
 	{
 	private:
+		int _kernel_size;
+		int _padding;
+		int _stride;
 
+		Tensor<T> input;
+
+		std::unique_ptr<Tensor<T>> output;
+		std::unique_ptr<Tensor<T>> input_error;
 
 	public:
-		MaxPool2d(int kernel_size, int padding = 1, int stride = 1);
+		MaxPool2d(int kernel_size, int stride = 1, int padding = 0);
 		~MaxPool2d();
 
 
