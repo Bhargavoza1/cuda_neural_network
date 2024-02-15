@@ -187,6 +187,7 @@ set CUDAFE_FLAGS=--sdk_dir "C:\Program Files (x86)\Windows Kits\10\"
       <PropsCacheOutputPath>x64\Debug\%(Filename)%(Extension).cache</PropsCacheOutputPath>
       <CudaCompileCoreProject>C:\Users\Bhargav\Desktop\Learning_cuda_with_NN\cuda_nn\cuda_nn.vcxproj</CudaCompileCoreProject>
     </CudaCompile>
+    <CudaCompile Include="layers\MaxPool2d.cu" />
     <CudaCompile Include="layers\ReLU.cu">
       <CompileOut>C:\Users\Bhargav\Desktop\Learning_cuda_with_NN\cuda_nn\x64\Debug\%(Filename)%(Extension).obj</CompileOut>
       <UseHostInclude>true</UseHostInclude>
@@ -356,6 +357,7 @@ set CUDAFE_FLAGS=--sdk_dir "C:\Program Files (x86)\Windows Kits\10\"
     <ClInclude Include="layers\CNN2D.h" />
     <ClInclude Include="layers\layer.h" />
     <ClInclude Include="layers\linear.h" />
+    <ClInclude Include="layers\MaxPool2d.h" />
     <ClInclude Include="layers\ReLU.h" />
     <ClInclude Include="layers\Sigmoid.h" />
     <ClInclude Include="models\MLP.h" />
