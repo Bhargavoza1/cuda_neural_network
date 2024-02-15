@@ -2,6 +2,10 @@
 #include"MaxPool2d.h"
 #include <cuda_runtime.h>
 #include <curand_kernel.h>
+#include <iostream>
+#include <vector>
+#include <limits>
+using namespace std;
 namespace Hex {
 	template<class T>
 	MaxPool2d<T>::MaxPool2d(int kernel_size, int stride, int padding):
@@ -14,21 +18,48 @@ namespace Hex {
 	{
 	}
 
+ 
 	template <typename T>
 	__global__ void maxpool2d_forward_kernel(const T* input, T* output,
 		int batch_size, int channel, int input_width, int input_height,
 		int output_width, int output_height,
-		int kernel_size, int stride , int padding) {
+		int kernel_size, int stride, int padding) {
 
 		int batch_idx = blockIdx.x / channel;
 		int channel_idx = blockIdx.x % channel;
 		int output_row = blockIdx.y * blockDim.y + threadIdx.x;
 		int output_col = blockIdx.z * blockDim.z + threadIdx.y;
 
-		if (batch_idx < batch_size && channel_idx < channel && output_row < output_width && output_col < output_height) {
-		
+		if (batch_idx < batch_size && channel_idx < channel  && output_row < output_width && output_col < output_height) {
+			// Determine the starting point (top-left corner) of the corresponding input region
+			int start_x = output_col * stride - padding;
+			int start_y = output_row * stride - padding;
+
+			// Find the limits of the region within the input
+			int end_x =  min(start_x + kernel_size, input_width);
+			int end_y =  min(start_y + kernel_size, input_height);
+
+			start_x =  max(start_x, 0);
+			start_y =  max(start_y, 0);
+
+		 
+			T max_val = static_cast<T>(0);
+
+			// Iterate over the input region and find the maximum value
+			for (int y = start_y; y < end_y; ++y) {
+				for (int x = start_x; x < end_x; ++x) {
+					T val = input[((batch_idx * channel + channel_idx) * input_height + y) * input_width + x];
+					max_val = max(max_val, val);
+				}
+			}
+
+			int output_idx = (batch_idx * channel * output_width * output_height) + (channel_idx * output_width * output_height) + (output_row * output_height) + output_col;
+			// Set the output value to the maximum found
+			output[output_idx] = max_val;
+			// printf("output[output_idx] %f\n", channel_idx);
 		}
 	}
+
 
 	template<class T>
 	Tensor<T>& MaxPool2d<T>::forward(Tensor<T>& input_tensor)
@@ -37,9 +68,9 @@ namespace Hex {
 
 
 		int  _batch_size = input.getShape()[0];
-		int  _channel_size = input.getShape()[0];
+		int  _channel_size = input.getShape()[1];
 		int  _in_width = input.getShape()[2];
-		int  _in_height = input.getShape()[3];
+		int  _in_height = input.getShape()[3]; 
 
 		int _out_width = ((_in_width - _kernel_size + 2 * _padding) / _stride) + 1;
 		int _out_height = ((_in_height - _kernel_size + 2 * _padding) / _stride) + 1;
@@ -55,7 +86,7 @@ namespace Hex {
 
 		maxpool2d_forward_kernel << <numBlocks, threadsPerBlock >> > (input.getData(), output->getData(),
 			_batch_size , _channel_size , _in_width, _in_height,
-			_out_width, _in_height,
+			_out_width, _out_height,
 			_kernel_size, _stride, _padding);
 
 		return *output;

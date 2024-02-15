@@ -123,6 +123,7 @@ void trainNeuralNetwork(MLP<T>& model, const Tensor<T>& input_data, const Tensor
 }
 
 #include "layers/CNN2D.h"
+ 
 int main() {
     
     // Define the parameters for your MLP
@@ -169,7 +170,7 @@ int main() {
    // trainNeuralNetwork(*mlp, *x_tensor, *y_tensor, 1000, 0.15f); 
   //  predictAndPrintResults(*mlp, *x_tensor, *y_tensor);
  
-    std::vector<int> shape = {1 ,1,10,10 };
+    std::vector<int> shape = {1 ,1,3,3 };
     Hex::Tensor<float> tensor(shape);
 
     // Assign sequential values starting from 1
@@ -192,14 +193,12 @@ int main() {
     Tensor<float>* predicted_output = &convo.forward(tensor);
      Tensor<float>* error_output = &convo.backpropagation(*predicted_output);
 
-     std::cout << "predicted_output" << endl;
+    // std::cout << "predicted_output" << endl;
    
-        predicted_output->print();
+       // predicted_output->print();
      std::cout << "after back propagation of predicted_output" << endl;
-     std::cout   << endl;
-     std::cout   << endl;
-     std::cout   << endl;
-        error_output->print();
+  
+         error_output->print();
     return 0;
  
    
