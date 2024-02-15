@@ -20,6 +20,9 @@
     <CudaCompile Include="layers\CNN2D.cu">
       <Filter>layers</Filter>
     </CudaCompile>
+    <CudaCompile Include="layers\MaxPool2d.cu">
+      <Filter>layers</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="layers">
@@ -61,6 +64,9 @@
       <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="layers\CNN2D.h">
+      <Filter>layers</Filter>
+    </ClInclude>
+    <ClInclude Include="layers\MaxPool2d.h">
       <Filter>layers</Filter>
     </ClInclude>
   </ItemGroup>

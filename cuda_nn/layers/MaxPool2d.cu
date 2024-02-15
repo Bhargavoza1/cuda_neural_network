@@ -20,4 +20,8 @@ namespace Hex {
 	{
 		return output_error;
 	}
+
+	template class MaxPool2d<float>;
+	template class MaxPool2d<int>;
+	template class MaxPool2d<double>;
 }
