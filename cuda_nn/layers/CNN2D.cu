@@ -228,7 +228,7 @@ namespace Hex
         int _out_height = output_error.getShape()[3];
         int _in_width = (_out_width - 1) * _stride - 2 * _padding + _kernel_size;
         int _in_height = (_out_height - 1) * _stride - 2 * _padding + _kernel_size; 
-        output_error.print();
+       // output_error.print();
 
         input_error.reset(new Tensor<T>({ _batch_size , _in_channels ,_in_width , _in_height }));
         dim3 threadsPerBlock(8 ,8, 8);
