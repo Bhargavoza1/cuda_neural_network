@@ -20,6 +20,14 @@ namespace Hex {
 		int output_width, int output_height,
 		int kernel_size, int stride , int padding) {
 
+		int batch_idx = blockIdx.x / channel;
+		int channel_idx = blockIdx.x % channel;
+		int output_row = blockIdx.y * blockDim.y + threadIdx.x;
+		int output_col = blockIdx.z * blockDim.z + threadIdx.y;
+
+		if (batch_idx < batch_size && channel_idx < channel && output_row < output_width && output_col < output_height) {
+		
+		}
 	}
 
 	template<class T>
@@ -50,7 +58,7 @@ namespace Hex {
 			_out_width, _in_height,
 			_kernel_size, _stride, _padding);
 
-		return input_tensor;
+		return *output;
 	}
 	template<class T>
 	Tensor<T>& MaxPool2d<T>::backpropagation(Tensor<T>& output_error, float learning_rate)
