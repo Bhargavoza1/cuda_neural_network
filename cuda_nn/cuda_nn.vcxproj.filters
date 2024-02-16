@@ -23,6 +23,9 @@
     <CudaCompile Include="layers\MaxPool2d.cu">
       <Filter>layers</Filter>
     </CudaCompile>
+    <CudaCompile Include="layers\BatchNorm.cu">
+      <Filter>layers</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="layers">
@@ -67,6 +70,9 @@
       <Filter>layers</Filter>
     </ClInclude>
     <ClInclude Include="layers\MaxPool2d.h">
+      <Filter>layers</Filter>
+    </ClInclude>
+    <ClInclude Include="layers\BatchNorm.h">
       <Filter>layers</Filter>
     </ClInclude>
   </ItemGroup>

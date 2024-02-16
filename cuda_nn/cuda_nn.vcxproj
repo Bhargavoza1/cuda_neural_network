@@ -78,6 +78,7 @@
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <CudaCompile Include="layers\BatchNorm.cu" />
     <CudaCompile Include="layers\CNN2D.cu" />
     <CudaCompile Include="costs\MSE.cu">
       <CompileOut>C:\Users\Bhargav\Desktop\Learning_cuda_with_NN\cuda_nn\x64\Debug\%(Filename)%(Extension).obj</CompileOut>
@@ -354,6 +355,7 @@ set CUDAFE_FLAGS=--sdk_dir "C:\Program Files (x86)\Windows Kits\10\"
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="costs\MSE.h" />
+    <ClInclude Include="layers\BatchNorm.h" />
     <ClInclude Include="layers\CNN2D.h" />
     <ClInclude Include="layers\layer.h" />
     <ClInclude Include="layers\linear.h" />
