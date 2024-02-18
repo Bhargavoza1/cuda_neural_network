@@ -27,22 +27,22 @@ namespace Hex
 
 		//input_tensor.print();
 		//std::cout << std::endl;
-		X = linear1.forward(input_tensor);
+		X = linear1.forward(input_tensor , Istraining);
 
 		//X.print();
-		X = relu1.forward(X);
+		X = relu1.forward(X , Istraining);
 
 		//////// hidden layer
 		for (int i = 0; i < _hiddenlayer; ++i) {
-			X = linear2.forward(X);
+			X = linear2.forward(X , Istraining);
 			//X.print();
-			X = relu2.forward(X);
+			X = relu2.forward(X , Istraining);
 			//X.print();
 		}
 		
-		X = linear3.forward(X);
+		X = linear3.forward(X , Istraining);
 		//X.print();
-		X = sigmoid1.forward(X);
+		X = sigmoid1.forward(X , Istraining);
 		//X.print();
 		return X;
 	}

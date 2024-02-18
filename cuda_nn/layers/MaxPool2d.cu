@@ -16,6 +16,9 @@ namespace Hex {
 	template<class T>
 	MaxPool2d<T>::~MaxPool2d()
 	{
+		output->cudafree();
+		input.cudafree();
+		input_error->cudafree();
 	}
 
  

@@ -16,6 +16,8 @@ namespace Hex {
     {
     private:
         
+        TensorShape _Tshape;
+
         float momentum;
         float eps;
 
@@ -45,6 +47,10 @@ namespace Hex {
 
         Tensor<T>& forward(Tensor<T>& input_tensor , bool Istraining = true) override;
         Tensor<T>& backpropagation(Tensor<T>& output_error, float learning_rate = 0.0001f) override;
+
+    private:
+        Tensor<T>& forward_2d(Tensor<T>& input_tensor, bool Istraining = true) ;
+        Tensor<T>& forward_4d(Tensor<T>& input_tensor, bool Istraining = true) ;
     };
 
 

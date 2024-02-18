@@ -80,7 +80,9 @@ namespace Hex
     template<class T>
     CNN2D<T>::~CNN2D()
     {
-       
+        output->cudafree();
+        input.cudafree();
+        input_error->cudafree();
     }
  
   

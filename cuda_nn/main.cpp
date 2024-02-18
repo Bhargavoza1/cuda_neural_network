@@ -33,7 +33,7 @@ void predictAndPrintResults( MLP<T>& model, const Tensor<T>& input_data, const T
         sliced_tensor2 = Hex::sliceFirstIndex(sample_index, input_data) ;
         transpose_tensor2 = Hex::transpose(*sliced_tensor2);
         inpurt_data = *transpose_tensor2;  
-        predicted_output =  &model.forward(inpurt_data);
+        predicted_output =  &model.forward(inpurt_data , false);
 
         // Printing the predicted output
         std::cout << "Predicted output:" << std::endl;
