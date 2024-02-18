@@ -5,29 +5,42 @@
 #include <memory>
 namespace Hex {
 
+
+    enum class TensorShape {
+        _2D,
+        _4D
+    };
+
     template <class T>
     class BatchNorm : public layer<T>
     {
     private:
-        // Define your member variables for BatchNorm
-        // Batch normalization parameters
-        Tensor<T> gamma; // Scale parameter
-        Tensor<T> beta; // Shift parameter
+        
+        float momentum;
+        float eps;
+
+        
+        Tensor<T> gamma;  
+        Tensor<T> beta;  
         Tensor<T> running_mean;
         Tensor<T> running_var;
 
-        // Cache for backpropagation
+     
         Tensor<T> x_normalized;
         Tensor<T> input_mean;
         Tensor<T> input_var;
         Tensor<T> input;
 
-        // Momentum and epsilon for running statistics
-        float momentum;
-        float eps;
+
+        std::unique_ptr<Tensor<T>> input_error;
+
+        std::unique_ptr<Tensor<T>> output;
+
+    
 
     public:
-        BatchNorm(int channels, float momentum = 0.9, float eps = 1e-5); 
+        BatchNorm(int Batch_or_channels,TensorShape tensorshape = TensorShape::_4D ,float momentum = 0.9, float eps = 1e-5);
+        
         ~BatchNorm();
 
         Tensor<T>& forward(Tensor<T>& input_tensor) override;

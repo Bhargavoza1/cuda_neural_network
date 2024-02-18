@@ -1,17 +1,21 @@
 
 #include "BatchNorm.h"
+#include "../utils/tensor_oprations.h"
 namespace Hex {
 
     template <class T>
-    BatchNorm<T>::BatchNorm(int channels, float momentum, float eps) 
-        : momentum(momentum), eps(eps) {
-  
-        gamma = Tensor<T>({ 1, channels, 1, 1 }); // Initialize to ones
-        beta = Tensor<T>({ 1, channels, 1, 1 }); // Initialize to zeros
-        running_mean = Tensor<T>({ 1, channels, 1, 1 }); // Initialize to zeros
-        running_var = Tensor<T>({ 1, channels, 1, 1 }); // Initialize to ones
+    BatchNorm<T>::BatchNorm(int Batch_or_channels, TensorShape tensorshape , float momentum, float eps)
+        : momentum(momentum), eps(eps) ,
+        gamma(tensorshape == TensorShape::_4D ? Tensor<T>({ 1, Batch_or_channels, 1, 1 }) : Tensor<T>({ 1, Batch_or_channels })),
+        beta(tensorshape == TensorShape::_4D ? Tensor<T>({ 1, Batch_or_channels, 1, 1 }) : Tensor<T>({ 1, Batch_or_channels })),
+        running_mean(tensorshape == TensorShape::_4D ? Tensor<T>({ 1, Batch_or_channels, 1, 1 }) : Tensor<T>({ 1, Batch_or_channels })),
+        running_var(tensorshape == TensorShape::_4D ? Tensor<T>({ 1, Batch_or_channels, 1, 1 }) : Tensor<T>({ 1, Batch_or_channels }))
+    {
 
-        gamma.print();
+        initTensorToOneOnGPU(gamma);
+        initTensorToOneOnGPU(running_var); 
+   
+        
     }
 
     template <class T>
@@ -21,6 +25,7 @@ namespace Hex {
 
     template <class T>
     Tensor<T>& BatchNorm<T>::forward(Tensor<T>& input_tensor) {
+        gamma.print();
         return input_tensor;
     }
 

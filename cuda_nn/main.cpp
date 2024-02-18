@@ -179,12 +179,12 @@ int main() {
     initTensorOnGPU(tensor , 0.0f);
  
     CNN2D<float> convo(shape,{1,1},3 );
-    BatchNorm<float> batch(2 );
+    BatchNorm<float> batch(2  , TensorShape::_4D   );
  
      Tensor<float>* predicted_output = &convo.forward(tensor);
  
      Tensor<float>* error_output = &convo.backpropagation(*predicted_output);
-   
+     Tensor<float>* error_outputa = &batch.forward(tensor);
      std::cout << "predicted_output" << endl;
    
         predicted_output->print();

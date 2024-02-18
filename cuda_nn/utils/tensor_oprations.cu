@@ -55,6 +55,48 @@ namespace Hex {
         return result;
     }
 
+
+
+    template<typename T>
+    void initTensorToOneOnGPU(Tensor<T>& tensor )
+    {
+
+
+        std::vector<int> shape = tensor.getShape();
+        int size = 1;
+        for (int dim : shape) {
+            size *= dim;
+        }
+
+        // Launch CUDA kernel to initialize and multiply the tensor
+        int blockSize = 256;
+        int gridSize = (size + blockSize - 1) / blockSize;
+        initializeTensortoOne << <gridSize, blockSize >> > (tensor.getData(), size );
+        cudaDeviceSynchronize();
+
+        cudaError_t cudaError = cudaGetLastError();
+        if (cudaError != cudaSuccess) {
+            printf("CUDA error from init: %s\n", cudaGetErrorString(cudaError));
+            exit(EXIT_FAILURE);  // or handle the error appropriately
+        }
+
+      
+    }
+
+
+    // CUDA kernel for tensor initialization with multiplication
+    template <typename T>
+    __global__ void initializeTensortoOne(T* data, int size ) {
+        int index = blockIdx.x * blockDim.x + threadIdx.x;
+        if (index < size) {
+
+
+            data[index] = static_cast<T>(1.0f);
+ 
+        }
+    }
+
+
     template<typename T>
     void initTensorOnGPU(Tensor<T>& tensor, float multiplier)
     {
@@ -63,7 +105,7 @@ namespace Hex {
         for (int dim : shape) {
             size *= dim;
         }
-        
+
         // Launch CUDA kernel to initialize and multiply the tensor
         int blockSize = 256;
         int gridSize = (size + blockSize - 1) / blockSize;
@@ -76,9 +118,9 @@ namespace Hex {
             exit(EXIT_FAILURE);  // or handle the error appropriately
         }
     }
-
 #include <curand_kernel.h>
- 
+#include "tensor_oprations.h"
+
    // CUDA kernel for tensor initialization with multiplication
     template <typename T>
     __global__ void initializeTensor(T* data, int size, float multiplier) {

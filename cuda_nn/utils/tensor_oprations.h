@@ -14,6 +14,9 @@ namespace Hex {
 	template <typename T>
 	void initTensorOnGPU(Tensor<T>& tensor, float multiplier);
 
+	template <typename T>
+	void initTensorToOneOnGPU(Tensor<T>& tensor, float multiplier);
+
 	//template <typename T>
 	//std::unique_ptr<Tensor<T>> slice(int index, Tensor<T> tensor);
 
