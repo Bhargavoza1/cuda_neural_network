@@ -62,7 +62,7 @@ namespace Hex {
 
 
 	template<class T>
-	Tensor<T>& MaxPool2d<T>::forward(Tensor<T>& input_tensor)
+	Tensor<T>& MaxPool2d<T>::forward(Tensor<T>& input_tensor, bool Istraining)
 	{
 		input = input_tensor;
 

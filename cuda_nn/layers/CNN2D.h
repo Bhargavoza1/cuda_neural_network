@@ -25,7 +25,7 @@ namespace Hex
     public:
         CNN2D(const std::vector<int>& batch_height_width, const std::vector<int>& in_out_channels, int kernel_size, int padding = 0 , int stride = 1, float w_b_range = 0.5f);
         ~CNN2D();
-       Tensor<T>& forward(Tensor<T>& input_tensor) override;
+       Tensor<T>& forward(Tensor<T>& input_tensor, bool Istraining = true) override;
        Tensor<T>& backpropagation(Tensor<T>& output_error, float learning_rate = 0.0001f)override;
 
     private:

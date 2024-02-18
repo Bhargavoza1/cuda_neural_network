@@ -112,7 +112,7 @@ namespace Hex{
 
 
 	template<class T>
-	Tensor<T>& linear<T>::forward(Tensor<T>& input_tensor)
+	Tensor<T>& linear<T>::forward(Tensor<T>& input_tensor, bool Istraining)
 	{
 		input = input_tensor;
 		if (weights.getShape()[1] != input.getShape()[0]) {

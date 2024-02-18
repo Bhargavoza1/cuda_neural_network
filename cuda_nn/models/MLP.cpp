@@ -20,7 +20,7 @@ namespace Hex
  
 	}
 	template<class T>
-	Tensor<T>& MLP<T>::forward(Tensor<T>& input_tensor)
+	Tensor<T>& MLP<T>::forward(Tensor<T>& input_tensor, bool Istraining)
 	{
 		//std::cout << std::endl;
 

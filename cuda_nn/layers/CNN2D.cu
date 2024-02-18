@@ -127,7 +127,7 @@ namespace Hex
 
 
     template<class T>
-    Tensor<T>& CNN2D<T>::forward(Tensor<T>& input_tensor)
+    Tensor<T>& CNN2D<T>::forward(Tensor<T>& input_tensor, bool Istraining)
     {
      
         input = input_tensor;

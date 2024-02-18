@@ -21,7 +21,7 @@ namespace Hex {
     }
 
     template<class T>
-    Tensor<T>& ReLU<T>::forward(Tensor<T>& input_tensor)
+    Tensor<T>& ReLU<T>::forward(Tensor<T>& input_tensor, bool Istraining)
     {
         input =  input_tensor ;
         output.reset(new Tensor<T>(input_tensor.getShape()));

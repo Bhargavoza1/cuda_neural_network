@@ -11,11 +11,8 @@ namespace Hex {
         running_mean(tensorshape == TensorShape::_4D ? Tensor<T>({ 1, Batch_or_channels, 1, 1 }) : Tensor<T>({ 1, Batch_or_channels })),
         running_var(tensorshape == TensorShape::_4D ? Tensor<T>({ 1, Batch_or_channels, 1, 1 }) : Tensor<T>({ 1, Batch_or_channels }))
     {
-
         initTensorToOneOnGPU(gamma);
         initTensorToOneOnGPU(running_var); 
-   
-        
     }
 
     template <class T>
@@ -24,7 +21,7 @@ namespace Hex {
     }
 
     template <class T>
-    Tensor<T>& BatchNorm<T>::forward(Tensor<T>& input_tensor) {
+    Tensor<T>& BatchNorm<T>::forward(Tensor<T>& input_tensor, bool Istraining  ) {
         gamma.print();
         return input_tensor;
     }

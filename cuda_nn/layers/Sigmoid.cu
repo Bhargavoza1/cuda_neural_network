@@ -41,7 +41,7 @@ namespace Hex {
 
     // Update forward method with sigmoid computation
     template<class T>
-    Tensor<T>& Sigmoid<T>::forward(Tensor<T>& input_tensor) {
+    Tensor<T>& Sigmoid<T>::forward(Tensor<T>& input_tensor, bool Istraining) {
         input= input_tensor;
         output.reset(new Tensor<T>(input_tensor.getShape()));
 
