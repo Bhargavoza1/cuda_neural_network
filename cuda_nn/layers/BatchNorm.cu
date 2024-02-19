@@ -57,7 +57,7 @@ namespace Hex {
         int col = blockIdx.y * blockDim.y + threadIdx.y;
 
         if (row < features && col < batch_size) {
-            //int input_idx = row * batch_size + col;
+            int input_idx = row * batch_size + col;
 
             if (Istraining) {
                 // Calculate mean
@@ -79,13 +79,17 @@ namespace Hex {
                     input_var[row] = sum_squares / (batch_size);
                 }
                 __syncthreads();
+ 
+                x_normalized[input_idx] = (input_data[input_idx] - input_mean[row]) / sqrtf(input_var[row] + eps);
+                output_data[input_idx] = gamma_data[row] * x_normalized[input_idx] + beta_data[row];
 
-       
-
+                running_mean[row] = momentum * running_mean[row] + (1 - momentum) * input_mean[row];
+                running_variance[row] = momentum * running_variance[row] + (1 - momentum) * input_var[row];
  
             }
             else {
-                 
+                x_normalized[input_idx] = (input_data[input_idx] - running_mean[row]) / sqrtf(running_variance[row] + eps);
+                output_data[input_idx] = gamma_data[row] * x_normalized[input_idx] + beta_data[row];
             }
         }
     }
@@ -119,9 +123,13 @@ namespace Hex {
             momentum,
             eps,
             Istraining);
-
-        input_mean.print();
-        input_var.print();
+        cudaDeviceSynchronize();
+         input_mean.print();
+         input_var.print();
+         x_normalized.print();
+         output->print();
+         running_mean.print();
+         running_var.print();
         return input_tensor;
     }
 
