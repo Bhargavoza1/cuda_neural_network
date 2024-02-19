@@ -185,6 +185,8 @@ int main() {
  
      //Tensor<float>* error_output = &convo.backpropagation(*predicted_output);
      Tensor<float>* error_outputa = &batch.forward(tensor , true);
+     Tensor<float>* error_outputa2 = &batch.backpropagation(*error_outputa );
+     //error_outputa2->print();
    //  std::cout << "predicted_output" << endl;
     // error_outputa->print();
       //  predicted_output->print();

@@ -54,6 +54,9 @@ namespace Hex {
     private:
         Tensor<T>& forward_2d(Tensor<T>& input_tensor, bool Istraining = true) ;
         Tensor<T>& forward_4d(Tensor<T>& input_tensor, bool Istraining = true) ;
+
+        Tensor<T>& backpropagation_2d(Tensor<T>& output_error, float learning_rate = 0.0001f) ;
+        Tensor<T>& backpropagation_4d(Tensor<T>& output_error, float learning_rate = 0.0001f) ;
     };
 
 

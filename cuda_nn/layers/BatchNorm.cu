@@ -124,12 +124,12 @@ namespace Hex {
             eps,
             Istraining);
         cudaDeviceSynchronize();
-         input_mean.print();
-         input_var.print();
-         x_normalized.print();
-         output->print();
-         running_mean.print();
-         running_var.print();
+         //input_mean.print();
+         //input_var.print();
+         //x_normalized.print();
+         //output->print();
+         //running_mean.print();
+         //running_var.print();
         return input_tensor;
     }
 
@@ -263,8 +263,118 @@ namespace Hex {
         return *output;
     }
 
+
+
     template <class T>
     Tensor<T>& BatchNorm<T>::backpropagation(Tensor<T>& output_error, float learning_rate) {
+
+        size_t tensor_dimensions = output_error.getShape().size();
+        //std::cout << " size from batch norm forward : " << tensor_dimensions << std::endl;
+        if (tensor_dimensions == 4 && _Tshape == TensorShape::_4D) {
+            //gamma.print();
+            return backpropagation_4d(output_error, learning_rate);
+        }
+        else if (tensor_dimensions == 2 && _Tshape == TensorShape::_2D) {
+            return backpropagation_2d(output_error, learning_rate);
+        }
+        assert(false && "Invalid tensor dimensions or shape");
+      
+    }
+
+
+    template<class T>
+    __global__ void batchnorm_backward_2d_kernel(const T* __restrict__ input_data,
+        const T* __restrict__ output_error, 
+        const T* __restrict__ x_normalized,
+        const T* __restrict__ input_mean,
+        const T* __restrict__ input_var,
+        const T* __restrict__ running_mean,
+        const T* __restrict__ running_variance,
+        T* __restrict__ input_error,
+        T* __restrict__ gamma_gradient,
+        T* __restrict__ beta_gradient,
+        const int features,
+        const int batch_size,
+        const float eps)
+    {
+        int row = blockIdx.x * blockDim.x + threadIdx.x;
+        int col = blockIdx.y * blockDim.y + threadIdx.y;
+
+        if (row < features && col < batch_size) {
+            int input_idx = row * batch_size + col;
+            T grad_gamma = 0.0;
+            T grad_beta = 0.0;
+
+            // Calculate gradient of beta and gamma
+
+            if (threadIdx.y == 0) {
+                T sum = 0;
+
+                for (int b = 0; b < batch_size; ++b) {
+                    int data_idx = row * batch_size + b;
+                    grad_gamma += output_error[data_idx] * x_normalized[data_idx];
+                    grad_beta += output_error[data_idx];
+                }
+          
+            }
+            __syncthreads();
+ 
+
+         
+
+          
+            //T inv_std_dev = 1.0 / sqrtf(input_var[row] + eps);
+            //T sigma = (input_data[input_idx] - input_mean[row]) * inv_std_dev;
+            //T grad_input = gamma_gradient[row] * output_error[input_idx] * inv_std_dev -
+            //    gamma_gradient[row] * grad_gamma * (1.0 / batch_size) -
+            //    grad_beta * (1.0 / batch_size);
+
+            //input_error[input_idx] = grad_input;
+
+            //if (threadIdx.y == 0) {
+            //     gamma_gradient[row]= grad_gamma;
+            //    beta_gradient[row]= grad_beta;
+            //}
+        }
+    }
+
+
+    template<class T>
+    Tensor<T>& BatchNorm<T>::backpropagation_2d(Tensor<T>& output_error, float learning_rate)
+    {
+        input_error.reset(new Tensor<T>({ input.getShape() }));
+
+        const int features = input.getShape()[0];
+        const int batch_size = input.getShape()[1];
+
+        const dim3 blockSize(16, 16); // Adjust block size as needed
+        const dim3 gridSize((features + blockSize.x - 1) / blockSize.x, (batch_size + blockSize.y - 1) / blockSize.y); // Adjust grid size as needed
+
+        // Invoke the CUDA kernel for backpropagation
+        batchnorm_backward_2d_kernel << <gridSize, blockSize >> > (input.getData(),
+            output_error.getData(), 
+            x_normalized.getData(),
+            input_mean.getData(),
+            input_var.getData(),
+            running_mean.getData(),
+            running_var.getData(),
+            input_error->getData(),
+            gamma.getData(),
+            beta.getData(),
+            features,
+            batch_size,
+            eps );
+
+        // Synchronize to ensure the kernel is finished
+        cudaDeviceSynchronize();
+        output_error.print();
+        gamma.print();
+        return *input_error;
+    }
+
+    template<class T>
+    Tensor<T>& BatchNorm<T>::backpropagation_4d(Tensor<T>& output_error, float learning_rate)
+    {
         return output_error;
     }
 
