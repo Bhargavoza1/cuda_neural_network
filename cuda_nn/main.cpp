@@ -172,25 +172,25 @@ int main() {
    // trainNeuralNetwork(*mlp, *x_tensor, *y_tensor, 1000, 0.15f); 
   //  predictAndPrintResults(*mlp, *x_tensor, *y_tensor);
  
-    std::vector<int> shape = {1 ,1,3,3 };
+    std::vector<int> shape = {1,1,3,3 };
     Hex::Tensor<float> tensor(shape);
 
  
     initTensorOnGPU(tensor , 0.0f);
- 
+    tensor.print();
     CNN2D<float> convo(shape,{1,1},3 );
-    BatchNorm<float> batch(2  , TensorShape::_4D   );
+    BatchNorm<float> batch(1   , TensorShape::_4D   );
  
      Tensor<float>* predicted_output = &convo.forward(tensor);
  
      Tensor<float>* error_output = &convo.backpropagation(*predicted_output);
-     Tensor<float>* error_outputa = &batch.forward(tensor);
-     std::cout << "predicted_output" << endl;
-   
-        predicted_output->print();
-    std::cout << "after back propagation of predicted_output" << endl;
+     Tensor<float>* error_outputa = &batch.forward(tensor , true);
+   //  std::cout << "predicted_output" << endl;
+    // error_outputa->print();
+      //  predicted_output->print();
+    //std::cout << "after back propagation of predicted_output" << endl;
   
-         error_output->print();
+       //  error_output->print();
     return 0;
  
    

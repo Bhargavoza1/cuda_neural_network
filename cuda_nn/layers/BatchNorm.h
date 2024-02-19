@@ -3,6 +3,9 @@
 #include "layer.h"
 #include <iostream>
 #include <memory>
+
+#define MAX_CHANNELS 64
+
 namespace Hex {
 
 
