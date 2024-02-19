@@ -10,7 +10,9 @@ namespace Hex {
         gamma(tensorshape == TensorShape::_4D ? Tensor<T>({ 1, Batch_or_channels, 1, 1 }) : Tensor<T>({ 1, Batch_or_channels })),
         beta(tensorshape == TensorShape::_4D ? Tensor<T>({ 1, Batch_or_channels, 1, 1 }) : Tensor<T>({ 1, Batch_or_channels })),
         running_mean(tensorshape == TensorShape::_4D ? Tensor<T>({ 1, Batch_or_channels, 1, 1 }) : Tensor<T>({ 1, Batch_or_channels })),
-        running_var(tensorshape == TensorShape::_4D ? Tensor<T>({ 1, Batch_or_channels, 1, 1 }) : Tensor<T>({ 1, Batch_or_channels }))
+        running_var(tensorshape == TensorShape::_4D ? Tensor<T>({ 1, Batch_or_channels, 1, 1 }) : Tensor<T>({ 1, Batch_or_channels })),
+        input_mean(tensorshape == TensorShape::_4D ? Tensor<T>({ 1, Batch_or_channels, 1, 1 }) : Tensor<T>({ 1, Batch_or_channels })),
+        input_var(tensorshape == TensorShape::_4D ? Tensor<T>({ 1, Batch_or_channels, 1, 1 }) : Tensor<T>({ 1, Batch_or_channels }))
     {
         initTensorToOneOnGPU(gamma);
         initTensorToOneOnGPU(running_var); 
@@ -47,12 +49,16 @@ namespace Hex {
         T* __restrict__ output_data,
         const T* __restrict__ gamma_data,
         const T* __restrict__ beta_data,
-        T* __restrict__ mean,
-        T* __restrict__ variance,
+        T* __restrict__ running_mean,
+        T* __restrict__ running_variance,
+        T* __restrict__  x_normalized,
+        T* __restrict__  input_mean,
+        T* __restrict__  input_var,
         const int batch_size,
         const int out_channels,
         const int input_width,
         const int input_height,
+        const float momentum,
         const float eps,
         const bool Istraining) {
 
@@ -61,48 +67,57 @@ namespace Hex {
         int channel_idx = batch_channel_idx % out_channels;
         int output_row = blockIdx.y * blockDim.y + threadIdx.x;
         int output_col = blockIdx.z * blockDim.z + threadIdx.y;
-
-        __shared__ T localmean[MAX_CHANNELS] ;
-        __shared__ T localvariance[MAX_CHANNELS] ;
-
-        if (batch_idx < batch_size && channel_idx < out_channels && output_row < input_width && output_col < input_height) {
-
-            // Compute mean along height and width for each channel
-            if (threadIdx.x == 0 && threadIdx.y == 0) {
-                T sum = 0;
-
-                for (int b = 0; b < batch_size; ++b) {
-                    for (int i = 0; i < input_width; ++i) {
-                        for (int j = 0; j < input_height; ++j) {
-                            int data_idx = b * out_channels * input_height * input_width + channel_idx * input_height * input_width + i * input_height + j;
-                            sum += input_data[data_idx];
  
-                        }
-                    }
-                }
-                localmean[channel_idx] = sum / (batch_size * input_height * input_width);
-                mean[channel_idx] = localmean[channel_idx];
-
-
-                T diff = 0;
-                T sum_squares = 0.0f;
-                for (int b = 0; b < batch_size; ++b) {
-                    for (int i = 0; i < input_width; ++i) {
-                        for (int j = 0; j < input_height; ++j) {
-                            int data_idx = b * out_channels * input_height * input_width + channel_idx * input_height * input_width + i * input_height + j;
-                            diff = input_data[data_idx] - localmean[channel_idx];
-                            sum_squares += diff * diff;
-                        }
-                    }
-                }
-                localvariance[channel_idx] = sum_squares / (batch_size * input_height * input_width);
-                variance[channel_idx] = localvariance[channel_idx];
-            }
-
-            __syncthreads();
-
+        if (batch_idx < batch_size && channel_idx < out_channels && output_row < input_width && output_col < input_height) {
             int input_idx = batch_idx * out_channels * input_height * input_width + channel_idx * input_height * input_width + output_row * input_width + output_col;
-            output_data[input_idx] = (input_data[input_idx] - localmean[channel_idx]) / sqrtf(localvariance[channel_idx] + eps);
+            if (Istraining) {
+
+                // Compute mean along height and width for each channel
+                if (threadIdx.x == 0 && threadIdx.y == 0) {
+                    T sum = 0;
+
+                    for (int b = 0; b < batch_size; ++b) {
+                        for (int i = 0; i < input_width; ++i) {
+                            for (int j = 0; j < input_height; ++j) {
+                                int data_idx = b * out_channels * input_height * input_width + channel_idx * input_height * input_width + i * input_height + j;
+                                sum += input_data[data_idx];
+ 
+                            }
+                        }
+                    }
+                    input_mean[channel_idx] = sum / (batch_size * input_height * input_width);
+                   
+                    T diff = 0;
+                    T sum_squares = 0.0f;
+                    for (int b = 0; b < batch_size; ++b) {
+                        for (int i = 0; i < input_width; ++i) {
+                            for (int j = 0; j < input_height; ++j) {
+                                int data_idx = b * out_channels * input_height * input_width + channel_idx * input_height * input_width + i * input_height + j;
+                                diff = input_data[data_idx] - input_mean[channel_idx];
+                                sum_squares += diff * diff;
+                            }
+                        }
+                    }
+                    input_var[channel_idx] = sum_squares / (batch_size * input_height * input_width);
+ 
+                }
+
+                __syncthreads();
+           
+                x_normalized[input_idx] = (input_data[input_idx] - input_mean[channel_idx]) / sqrtf(input_var[channel_idx] + eps);
+                output_data[input_idx] = gamma_data[channel_idx] * x_normalized[input_idx] + beta_data[channel_idx];
+
+                //self.running_mean = self.momentum * self.running_mean + (1 - self.momentum) * mean
+                //    self.running_var = self.momentum * self.running_var + (1 - self.momentum) * var
+
+                running_mean[channel_idx] = momentum * running_mean[channel_idx] + (1 - momentum) * input_mean[channel_idx]; 
+                running_variance[channel_idx] = momentum * running_variance[channel_idx] + (1 - momentum) * input_var[channel_idx];
+
+            }
+            else {
+                x_normalized[input_idx] = (input_data[input_idx] - running_mean[channel_idx]) / sqrtf(running_variance[channel_idx] + eps);
+                output_data[input_idx] = gamma_data[channel_idx] * x_normalized[input_idx] + beta_data[channel_idx];
+            }
         
         }
     }
@@ -138,16 +153,24 @@ namespace Hex {
             beta.getData(),
             running_mean.getData(),
             running_var.getData(),
+            x_normalized.getData(),
+            input_mean.getData(),
+            input_var.getData(),
             _batch_size,
             _out_channels,
             _in_width,
             _in_height,
+            momentum,
             eps,
-           Istraining); 
+            Istraining); 
+        cudaDeviceSynchronize();
 
+        input_mean.print();
+        input_var.print();
+        x_normalized.print();
+        output->print();
         running_mean.print();
         running_var.print();
-        output->print();
         return *output;
     }
 
