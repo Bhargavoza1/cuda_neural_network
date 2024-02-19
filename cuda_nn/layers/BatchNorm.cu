@@ -5,14 +5,14 @@
 namespace Hex {
 
     template <class T>
-    BatchNorm<T>::BatchNorm(int Batch_or_channels, TensorShape tensorshape , float momentum, float eps)
+    BatchNorm<T>::BatchNorm(int features_or_channels, TensorShape tensorshape , float momentum, float eps)
         : momentum(momentum), eps(eps) , _Tshape(tensorshape) ,
-        gamma(tensorshape == TensorShape::_4D ? Tensor<T>({ 1, Batch_or_channels, 1, 1 }) : Tensor<T>({ 1, Batch_or_channels })),
-        beta(tensorshape == TensorShape::_4D ? Tensor<T>({ 1, Batch_or_channels, 1, 1 }) : Tensor<T>({ 1, Batch_or_channels })),
-        running_mean(tensorshape == TensorShape::_4D ? Tensor<T>({ 1, Batch_or_channels, 1, 1 }) : Tensor<T>({ 1, Batch_or_channels })),
-        running_var(tensorshape == TensorShape::_4D ? Tensor<T>({ 1, Batch_or_channels, 1, 1 }) : Tensor<T>({ 1, Batch_or_channels })),
-        input_mean(tensorshape == TensorShape::_4D ? Tensor<T>({ 1, Batch_or_channels, 1, 1 }) : Tensor<T>({ 1, Batch_or_channels })),
-        input_var(tensorshape == TensorShape::_4D ? Tensor<T>({ 1, Batch_or_channels, 1, 1 }) : Tensor<T>({ 1, Batch_or_channels }))
+        gamma(tensorshape == TensorShape::_4D ? Tensor<T>({ 1, features_or_channels, 1, 1 }) : Tensor<T>({ features_or_channels, 1 })),
+        beta(tensorshape == TensorShape::_4D ? Tensor<T>({ 1, features_or_channels, 1, 1 }) : Tensor<T>({ features_or_channels, 1 })),
+        running_mean(tensorshape == TensorShape::_4D ? Tensor<T>({ 1, features_or_channels, 1, 1 }) : Tensor<T>({ features_or_channels, 1 })),
+        running_var(tensorshape == TensorShape::_4D ? Tensor<T>({ 1, features_or_channels, 1, 1 }) : Tensor<T>({ features_or_channels, 1 })),
+        input_mean(tensorshape == TensorShape::_4D ? Tensor<T>({ 1, features_or_channels, 1, 1 }) : Tensor<T>({ features_or_channels, 1 })),
+        input_var(tensorshape == TensorShape::_4D ? Tensor<T>({ 1, features_or_channels, 1, 1 }) : Tensor<T>({ features_or_channels, 1 }))
     {
         initTensorToOneOnGPU(gamma);
         initTensorToOneOnGPU(running_var); 
@@ -37,15 +37,96 @@ namespace Hex {
         assert(false && "Invalid tensor dimensions or shape");
     }
 
+    template<class T>
+    __global__ void batchnorm_forward_2d_kernel(const T* __restrict__ input_data,
+        T* __restrict__ output_data,
+        const T* __restrict__ gamma_data,
+        const T* __restrict__ beta_data,
+        T* __restrict__ running_mean,
+        T* __restrict__ running_variance,
+        T* __restrict__ x_normalized,
+        T* __restrict__ input_mean,
+        T* __restrict__ input_var,
+        const int features,
+        const int batch_size,
+        const float momentum,
+        const float eps,
+        const bool Istraining) {
 
+        int row = blockIdx.x * blockDim.x + threadIdx.x;
+        int col = blockIdx.y * blockDim.y + threadIdx.y;
+
+        if (row < features && col < batch_size) {
+            //int input_idx = row * batch_size + col;
+
+            if (Istraining) {
+                // Calculate mean
+                if (threadIdx.y == 0) {
+                    T sum = 0;
+                    for (int b = 0; b < batch_size; ++b) {
+                        int data_idx = row * batch_size + b;
+                        sum += input_data[data_idx];
+                    }
+                    input_mean[row] = sum / (batch_size);
+
+                    T diff = 0;
+                    T sum_squares = 0.0f;
+                    for (int b = 0; b < batch_size; ++b) {
+                        int data_idx = row * batch_size + b;
+                        diff = input_data[data_idx] - input_mean[row];
+                        sum_squares += diff * diff;
+                    }
+                    input_var[row] = sum_squares / (batch_size);
+                }
+                __syncthreads();
+
+       
+
+ 
+            }
+            else {
+                 
+            }
+        }
+    }
 
     template<class T>
     Tensor<T>& BatchNorm<T>::forward_2d(Tensor<T>& input_tensor, bool Istraining)
     {
+
+        input = input_tensor;
+        x_normalized = input_tensor;
+        output.reset(new Tensor<T>({ input.getShape() }));
+
+        int _fetures = input.getShape()[0];
+        int _batch_size = input.getShape()[1];
+ 
+        dim3 threadsPerBlock(16, 16);
+        dim3 numBlocks( (_fetures + threadsPerBlock.x - 1) / threadsPerBlock.x,
+            (_batch_size + threadsPerBlock.y - 1) / threadsPerBlock.y);
+
+        batchnorm_forward_2d_kernel << < numBlocks, threadsPerBlock >> > (input.getData(),
+            output->getData(),
+            gamma.getData(),
+            beta.getData(),
+            running_mean.getData(),
+            running_var.getData(),
+            x_normalized.getData(),
+            input_mean.getData(),
+            input_var.getData(),
+            _fetures,
+            _batch_size,
+            momentum,
+            eps,
+            Istraining);
+
+        input_mean.print();
+        input_var.print();
         return input_tensor;
     }
+
     template<class T>
-    __global__ void batchnorm_forward4d_kernel(  const T* __restrict__ input_data,
+    __global__ void batchnorm_forward_4d_kernel(  const T* __restrict__ input_data,
         T* __restrict__ output_data,
         const T* __restrict__ gamma_data,
         const T* __restrict__ beta_data,
@@ -147,7 +228,7 @@ namespace Hex {
     
  
 
-        batchnorm_forward4d_kernel << <numBlocks, threadsPerBlock >> > (  input.getData(),
+        batchnorm_forward_4d_kernel << <numBlocks, threadsPerBlock >> > (  input.getData(),
             output->getData(),
             gamma.getData(),
             beta.getData(),
@@ -165,12 +246,12 @@ namespace Hex {
             Istraining); 
         cudaDeviceSynchronize();
 
-        input_mean.print();
-        input_var.print();
-        x_normalized.print();
-        output->print();
-        running_mean.print();
-        running_var.print();
+        //input_mean.print();
+        //input_var.print();
+        //x_normalized.print();
+        //output->print();
+        //running_mean.print();
+        //running_var.print();
         return *output;
     }
 

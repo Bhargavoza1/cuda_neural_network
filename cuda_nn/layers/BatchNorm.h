@@ -44,7 +44,7 @@ namespace Hex {
     
 
     public:
-        BatchNorm(int Batch_or_channels,TensorShape tensorshape = TensorShape::_4D ,float momentum = 0.9, float eps = 1e-5);
+        BatchNorm(int features_or_channels,TensorShape tensorshape = TensorShape::_4D ,float momentum = 0.9, float eps = 1e-5);
         
         ~BatchNorm();
 
