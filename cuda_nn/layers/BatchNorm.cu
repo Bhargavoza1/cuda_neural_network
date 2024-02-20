@@ -433,26 +433,56 @@ namespace Hex {
 
             grad_normalized[input_idx] = output_error[input_idx] * gamma_gradient[channel_idx];
 
+            T dvar = 0.0f;
+            if (threadIdx.x == 0 && threadIdx.y == 0) {
 
-            //if (threadIdx.x == 0 && threadIdx.y == 0) {
-            //    T sum = 0;
+                for (int b = 0; b < batch_size; ++b) {
+                    for (int i = 0; i < input_width; ++i) {
+                        for (int j = 0; j < input_height; ++j) {
+                            int data_idx = b * out_channels * input_height * input_width + channel_idx * input_height * input_width + i * input_height + j;
+                            T r = (input_data[data_idx] - input_mean[channel_idx]);
+                            T t = pow(input_var[channel_idx] + eps, -1.5);
+                            dvar += grad_normalized[data_idx] * r * -0.5 * t;
+                           // printf("dvar %f \n", dvar);
+                        }
+                    }
+                }
+               
+            }
+            __syncthreads();
 
-            //    for (int b = 0; b < batch_size; ++b) {
-            //        for (int i = 0; i < input_width; ++i) {
-            //            for (int j = 0; j < input_height; ++j) {
-            //                int data_idx = b * out_channels * input_height * input_width + channel_idx * input_height * input_width + i * input_height + j;
-            //                sum += input_data[data_idx];
 
-            //            }
-            //        }
-            //    }
-            //    input_mean[channel_idx] = sum / (batch_size * input_height * input_width);
 
+            T dmean = 0.0f;
+            if (threadIdx.x == 0 && threadIdx.y == 0) {
+
+                T a = 0.0;
+                T d = 0.0;
+                for (int b = 0; b < batch_size; ++b) {
+                    for (int i = 0; i < input_width; ++i) {
+                        for (int j = 0; j < input_height; ++j) {
+                            int data_idx = b * out_channels * input_height * input_width + channel_idx * input_height * input_width + i * input_height + j;
+                            a += grad_normalized[data_idx] * (-1 / sqrt(input_var[channel_idx] + eps));
+                            d += (-2 * (input_data[data_idx] - input_mean[channel_idx])) / (batch_size * input_height * input_width);
+                           
+                        }
+                    }
+                }
+                dmean = a * dvar + d;
+              //  printf("dvar %lf \n", dmean);
+            }
+            __syncthreads();
+
+            for (int b = 0; b < batch_size; ++b) {
+                for (int i = 0; i < input_width; ++i) {
+                    for (int j = 0; j < input_height; ++j) {
+                        int data_idx = b * out_channels * input_height * input_width + channel_idx * input_height * input_width + i * input_height + j;
+                        input_error[data_idx] = grad_normalized[data_idx] / sqrt(input_var[channel_idx] + eps) + dvar * 2.0 * (input_data[data_idx] - input_mean[channel_idx]) / (batch_size * input_height * input_width) + dmean / (batch_size * input_height * input_width);
+                        // printf("dvar %f \n", dvar);
+                    }
+                }
+            }
  
-
-            //}
-
-            //__syncthreads();
 
         //if (x < _in_width && y < _in_height) {
         //    int input_idx = ((b * _out_channels + oc) * _in_width + x) * _in_height + y;
