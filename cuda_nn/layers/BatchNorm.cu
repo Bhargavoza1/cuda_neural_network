@@ -431,8 +431,6 @@ namespace Hex {
 
             int input_idx = batch_idx * out_channels * input_height * input_width + channel_idx * input_height * input_width + output_row * input_width + output_col;
 
-
-
             grad_normalized[input_idx] = output_error[input_idx] * gamma_gradient[channel_idx];
 
             T dvar = 0.0f;
@@ -452,9 +450,7 @@ namespace Hex {
                
             }
             __syncthreads();
-
-
-
+             
             T dmean = 0.0f;
             if (threadIdx.x == 0 && threadIdx.y == 0) {
 
@@ -484,11 +480,9 @@ namespace Hex {
                     }
                 }
             }
- 
-
+  
             T grad_gamma = 0.0;
-            T grad_beta = 0.0;
-
+            T grad_beta = 0.0; 
             if (threadIdx.x == 0 && threadIdx.y == 0) {
                  
                 for (int b = 0; b < batch_size; ++b) {
@@ -543,9 +537,6 @@ namespace Hex {
          //beta.print();
         return *input_error;
     }
-
-
- 
 
     template class BatchNorm<float>;
     template class BatchNorm<int>;
