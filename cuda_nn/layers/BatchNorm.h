@@ -31,13 +31,14 @@ namespace Hex {
         Tensor<T> running_var;
 
      
-        Tensor<T> x_normalized;
+        Tensor<T>* x_normalized;
         Tensor<T> input_mean;
         Tensor<T> input_var;
         Tensor<T> input;
 
 
         std::unique_ptr<Tensor<T>> input_error;
+        std::unique_ptr<Tensor<T>> grad_normalized;
 
         std::unique_ptr<Tensor<T>> output;
 

@@ -177,7 +177,7 @@ int main() {
 
  
     initTensorOnGPU(tensor , 0.0f);
-    tensor.print();
+    //tensor.print();
     //CNN2D<float> convo(shape,{1,1},3 );
     BatchNorm<float> batch(3  , TensorShape::_2D   );
  
@@ -185,8 +185,8 @@ int main() {
  
      //Tensor<float>* error_output = &convo.backpropagation(*predicted_output);
      Tensor<float>* error_outputa = &batch.forward(tensor , true);
-     Tensor<float>* error_outputa2 = &batch.backpropagation(*error_outputa );
-     //error_outputa2->print();
+      Tensor<float>* error_outputa2 = &batch.backpropagation(*error_outputa );
+       error_outputa2->print();
    //  std::cout << "predicted_output" << endl;
     // error_outputa->print();
       //  predicted_output->print();

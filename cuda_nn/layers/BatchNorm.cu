@@ -21,6 +21,7 @@ namespace Hex {
     template <class T>
     BatchNorm<T>::~BatchNorm() {
         // Destructor implementation
+        delete x_normalized; 
     }
 
     template <class T>
@@ -99,8 +100,9 @@ namespace Hex {
     {
 
         input = input_tensor;
-        x_normalized = input_tensor;
-        output.reset(new Tensor<T>({ input.getShape() }));
+       
+         x_normalized = new Tensor<T>({ input_tensor.getShape() });
+        output.reset(new Tensor<T>({ input_tensor.getShape() }));
 
         int _fetures = input.getShape()[0];
         int _batch_size = input.getShape()[1];
@@ -108,14 +110,14 @@ namespace Hex {
         dim3 threadsPerBlock(16, 16);
         dim3 numBlocks( (_fetures + threadsPerBlock.x - 1) / threadsPerBlock.x,
             (_batch_size + threadsPerBlock.y - 1) / threadsPerBlock.y);
-
+       // input.print();
         batchnorm_forward_2d_kernel << < numBlocks, threadsPerBlock >> > (input.getData(),
             output->getData(),
             gamma.getData(),
             beta.getData(),
             running_mean.getData(),
             running_var.getData(),
-            x_normalized.getData(),
+            x_normalized->getData(),
             input_mean.getData(),
             input_var.getData(),
             _fetures,
@@ -123,14 +125,16 @@ namespace Hex {
             momentum,
             eps,
             Istraining);
-        cudaDeviceSynchronize();
+        cudaDeviceSynchronize(); 
+        //input.print();
          //input_mean.print();
          //input_var.print();
          //x_normalized.print();
          //output->print();
          //running_mean.print();
          //running_var.print();
-        return input_tensor;
+         //x_normalized->print();
+        return *output;
     }
 
     template<class T>
@@ -215,7 +219,7 @@ namespace Hex {
     Tensor<T>& BatchNorm<T>::forward_4d(Tensor<T>& input_tensor, bool Istraining)
     {
         input = input_tensor;
-        x_normalized = input_tensor;
+        x_normalized = new Tensor<T>({ input_tensor.getShape() });
         output.reset(new Tensor<T>({ input.getShape()}));
        
         int  _batch_size = input.getShape()[0];
@@ -242,7 +246,7 @@ namespace Hex {
             beta.getData(),
             running_mean.getData(),
             running_var.getData(),
-            x_normalized.getData(),
+            x_normalized->getData(),
             input_mean.getData(),
             input_var.getData(),
             _batch_size,
@@ -287,12 +291,11 @@ namespace Hex {
         const T* __restrict__ output_error, 
         const T* __restrict__ x_normalized,
         const T* __restrict__ input_mean,
-        const T* __restrict__ input_var,
-        const T* __restrict__ running_mean,
-        const T* __restrict__ running_variance,
+        const T* __restrict__ input_var, 
         T* __restrict__ input_error,
         T* __restrict__ gamma_gradient,
         T* __restrict__ beta_gradient,
+        T* __restrict__ grad_normalized ,
         const int features,
         const int batch_size,
         const float eps)
@@ -303,38 +306,68 @@ namespace Hex {
         if (row < features && col < batch_size) {
             int input_idx = row * batch_size + col;
             T grad_gamma = 0.0;
-            T grad_beta = 0.0;
-
+            T grad_beta = 0.0; 
+            
             // Calculate gradient of beta and gamma
 
+
+            T mybatch = static_cast<T>(batch_size);
+         
+            grad_normalized[input_idx] = output_error[input_idx] * gamma_gradient[row];
+           //  printf("dmean %f \n", grad_normalized[input_idx]);
+            // Calculate dvar
+        
+            T dvar = 0.0f;
             if (threadIdx.y == 0) {
-                T sum = 0;
+                
+                for (int b = 0; b < batch_size; ++b) {
+                    int data_idx = row * batch_size + b;
+                    T r = (input_data[data_idx] - input_mean[row]);
+                    T t = pow(input_var[row] + eps, -1.5);
+                    dvar += grad_normalized[data_idx] * r * -0.5 * t ;
+                    
+                }
+               
+            }
+            __syncthreads(); 
+
+            // Calculate dmean
+
+            T dmean =   0.0f;
+            if (threadIdx.y == 0) {
+
+                T a = 0.0;
+                T d = 0.0;
+                for (int b = 0; b < batch_size; ++b) {
+                    int data_idx = row * batch_size + b;
+                    a += grad_normalized[data_idx] * (-1 / sqrt(input_var[row] + eps));
+                    d += (-2 * (input_data[data_idx] - input_mean[row])) / mybatch;
+                }
+                dmean = a* dvar + d;
+            }
+            __syncthreads();
+
+            for (int b = 0; b < batch_size; ++b) {
+                int data_idx = row * batch_size + b;
+               
+                input_error[data_idx] = grad_normalized[data_idx] / sqrt(input_var[row] + eps) + dvar * 2.0 * (input_data[data_idx] - input_mean[row]) / mybatch + dmean / mybatch;
+                
+            }
+
+            if (threadIdx.y == 0) {
+            
 
                 for (int b = 0; b < batch_size; ++b) {
                     int data_idx = row * batch_size + b;
                     grad_gamma += output_error[data_idx] * x_normalized[data_idx];
                     grad_beta += output_error[data_idx];
                 }
-          
+
+                gamma_gradient[row] = grad_gamma;
+                beta_gradient[row] = grad_beta;
             }
             __syncthreads();
- 
 
-         
-
-          
-            //T inv_std_dev = 1.0 / sqrtf(input_var[row] + eps);
-            //T sigma = (input_data[input_idx] - input_mean[row]) * inv_std_dev;
-            //T grad_input = gamma_gradient[row] * output_error[input_idx] * inv_std_dev -
-            //    gamma_gradient[row] * grad_gamma * (1.0 / batch_size) -
-            //    grad_beta * (1.0 / batch_size);
-
-            //input_error[input_idx] = grad_input;
-
-            //if (threadIdx.y == 0) {
-            //     gamma_gradient[row]= grad_gamma;
-            //    beta_gradient[row]= grad_beta;
-            //}
         }
     }
 
@@ -343,32 +376,32 @@ namespace Hex {
     Tensor<T>& BatchNorm<T>::backpropagation_2d(Tensor<T>& output_error, float learning_rate)
     {
         input_error.reset(new Tensor<T>({ input.getShape() }));
-
+        grad_normalized.reset(new Tensor<T>({ input.getShape() }));
         const int features = input.getShape()[0];
         const int batch_size = input.getShape()[1];
-
+       // input.print();
         const dim3 blockSize(16, 16); // Adjust block size as needed
         const dim3 gridSize((features + blockSize.x - 1) / blockSize.x, (batch_size + blockSize.y - 1) / blockSize.y); // Adjust grid size as needed
-
+       // input_error->print();
         // Invoke the CUDA kernel for backpropagation
         batchnorm_backward_2d_kernel << <gridSize, blockSize >> > (input.getData(),
             output_error.getData(), 
-            x_normalized.getData(),
+            x_normalized->getData(),
             input_mean.getData(),
-            input_var.getData(),
-            running_mean.getData(),
-            running_var.getData(),
+            input_var.getData(), 
             input_error->getData(),
             gamma.getData(),
             beta.getData(),
+            grad_normalized->getData(),
             features,
             batch_size,
             eps );
 
         // Synchronize to ensure the kernel is finished
         cudaDeviceSynchronize();
-        output_error.print();
-        gamma.print();
+        //std::cout << " aaaaaaaaaaaaaaa" << std::endl;
+        // gamma.print();
+        // beta.print();
         return *input_error;
     }
 
