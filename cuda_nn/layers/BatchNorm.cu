@@ -431,6 +431,8 @@ namespace Hex {
 
             int input_idx = batch_idx * out_channels * input_height * input_width + channel_idx * input_height * input_width + output_row * input_width + output_col;
 
+
+
             grad_normalized[input_idx] = output_error[input_idx] * gamma_gradient[channel_idx];
 
             T dvar = 0.0f;
@@ -484,54 +486,26 @@ namespace Hex {
             }
  
 
-        //if (x < _in_width && y < _in_height) {
-        //    int input_idx = ((b * _out_channels + oc) * _in_width + x) * _in_height + y;
-        //    T grad_gamma = 0.0;
-        //    T grad_beta = 0.0;
-        //    T dvar = 0.0f;
-        //    T dmean = 0.0f;
+            T grad_gamma = 0.0;
+            T grad_beta = 0.0;
 
-        //    grad_normalized[input_idx] = output_error[input_idx] * gamma_gradient[oc];
+            if (threadIdx.x == 0 && threadIdx.y == 0) {
+                 
+                for (int b = 0; b < batch_size; ++b) {
+                    for (int i = 0; i < input_width; ++i) {
+                        for (int j = 0; j < input_height; ++j) {
+                            int data_idx = b * out_channels * input_height * input_width + channel_idx * input_height * input_width + i * input_height + j; 
+                            grad_gamma += output_error[data_idx] * x_normalized[data_idx];
+                            grad_beta += output_error[data_idx];
+                        }
+                    }
+                }
+ 
+                gamma_gradient[channel_idx] = grad_gamma;
+                beta_gradient[channel_idx] = grad_beta;
+            }
+            __syncthreads();
 
-        //    if (threadIdx.y == 0) {
-        //        for (int b = 0; b < _batch_size; ++b) {
-        //            int data_idx = ((b * _out_channels + oc) * _in_width + x) * _in_height + y;
-        //            T r = (input_data[data_idx] - input_mean[oc]);
-        //            T t = pow(input_var[oc] + eps, -1.5);
-        //            dvar += grad_normalized[data_idx] * r * -0.5 * t;
-        //        }
-        //    }
-        //    __syncthreads();
-
-        //    if (threadIdx.y == 0) {
-        //        T a = 0.0;
-        //        T d = 0.0;
-        //        for (int b = 0; b < _batch_size; ++b) {
-        //            int data_idx = ((b * _out_channels + oc) * _in_width + x) * _in_height + y;
-        //            a += grad_normalized[data_idx] * (-1 / sqrt(input_var[oc] + eps));
-        //            d += (-2 * (input_data[data_idx] - input_mean[oc])) / _batch_size;
-        //        }
-        //        dmean = a * dvar + d;
-        //    }
-        //    __syncthreads();
-
-        //    for (int b = 0; b < _batch_size; ++b) {
-        //        int data_idx = ((b * _out_channels + oc) * _in_width + x) * _in_height + y;
-        //        input_error[data_idx] = grad_normalized[data_idx] / sqrt(input_var[oc] + eps) + dvar * 2.0 * (input_data[data_idx] - input_mean[oc]) / _batch_size + dmean / _batch_size;
-        //    }
-
-        //    if (threadIdx.y == 0) {
-        //        for (int b = 0; b < _batch_size; ++b) {
-        //            int data_idx = ((b * _out_channels + oc) * _in_width + x) * _in_height + y;
-        //            grad_gamma += output_error[data_idx] * x_normalized[data_idx];
-        //            grad_beta += output_error[data_idx];
-        //        }
-
-        //        atomicAdd(&gamma_gradient[oc], grad_gamma);
-        //        atomicAdd(&beta_gradient[oc], grad_beta);
-        //    }
-        //    __syncthreads();
-        //}
     }
 
     template<class T>
@@ -565,7 +539,8 @@ namespace Hex {
             eps);
         cudaDeviceSynchronize();
 
-        grad_normalized->print();
+        //gamma.print();
+         //beta.print();
         return *input_error;
     }
 
