@@ -3,7 +3,7 @@
 #include <vector>
 #include <iostream>
 #include <cuda_runtime.h>
-
+#include <cassert>
 namespace Hex {
     // Constructor
     template <typename T>
@@ -138,8 +138,8 @@ namespace Hex {
             size *= dim; 
         }
 
-        if (new_size != size ) {
-            std::cerr << "Error: New shape's total size does not match current size." << std::endl;
+        if (new_size != size ) { 
+            assert(false && "Error: New shape's total size does not match current size.");
             return;
         }
         shape = new_shape;
