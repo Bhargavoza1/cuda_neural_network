@@ -18,7 +18,7 @@ namespace Hex {
     // Destructor
     template <typename T>
     Tensor<T>::~Tensor() {
-        
+       // if (this != nullptr) { cudafree(data); }
        
     }
 
@@ -123,6 +123,26 @@ namespace Hex {
             // If not the last dimension, add a new line after completing the inner block
             std::cout << std::endl;
         }
+    }
+
+
+    template <typename T>
+    void Tensor<T>::reshape(const std::vector<int>& new_shape) {
+        int new_size = 1;
+        for (int dim : new_shape) {
+            new_size *= dim;   
+        }
+ 
+        int size = 1;
+        for (int dim : getShape() ) {
+            size *= dim; 
+        }
+
+        if (new_size != size ) {
+            std::cerr << "Error: New shape's total size does not match current size." << std::endl;
+            return;
+        }
+        shape = new_shape;
     }
 
 

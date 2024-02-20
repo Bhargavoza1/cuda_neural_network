@@ -34,6 +34,9 @@ namespace Hex {
         T* getData() override;
 
         void cudafree();
+
+     
+        void reshape(const std::vector<int>& new_shape);
     private:
         int calculateIndex(const std::vector<int>& indices) const;
         void printHelper(const T* data, const std::vector<int>& shape, int dimension, std::vector<int> indices) const;
