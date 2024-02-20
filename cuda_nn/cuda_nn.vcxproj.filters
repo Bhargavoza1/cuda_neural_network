@@ -26,6 +26,9 @@
     <CudaCompile Include="layers\BatchNorm.cu">
       <Filter>layers</Filter>
     </CudaCompile>
+    <CudaCompile Include="layers\flatten_layer.cu">
+      <Filter>layers</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="layers">
@@ -73,6 +76,9 @@
       <Filter>layers</Filter>
     </ClInclude>
     <ClInclude Include="layers\BatchNorm.h">
+      <Filter>layers</Filter>
+    </ClInclude>
+    <ClInclude Include="layers\flatten_layer.h">
       <Filter>layers</Filter>
     </ClInclude>
   </ItemGroup>
