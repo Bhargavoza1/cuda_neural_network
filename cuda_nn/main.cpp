@@ -172,14 +172,14 @@ int main() {
    // trainNeuralNetwork(*mlp, *x_tensor, *y_tensor, 1000, 0.15f); 
   //  predictAndPrintResults(*mlp, *x_tensor, *y_tensor);
  
-    std::vector<int> shape = { 3,2 };
+    std::vector<int> shape = {1 ,1 ,3,3 };
     Hex::Tensor<float> tensor(shape);
 
  
     initTensorOnGPU(tensor , 0.0f);
     //tensor.print();
     //CNN2D<float> convo(shape,{1,1},3 );
-    BatchNorm<float> batch(3  , TensorShape::_2D   );
+    BatchNorm<float> batch(1  , TensorShape::_4D   );
  
      //Tensor<float>* predicted_output = &convo.forward(tensor);
  
