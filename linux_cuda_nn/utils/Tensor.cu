@@ -3,9 +3,9 @@
 #include <vector>
 #include <iostream>
 #include <cuda_runtime.h>
-
+#include <cassert>
 namespace Hex {
-    // Constructor
+       // Constructor
     template <typename T>
     Tensor<T>::Tensor(const std::vector<int>& shape) : shape(shape) {
         int size = 1;
@@ -18,12 +18,12 @@ namespace Hex {
     // Destructor
     template <typename T>
     Tensor<T>::~Tensor() {
-        
+       // if (this != nullptr) { cudafree(data); }
        
     }
 
     template <typename T>
-    void Tensor<T>::cudafree(){ cudaFree(data); }
+    void Tensor<T>::cudafree() { if (this != nullptr) { cudaFree(data); } }
 
     // Set element at index
     template <typename T>
@@ -97,11 +97,11 @@ namespace Hex {
         int currentDimensionSize = shape[dimension];
 
         std::cout << "[";
-        int shape2 = shape.size();
+
         for (int i = 0; i < currentDimensionSize; ++i) {
             indices.push_back(i);
 
-            if (dimension < shape2 - 1) {
+            if (dimension < shape.size() - 1) {
                 // If not the last dimension, recursively print the next dimension
                 printHelper(data, shape, dimension + 1, indices);
             }
@@ -119,12 +119,33 @@ namespace Hex {
 
         std::cout << "]";
 
-        if (dimension < shape2 - 1) {
+        if (dimension < shape.size() - 1) {
             // If not the last dimension, add a new line after completing the inner block
             std::cout << std::endl;
         }
     }
 
+
+    template <typename T>
+    void Tensor<T>::reshape(const std::vector<int>& new_shape) {
+        int new_size = 1;
+        for (int dim : new_shape) {
+            new_size *= dim;   
+        }
+ 
+        int size = 1;
+        for (int dim : getShape() ) {
+            size *= dim; 
+        }
+
+
+        if (new_size != size ) { 
+            assert(false && "Error: New shape's total size does not match current size.");
+            return;
+        }
+        shape = new_shape;
+    }
+     
 
     // Helper function to calculate indices from a flat index
      template <typename T>

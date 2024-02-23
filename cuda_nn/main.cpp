@@ -86,7 +86,7 @@ void trainNeuralNetwork(MLP<T>& model, const Tensor<T>& input_data, const Tensor
         for (int sample_index = 0; sample_index < num_samples; ++sample_index) {
 
             predicted_output = &model.forward(sampled_input_data); 
-
+            
             error = *Hex::mse(sampled_target_data, *predicted_output);
  
             total_error += error.get({0});  

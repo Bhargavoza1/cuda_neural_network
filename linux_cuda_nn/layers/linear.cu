@@ -6,54 +6,25 @@
 #include "../utils/Errorhelper.cpp"
 namespace Hex{
 
+
+
 	template<class T>
-	__global__ void initWeightKernel(T* weights, T* bias, int output_size, int input_size, bool bias_as_zero, float w_b_range ) {
-		int i = blockIdx.x * blockDim.x + threadIdx.x;
-		int j = blockIdx.y * blockDim.y + threadIdx.y;
+	linear<T>::linear(int input_size, int output_size, int batch_size, bool bias_as_zero, float w_b_range)
+		: _bias_as_zero(bias_as_zero), _w_b_range(w_b_range), _batch_size(batch_size), _output_size(output_size),
+		weights(std::vector<int>{input_size, output_size}),
+		bias(std::vector<int>{1, output_size}) 
+	{
+		init_weight_n_bias();
 
-		if (i < output_size && j < input_size) {
-			//// Random initialization of weights within the specified range
-			curandState state;
-			curand_init(clock64(), i * input_size + j, 0, &state);
+	}
 
-			float float_weight = (2 * curand_uniform(&state) - 1) * w_b_range;
-			weights[i * input_size + j] = static_cast<T>(float_weight);
-		}
 
-		//// Initialize bias if Isbias is true
-		if (  i < output_size && j == 0) {
-			if (bias_as_zero) {
-				 
-				bias[i] = static_cast<T>(0.0);
-			}
-			else {
-				curandState state_bias;
-				curand_init(clock64(), i, 0, &state_bias);
-
-				float float_bias = (2 * curand_uniform(&state_bias) - 1) * w_b_range;
-				bias[i] = static_cast<T>(float_bias);
-			}
-			
-		}
-
-		/*int i = blockIdx.x * blockDim.x + threadIdx.x;
-		int j = blockIdx.y * blockDim.y + threadIdx.y;
-
-		if (i < output_size && j < input_size) {
-			 
-			weights[i * input_size + j] = static_cast<T>(i * input_size + j + 1);   
-		}
-
-		 Initialize bias if Isbias is true
-		if (  i < output_size && j == 0) {
-			if (bias_as_zero) {
-				bias[i] = static_cast<T>(0.0);
-			}
-			else {
-				 
-				bias[i] = static_cast<T>(i + 1);   
-			}
-		}*/
+	template<class T>
+	linear<T>::~linear()
+	{
+		output->cudafree();
+		input.cudafree();
+		input_error->cudafree();
 	}
 
 	template<class T>
@@ -61,169 +32,242 @@ namespace Hex{
 		int W_x_dim, int W_y_dim,
 		int X_x_dim, int X_y_dim) {
 
-		int col = blockIdx.y * blockDim.y + threadIdx.y;
 		int row = blockIdx.x * blockDim.x + threadIdx.x;
-	
+		int col = blockIdx.y * blockDim.y + threadIdx.y;
 
-		int Y_x_dim = W_x_dim;
-		int Y_y_dim = X_y_dim;
-
+		int Y_x_dim = X_x_dim;
+		int Y_y_dim = W_y_dim;
+		//printf("%d x %d", Y_x_dim, Y_y_dim);
 		T Y_value = 0;
 
 		if (row < Y_x_dim && col < Y_y_dim) {
-			// Perform the matrix multiplication: Y = W * A  
-			for (int i = 0; i < W_y_dim; ++i) {
-				Y_value += W[row * W_y_dim + i] * X[i]; 
-				//printf("W[row * W_y_dim + i] %d\n", W[row * W_y_dim + i]);
-				 //	printf("W[row * W_x_dim + i] %d\n", W[i * W_x_dim + row]);
-				//Y_value += W[row * W_y_dim + i] * X[i * X_y_dim + col]; 
+			// Perform the matrix multiplication: Y = X * W  
+			for (int i = 0; i < X_y_dim; ++i) {
+				Y_value += X[row * X_y_dim + i] * W[i * W_y_dim + col];
 			}
-	
+
 			// Add bias Y_value + b
-			Y_value += b[row];
-			
-			// Store the result in the output tensor
-			Y[row * Y_y_dim + col] = Y_value;
+			Y[row * Y_y_dim + col] = Y_value + b[col];
 		}
+	}
+
+	template<class T>
+	Tensor<T>& linear<T>::forward(Tensor<T>& input_tensor, bool Istraining)
+	{
+		
  
-
-	}
-
-
-	template<class T>
-	linear<T>::linear(int input_size, int output_size,bool bias_as_zero, float w_b_range )
-		: _bias_as_zero(bias_as_zero), _w_b_range(w_b_range) ,
-		weights(std::vector<int>{output_size , input_size  }),
-		bias(   std::vector<int>{output_size,1}) , 
-		output(std::vector<int>{output_size, 1  }),
-		input(std::vector<int>{input_size, 1  }),
-		input_error(std::vector<int>{input_size, 1  })
-	{ 
-		init_weight_n_bias();
-	}
-
-	template<class T>
-	linear<T>::~linear()
-	{
-		output.cudafree();
-		input.cudafree();
-		input_error.cudafree();
-	}
-
-
-	template<class T>
-	Tensor<T>& linear<T>::forward(Tensor<T>& input_tensor)
-	{
 		input = input_tensor;
-		if (weights.getShape()[1] != input.getShape()[0]) {
-			std::cerr << "Error: Tensor shapes must be the same for addition. Shape of tensor1: "
-				<< weights.getShape()[1] << ", Shape of tensor2: " << input.getShape()[0] << std::endl;
-			throw std::runtime_error("Tensor shape mismatch");
-		}
+		output.reset(new Tensor<T>({ input_tensor.getShape()[0] , _output_size}));
+
+		//if (weights.getShape()[0] != input.getShape()[1]) {
+		//	std::cerr << "Error: Tensor shapes must be compatible for matrix multiplication. Shape of weights: "
+		//		<< weights.getShape()[0] << "x" << weights.getShape()[1]
+		//		<< ", Shape of input: " << input.getShape()[0] << "x" << input.getShape()[1] << std::endl;
+		//	throw std::runtime_error("Tensor shape mismatch");
+		//}
+
+
 		//std::cout << "dbug strat of linear" << std::endl;
-		//std::cout << "weight" << std::endl;
-		//weights.print();
 
 		//std::cout << "intpu" << std::endl;
 		//input.print();
+		//std::cout << std::endl;
+
+		//std::cout << "weight" << std::endl;
+		//weights.print();
+		//std::cout << std::endl;
 		//std::cout << "bias" << std::endl;
 		//bias.print();
+		//std::cout << std::endl;
+		dim3 threadsPerBlock(16, 16);
+		dim3 numBlocks((output->getShape()[0] + threadsPerBlock.x - 1) / threadsPerBlock.x,
+			(output->getShape()[1] + threadsPerBlock.y - 1) / threadsPerBlock.y);
 
-		dim3 threadsPerBlock(256);
-		dim3 numBlocks((output.getShape()[0] + threadsPerBlock.x - 1) / threadsPerBlock.x,
-			(output.getShape()[1] + threadsPerBlock.y - 1) / threadsPerBlock.y);
 		// Launch the forward kernel
-		 
-		linearLayerForward << <numBlocks, threadsPerBlock >> > (weights.getData(), input.getData(), output.getData(), bias.getData(),
-			weights.getShape()[0], weights.getShape()[1] ,
+		linearLayerForward << <numBlocks, threadsPerBlock >> > (weights.getData(), input.getData(), output->getData(), bias.getData(),
+			weights.getShape()[0], weights.getShape()[1],
 			input.getShape()[0], input.getShape()[1]);
 		cudaDeviceSynchronize();
-/*	 	std::cout << "output" << std::endl;
-		output.print();*/ 
-		 
+
+		//std::cout << "output" << std::endl;
+		//output->print(); 
+		//std::cout << std::endl;
+
 		cudaError_t cudaError = cudaGetLastError();
-		if (cudaError == cudaErrorInvalidValue) {
-			printf("error from liner forward method aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa: %s\n", cudaGetErrorString(cudaError));
-			//  exit(EXIT_FAILURE);  // or handle the error appropriately
+		if (cudaError != cudaSuccess) {
+			printf("Error from linear forward method: %s\n", cudaGetErrorString(cudaError));
+			exit(EXIT_FAILURE);  // or handle the error appropriately
 		}
-	
-		//std::cout << "dbug end of linear" << std::endl;
-		//std::cout << std::endl;
-		//std::cout << std::endl;
-		//std::cout << std::endl;
-		return output;
+
+		return *output;
 	}
 
-	template<class T>
-	__global__ void backpropagationAndUpdateKernel(T* weights, T* bias,
-		const T* output_error,const T* input_data, T* input_error,
-		float learning_rate, int w_x_dim, int w_y_dim,
-		int input_x_dim, int input_y_dim)
-	{
-		int row = blockIdx.x * blockDim.x + threadIdx.x;
-		int col = blockIdx.y * blockDim.y + threadIdx.y;
-		
-		if (row < w_y_dim && col < input_y_dim) {
-			T sum = 0;
-			for (int i = 0; i < w_x_dim; ++i) {
-				sum  += weights[i * w_y_dim + row] * output_error[i]; 
-			} 
-			input_error[row * input_y_dim + col] = sum; 
-			
-		}
+ 
 
-		if (row < w_x_dim && col < input_y_dim) {
-			T gw = 0;
-			
-			bias[row] -= learning_rate * output_error[row];
-			for (int i = 0; i < w_y_dim; ++i) {
-				 gw  = output_error[row] * input_data[i]; 
-				 weights[row * w_y_dim + i] = weights[row * w_y_dim + i] - learning_rate * gw;
-				// printf("weight from kernalaaaaaaaaaaaaa %f \n", weights[row * w_y_dim + i]);
+	template<typename T>
+	__global__ void linear_backprop_kernel(T* input_error_data, const T* output_error_data, const T* weights_data, int batch_size, int input_size, int output_size) {
+		int tid_x = blockIdx.x * blockDim.x + threadIdx.x;
+		int tid_y = blockIdx.y * blockDim.y + threadIdx.y;
+		// Assuming input_error_data, output_error_data, weights_data are row-major
+
+		if (tid_x < input_size && tid_y < batch_size) {
+			int idx = tid_y * input_size + tid_x;
+			T sum = 0;
+			for (int i = 0; i < output_size; ++i) {
+				sum += output_error_data[tid_y * output_size + i] * weights_data[tid_x * output_size + i];
 			}
-			
+			input_error_data[idx] = sum;
+		}
+	}
+
+	template<typename T>
+	__global__ void linear_update_weights_and_bias_kernel(T* weights, T* bias, const T* input, const T* output_error,
+		int batch_size, int input_size, int output_size, float learning_rate) {
+
+		int idx_x = blockIdx.x * blockDim.x + threadIdx.x;
+		int idx_y = blockIdx.y * blockDim.y + threadIdx.y;
+
+		if (idx_y < output_size) {
+			if (idx_x < input_size) {
+				// Update weights
+				T weight_sum = 0;
+				for (int i = 0; i < batch_size; ++i) {
+					weight_sum += output_error[i * output_size + idx_y] * input[i * input_size + idx_x];
+				}
+				// printf("weight_sum %f : weight at %f  after lerning rate %f \n",  weight_sum , weights[idx_x * output_size + idx_y],weights[idx_x * output_size + idx_y] - learning_rate * weight_sum);
+				weights[idx_x * output_size + idx_y] -= learning_rate * weight_sum;
+			}
+			// Update bias
+			T bias_sum = 0;
+			for (int i = 0; i < batch_size; ++i) {
+				bias_sum += output_error[i * output_size + idx_y];
+			}
+			// printf("weight_sum %f\n", bias_sum);
+			bias[idx_y] -= learning_rate * bias_sum;
 		}
 	}
 
 	template<class T>
 	Tensor<T>& linear<T>::backpropagation(Tensor<T>& output_error, float learning_rate)
 	{
-		
-		dim3 threadsPerBlock(16, 16);
-		dim3 numBlocks((weights.getShape()[1] + threadsPerBlock.x - 1) / threadsPerBlock.x,
-			(weights.getShape()[0] + threadsPerBlock.y - 1) / threadsPerBlock.y);
-		 
-		backpropagationAndUpdateKernel << <numBlocks, threadsPerBlock >> > (
-			weights.getData(), bias.getData(),
-			output_error.getData(), input.getData(), input_error.getData(),
-			learning_rate, weights.getShape()[0], weights.getShape()[1],
-			output_error.getShape()[0], output_error.getShape()[1]);
+		//std::cout << std::endl;
+		// std::cout << "output_error after update" << std::endl;
+		//  output_error.print();
+
+		input_error.reset(new Tensor<T>({ output_error.getShape()[0] ,input.getShape()[1] }));
+		dim3 block_size(16, 16); // Adjust block size according to your GPU architecture
+		dim3 grid_size((input.getShape()[1] + block_size.x - 1) / block_size.x,
+			(input.getShape()[0] + block_size.y - 1) / block_size.y);
+
+		linear_backprop_kernel << <grid_size, block_size >> > (input_error->getData(), output_error.getData(),
+			weights.getData(), input.getShape()[0], input.getShape()[1], output_error.getShape()[1]);
+
+		cudaDeviceSynchronize();
+
+ 
+
+		dim3 blockDim(16, 16);
+		dim3 gridDim((weights.getShape()[0] + blockDim.x - 1) / blockDim.x, (weights.getShape()[1] + blockDim.y - 1) / blockDim.y);
+		linear_update_weights_and_bias_kernel << <gridDim, blockDim >> > (weights.getData(), bias.getData(),
+			input.getData(), output_error.getData(), _batch_size, weights.getShape()[0], weights.getShape()[1], learning_rate);
+
 		cudaDeviceSynchronize();
 		cudaError_t cudaError = cudaGetLastError();
 		if (cudaError != cudaSuccess) {
-			printf("error from liner backword method : %s\n", cudaGetErrorString(cudaError));
+			printf("Error from linear backward method: %s\n", cudaGetErrorString(cudaError));
 			exit(EXIT_FAILURE);  // or handle the error appropriately
 		}
-		return input_error;
 
 
+
+		//std::cout << std::endl;
+		//std::cout << "bias after update" << std::endl;
+		// bias.print();
+		// std::cout << std::endl;
+		// std::cout << "weights after update" << std::endl;
+		//weights.print();
+		//std::cout << std::endl;
+		//std::cout << "input_error after update" << std::endl;
+		//input_error->print();
+		//std::cout << "dbug end of linear" << std::endl;
+		//std::cout << std::endl;
+
+		return *input_error;
 	}
 
 
 
 	template<class T>
+	__global__ void initWeightKernel(T* weights, T* bias, int  input_size, int  output_size, int batch_size, bool bias_as_zero, float w_b_range) {
+		int i = blockIdx.x * blockDim.x + threadIdx.x;
+		int j = blockIdx.y * blockDim.y + threadIdx.y;
+
+		if (i < input_size && j < output_size) {
+			// Random initialization of weights within the specified range
+			curandState state;
+			curand_init(clock64(), i * output_size + j, 0, &state);
+
+			float float_weight = (2 * curand_uniform(&state) - 1) * w_b_range;
+			weights[i * output_size + j] = static_cast<T>(float_weight);
+
+
+
+		}
+
+
+		if (i == 0 && j < output_size) {
+
+			if (bias_as_zero) {
+				bias[j] = static_cast<T>(0.0);
+			}
+			else {
+				curandState state_bias;
+				curand_init(clock64(), j, 0, &state_bias);
+
+				float float_bias = (2 * curand_uniform(&state_bias) - 1) * w_b_range;
+				bias[j] = static_cast<T>(float_bias);
+			}
+		}
+
+		// int i = blockIdx.x * blockDim.x + threadIdx.x;
+		//int j = blockIdx.y * blockDim.y + threadIdx.y;
+
+		//int Y_x_dim = batch_size;
+		//int Y_y_dim = output_size;
+
+		//if (i < input_size && j < output_size) {
+		//	 
+		//	weights[i * output_size + j] = static_cast<T>(i * output_size + j + 1);
+		//	
+		//}
+
+		//// Initialize bias if Isbias is true
+		//if (  i == 0 && j <= Y_y_dim) {
+		//	
+		//	if (bias_as_zero) {
+		//		bias[j] = static_cast<T>( (j) * 0.0);
+		//	}
+		//	else {
+		//		 
+		//		bias[j] = static_cast<T>((j)+ 1);
+		//	}
+		//} 
+	}
+
+	template<class T>
 	void linear<T>::init_weight_n_bias() {
 		dim3 threadsPerBlock(16, 16);
-		dim3 numBlocks((weights.getShape()[1] + threadsPerBlock.x - 1) / threadsPerBlock.x,
-			(weights.getShape()[0] + threadsPerBlock.y - 1) / threadsPerBlock.y);
+		dim3 numBlocks((weights.getShape()[0] + threadsPerBlock.x - 1) / threadsPerBlock.x,
+			(weights.getShape()[1] + threadsPerBlock.y - 1) / threadsPerBlock.y);
 
 		// Launch the kernel to initialize weights and bias
 		initWeightKernel << <numBlocks, threadsPerBlock >> > (weights.getData(), bias.getData(), weights.getShape()[0],
-															 weights.getShape()[1], _bias_as_zero, _w_b_range );
-		cudaDeviceSynchronize();   
+			weights.getShape()[1], _batch_size, _bias_as_zero, _w_b_range);
+		cudaDeviceSynchronize();
 	}
 
- 
+
+
 
 	template<class T>
 	Tensor<T>& linear<T>::printW()
@@ -236,6 +280,7 @@ namespace Hex{
 	{
 		return bias;
 	}
+
  
     // Explicit instantiation of the template class for supported types
     template class linear<float>;

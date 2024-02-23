@@ -15,6 +15,7 @@ namespace Hex {
         Tensor<T> X;
        
         linear<T>  linear1;
+    
         ReLU<T>  relu1;
         linear<T>  linear2;
         ReLU<T>  relu2;
@@ -23,11 +24,11 @@ namespace Hex {
 
 	public:
         // Constructor
-        MLP(int input_size, int output_size, int hiddenlayer = 1, int h_l_dimension = 10);
+        MLP(int input_size, int output_size,  int batch_size = 1 , int hiddenlayer = 1, int h_l_dimension = 10);
         ~MLP();
 
         // Override forward method
-        Tensor<T>& forward(Tensor<T>& input_tensor) override;
+        Tensor<T>& forward(Tensor<T>& input_tensor, bool Istraining = true) override;
 
         // Override backpropagation method
         Tensor<T>& backpropagation(Tensor<T>& output_error, float learning_rate = 0.001f) override;

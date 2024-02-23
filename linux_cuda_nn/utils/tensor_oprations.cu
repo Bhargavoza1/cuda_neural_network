@@ -1,67 +1,107 @@
+#include "tensor_oprations.h"
 #include "Tensor.h"
+#include <curand_kernel.h>
 #include <cuda_runtime.h> 
 #include "Errorhelper.cpp"
 #include <memory>
 #include <iostream>
-
+#include <vector>
  namespace Hex{ 
  
-     template<class T, class U>
-     __global__ void addKernel(const T* a, const U* b, typename std::common_type<T, U>::type* c, int size) {
-         int idx = threadIdx.x + blockDim.x * blockIdx.x;
-         if (idx < size) {
-             c[idx] = static_cast<typename std::common_type<T, U>::type>(a[idx] + b[idx]);
-         }
-     }
+       template<class T, class U>
+    __global__ void addKernel(const T* a, const U* b, typename std::common_type<T, U>::type* c, int size) {
+        int idx = threadIdx.x + blockDim.x * blockIdx.x;
+        if (idx < size) {
+            c[idx] = static_cast<typename std::common_type<T, U>::type>(a[idx] + b[idx]);
+        }
+    }
 
-     template<class T, class U>
-     std::unique_ptr<Tensor<typename std::common_type<T, U>::type>> addTensor(const Tensor<T>& tensor1, const Tensor<U>& tensor2) {
+    template<class T, class U>
+    std::unique_ptr<Tensor<typename std::common_type<T, U>::type>> addTensor(const Tensor<T>& tensor1, const Tensor<U>& tensor2) {
 
-         if (tensor1.getShape() != tensor2.getShape()) {
-             std::cerr << "Error: Tensor shapes must be the same for addition. Shape of tensor1: "
-                 << shapeToString(tensor1.getShape()) << ", Shape of tensor2: " << shapeToString(tensor2.getShape()) << std::endl;
-             exit(EXIT_FAILURE); // or use exit(EXIT_FAILURE) if you prefer
-         }
+        if (tensor1.getShape() != tensor2.getShape()) {
+            std::cerr << "Error: Tensor shapes must be the same for addition. Shape of tensor1: "
+                << shapeToString(tensor1.getShape()) << ", Shape of tensor2: " << shapeToString(tensor2.getShape()) << std::endl;
+            exit(EXIT_FAILURE); // or use exit(EXIT_FAILURE) if you prefer
+        }
 
 
-         using CommonType = typename std::common_type<T, U>::type;
-         std::vector<int> shape = tensor1.getShape();
-      
-         std::unique_ptr<Tensor<CommonType>> result(new Tensor<CommonType>(shape));
+        using CommonType = typename std::common_type<T, U>::type;
+        std::vector<int> shape = tensor1.getShape();
+        
+        std::unique_ptr<Tensor<CommonType>> result(new Tensor<CommonType>(shape));
 
-      
-         int size = 1;
-         for (int dim : shape) {
-             size *= dim;
-         }
+        
+        int size = 1;
+        for (int dim : shape) {
+            size *= dim;
+        }
 
-         dim3 blockSize(256);
-         dim3 gridSize((size + blockSize.x - 1) / blockSize.x);
-         addKernel<<<gridSize, blockSize>>> (tensor1.getData(), tensor2.getData(), result->getData(), size);
-         cudaDeviceSynchronize();
+        dim3 blockSize(256);
+        dim3 gridSize((size + blockSize.x - 1) / blockSize.x);
+        addKernel<<<gridSize, blockSize>>> (tensor1.getData(), tensor2.getData(), result->getData(), size);
+        cudaDeviceSynchronize();
 
-         cudaError_t cudaError = cudaGetLastError();
-         if (cudaError != cudaSuccess) {
-             printf("CUDA error from add tensor: %s\n", cudaGetErrorString(cudaError));
-             exit(EXIT_FAILURE);  // or handle the error appropriately
-         }
-         // Update the data pointer in the result tensor
-     
-         //result->setData(resultData);
+        cudaError_t cudaError = cudaGetLastError();
+        if (cudaError != cudaSuccess) {
+            printf("CUDA error from add tensor: %s\n", cudaGetErrorString(cudaError));
+            exit(EXIT_FAILURE);  // or handle the error appropriately
+        }
+        // Update the data pointer in the result tensor
+       
+        //result->setData(resultData);
  
-         return result;
-     }
+        return result;
+    }
 
+// CUDA kernel for tensor initialization with multiplication
+    template <typename T>
+    __global__ void initializeTensortoOne(T* data, int size ) {
+        int index = blockIdx.x * blockDim.x + threadIdx.x;
+        if (index < size) {
+
+
+            data[index] = static_cast<T>(1.0f);
+ 
+        }
+    }
+
+    template<typename T>
+    void initTensorToOneOnGPU(Tensor<T>& tensor )
+    {
+
+
+        std::vector<int> shape = tensor.getShape();
+        int size = 1;
+        for (int dim : shape) {
+            size *= dim;
+        }
+
+        // Launch CUDA kernel to initialize and multiply the tensor
+        int blockSize = 256;
+        int gridSize = (size + blockSize - 1) / blockSize;
+        initializeTensortoOne << <gridSize, blockSize >> > (tensor.getData(), size );
+        cudaDeviceSynchronize();
+
+        cudaError_t cudaError = cudaGetLastError();
+        if (cudaError != cudaSuccess) {
+            printf("CUDA error from init: %s\n", cudaGetErrorString(cudaError));
+            exit(EXIT_FAILURE);  // or handle the error appropriately
+        }
 
       
+    }
 
 
-       // CUDA kernel for tensor initialization with multiplication
+     // CUDA kernel for tensor initialization with multiplication
     template <typename T>
     __global__ void initializeTensor(T* data, int size, float multiplier) {
         int index = blockIdx.x * blockDim.x + threadIdx.x;
         if (index < size) {
-           
+            //curandState state;
+            //curand_init(clock64(), index, 0, &state); // Initialize random number generator for each thread
+
+            //data[index] = curand_uniform(&state) * (2 * 0.5f) - 0.5f;
             T value = static_cast<T>(index+1)  ;
 
             if (multiplier != 0) {
@@ -73,6 +113,7 @@
     }
 
 
+
     template<typename T>
     void initTensorOnGPU(Tensor<T>& tensor, float multiplier)
     {
@@ -81,7 +122,7 @@
         for (int dim : shape) {
             size *= dim;
         }
-        
+
         // Launch CUDA kernel to initialize and multiply the tensor
         int blockSize = 256;
         int gridSize = (size + blockSize - 1) / blockSize;
@@ -96,8 +137,7 @@
     }
 
 
- 
-
+  
 
     template <typename T>
     std::unique_ptr<Tensor<T>>  sliceFirstIndex(int firstIndex, const Tensor<T>& tensor) {
@@ -173,18 +213,20 @@
 
         return transposed_tensor;
     }
-
     	
  
- 
+   
+	template void initTensorToOneOnGPU(Tensor<float>& tensor );
 	template void initTensorOnGPU(Tensor<float>& tensor, float multiplier);
 	template std::unique_ptr<Tensor<float>> transpose(const Tensor<float>& tensor);
 	template std::unique_ptr<Tensor<float>>  sliceFirstIndex(int firstIndex, const Tensor<float>& tensor);
 
+    template void initTensorToOneOnGPU(Tensor<int>& tensor );
     template void initTensorOnGPU(Tensor<int>& tensor, float multiplier);
 	template std::unique_ptr<Tensor<int>> transpose(const Tensor<int>& tensor);
 	template std::unique_ptr<Tensor<int>>  sliceFirstIndex(int firstIndex, const Tensor<int>& tensor);
 
+    template void initTensorToOneOnGPU(Tensor<double>& tensor );
     template void initTensorOnGPU(Tensor<double>& tensor, float multiplier);
 	template std::unique_ptr<Tensor<double>> transpose(const Tensor<double>& tensor);
 	template std::unique_ptr<Tensor<double>>  sliceFirstIndex(int firstIndex, const Tensor<double>& tensor);

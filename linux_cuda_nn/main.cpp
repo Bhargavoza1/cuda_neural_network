@@ -7,6 +7,13 @@
  
 #include "models/MLP.h"
 #include "costs/MSE.h"
+#include "layers/CNN2D.h"
+#include <iostream>
+
+ #include <memory>
+ 
+ 
+ 
 
 using namespace Hex;
 using namespace std;
@@ -30,10 +37,10 @@ void predictAndPrintResults( MLP<T>& model, const Tensor<T>& input_data, const T
     Tensor<T>* predicted_output;
     for (int sample_index = 0; sample_index < num_samples; ++sample_index) {
          
-        sliced_tensor2 =  sliceFirstIndex(sample_index, input_data) ;
-        transpose_tensor2 = transpose(*sliced_tensor2);
-        inpurt_data = *transpose_tensor2;  
-        predicted_output =  &model.forward(inpurt_data);
+        sliced_tensor2 = Hex::sliceFirstIndex(sample_index, input_data) ;
+      //  transpose_tensor2 = Hex::transpose(*sliced_tensor2);
+        inpurt_data = *sliced_tensor2;
+        predicted_output =  &model.forward(inpurt_data , false);
 
         // Printing the predicted output
         std::cout << "Predicted output:" << std::endl;
@@ -65,54 +72,34 @@ void predictAndPrintResults( MLP<T>& model, const Tensor<T>& input_data, const T
 template<typename T>
 void trainNeuralNetwork(MLP<T>& model, const Tensor<T>& input_data, const Tensor<T>& target_data, int num_epochs, T learning_rate) {
     // Get the number of samples
-    std::vector<int> input_shape = input_data.getShape();
-    std::vector<int> target_shape = target_data.getShape();
+    std::vector<int> input_shape = input_data.getShape(); 
 
-    int num_samples = input_shape[0];
-    std::unique_ptr<Tensor<T>> input_slicing;
-    std::unique_ptr<Tensor<T>> input_transpose;
-    Tensor<T> sampled_input_data;
-    
-    std::unique_ptr<Tensor<T>> Target_slicing;
-    std::unique_ptr<Tensor<T>> Target_transpose;
-    Tensor<T> sampled_target_data;
+    int num_samples = input_shape[0]; 
+
+    Tensor<T> sampled_input_data = input_data;
+    Tensor<T> sampled_target_data = target_data;
     
     Tensor<T>* predicted_output; 
-
-    std::unique_ptr<Tensor<T>> up_error;
     Tensor<T> error;
-
-    std::unique_ptr<Tensor<T>> up_output_error;
     Tensor<T> output_error;
   
-
-
-    
+    sampled_input_data.reshape({ 4,2 });
+    sampled_target_data.reshape({ 4,2 });
+ 
     // Training loop
     for (int epoch = 0; epoch < num_epochs; ++epoch) {
       
         T total_error = 0;
         for (int sample_index = 0; sample_index < num_samples; ++sample_index) {
-            
-            input_slicing =  sliceFirstIndex(sample_index, input_data);
-            input_transpose =  transpose(*input_slicing);
-            sampled_input_data = *input_transpose;
-            
-            Target_slicing =  sliceFirstIndex(sample_index, target_data);
-            Target_transpose =  transpose(*Target_slicing);
-            sampled_target_data = *Target_transpose;
-          
-            predicted_output = &model.forward(sampled_input_data);
-            //predicted_output->print();
-            up_error =  mse(sampled_target_data, *predicted_output);
-            error = *up_error;
-           // std::cout << error.get({ 0 }) << endl;
-            total_error += error.get({0});  
 
-            up_output_error =  mse_derivative(sampled_target_data, *predicted_output);
-            output_error = *up_output_error;
-           // output_error.print();
-            // Backward propagation
+            predicted_output = &model.forward(sampled_input_data); 
+            
+            error = *Hex::mse(sampled_target_data, *predicted_output);
+ 
+            total_error += error.get({0});  
+            
+            output_error = *Hex::mse_derivative(sampled_target_data, *predicted_output);
+ 
             model.backpropa(output_error, learning_rate);
         } 
         // Calculate the average error on all samples
@@ -122,17 +109,21 @@ void trainNeuralNetwork(MLP<T>& model, const Tensor<T>& input_data, const Tensor
     std::cout << std::endl;
 }
 
-
+#include "layers/CNN2D.h"
+//#include "layers/MaxPool2d.h"
+#include "layers/BatchNorm.h"
+ 
 int main() {
     
     // Define the parameters for your MLP
     int input_size = 2;        // Size of input layer
     int output_size = 2;       // Size of output layer
+    int batchsize = 4;
     int hiddenlayer = 1;       // Number of hidden layers
     int h_l_dimension = 3;     // Dimension of each hidden layer
 
     // Create an instance of the MLP class
-    std::unique_ptr<Hex::MLP<float>>  mlp(new  Hex::MLP<float>(input_size, output_size, hiddenlayer, h_l_dimension));
+    std::unique_ptr<Hex::MLP<float>>  mlp(new  Hex::MLP<float>(input_size, output_size, batchsize, hiddenlayer, h_l_dimension));
     
 
     // Define your input data
@@ -166,11 +157,15 @@ int main() {
         y_tensor->set({ i, 0, 1 }, y_train[i][0][1]);
     }
 
-    trainNeuralNetwork(*mlp, *x_tensor, *y_tensor, 1000, 0.15f); 
-    predictAndPrintResults(*mlp, *x_tensor, *y_tensor);
+   
+  
+    trainNeuralNetwork(*mlp, *x_tensor, *y_tensor, 1000 , 0.2f); 
+     
+
+ 
+        predictAndPrintResults(*mlp, *x_tensor, *y_tensor);
  
     
-
     return 0;
  
    

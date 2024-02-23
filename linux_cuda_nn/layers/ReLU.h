@@ -19,7 +19,7 @@ namespace Hex{
         ~ReLU();
 
         // Override forward method
-        Tensor<T>& forward(Tensor<T>& input_tensor) override;
+        Tensor<T>& forward(Tensor<T>& input_tensor, bool Istraining = true) override;
 
         // Override backpropagation method
         Tensor<T>& backpropagation(Tensor<T>& output_error, float learning_rate = 0.001f) override;

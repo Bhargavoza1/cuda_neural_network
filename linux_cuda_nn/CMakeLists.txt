@@ -21,7 +21,11 @@ set(SOURCES
     costs/MSE.cu
     layers/linear.cu
     layers/ReLU.cu
+    layers/CNN2D.cu
     layers/Sigmoid.cu
+    layers/MaxPool2d.cu
+    layers/flatten_layer.cu
+    layers/BatchNorm.cu
     models/MLP.cpp
     utils/Errorhelper.cpp
     utils/Tensor.cu
