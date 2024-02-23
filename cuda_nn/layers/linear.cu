@@ -102,46 +102,7 @@ namespace Hex {
 		return *output;
 	}
 
-	template<class T>
-	__global__ void backpropagationAndUpdateKernel(T* weights, T* bias,
-		const T* output_error, const T* input_data, T* input_error,
-		float learning_rate, int w_x_dim, int w_y_dim,
-		int output_x_dim, int output_y_dim)
-	{
-
-		int row = blockIdx.x * blockDim.x + threadIdx.x;
-		int col = blockIdx.y * blockDim.y + threadIdx.y;
-
-		if (row < output_x_dim && col < w_x_dim) {
-
-			T sum = 0;
-			for (int k = 0; k < output_y_dim; ++k) {
-				for (int i = 0; i < w_y_dim; ++i) {
-					weights[k * w_y_dim + i] -= learning_rate * output_error[row * output_y_dim + k] * input_data[row * w_y_dim + col];
-				}
-			}
-
-			for (int j = 0; j < output_y_dim; ++j) {
-				T delta_bias = output_error[row * output_y_dim + col];
-
-				sum += output_error[row * output_y_dim + j] * weights[col * output_y_dim + j];
-				// printf("weights dim %f     \n ", sum);
-				bias[j] -= learning_rate * delta_bias;
-			}
-			input_error[row * w_x_dim + col] = sum;
-
-			//for (int i = 0; i < output_y_dim; ++i) {
-			//	int output_index = row * output_y_dim + i;
-			//	int input_index = col * output_y_dim + i;
-			//	delta_weight += output_error[output_index] * input_data[input_index];
-			//	 printf("weights dim %f = %f x %f    \n ", delta_weight, output_error[output_index], input_data[input_index]);
-			//}
-
-
-
-		}
-	}
-
+ 
 
 	template<typename T>
 	__global__ void linear_backprop_kernel(T* input_error_data, const T* output_error_data, const T* weights_data, int batch_size, int input_size, int output_size) {
@@ -160,7 +121,9 @@ namespace Hex {
 	}
 
 	template<typename T>
-	__global__ void update_weights_and_bias_kernel(T* weights, T* bias, const T* input, const T* output_error, int batch_size, int input_size, int output_size, float learning_rate) {
+	__global__ void linear_update_weights_and_bias_kernel(T* weights, T* bias, const T* input, const T* output_error,
+		int batch_size, int input_size, int output_size, float learning_rate) {
+
 		int idx_x = blockIdx.x * blockDim.x + threadIdx.x;
 		int idx_y = blockIdx.y * blockDim.y + threadIdx.y;
 
@@ -201,20 +164,11 @@ namespace Hex {
 
 		cudaDeviceSynchronize();
 
-		/*	dim3 threadsPerBlock(16, 16);
-			dim3 numBlocks((input.getShape()[0] + threadsPerBlock.x - 1) / threadsPerBlock.x,
-				(input.getShape()[1] + threadsPerBlock.y - 1) / threadsPerBlock.y);
-
-			backpropagationAndUpdateKernel << <numBlocks, threadsPerBlock >> > (
-				weights.getData(), bias.getData(),
-				output_error.getData(), input.getData(), input_error->getData(),
-				learning_rate, weights.getShape()[0], weights.getShape()[1],
-				output_error.getShape()[0], output_error.getShape()[1]);
-			cudaDeviceSynchronize();*/
+ 
 
 		dim3 blockDim(16, 16);
 		dim3 gridDim((weights.getShape()[0] + blockDim.x - 1) / blockDim.x, (weights.getShape()[1] + blockDim.y - 1) / blockDim.y);
-		update_weights_and_bias_kernel << <gridDim, blockDim >> > (weights.getData(), bias.getData(),
+		linear_update_weights_and_bias_kernel << <gridDim, blockDim >> > (weights.getData(), bias.getData(),
 			input.getData(), output_error.getData(), _batch_size, weights.getShape()[0], weights.getShape()[1], learning_rate);
 
 		cudaDeviceSynchronize();
