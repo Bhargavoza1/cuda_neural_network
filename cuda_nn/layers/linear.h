@@ -9,6 +9,7 @@ namespace Hex {
         bool _Isbias;
         bool _bias_as_zero;
         float _w_b_range;
+        int _batch_size;
         Tensor<T> weights;
         Tensor<T> bias; 
         Tensor<T> output;
@@ -18,7 +19,7 @@ namespace Hex {
     public:
         // Constructor
        // linear() {};
-        linear(int input_size, int output_size, bool bias_as_zero = false , float w_b_range = 0.5f );
+        linear(int input_size, int output_size, int batch_size = 1, bool bias_as_zero = false , float w_b_range = 0.5f );
         ~linear();
 
         // Override forward method
