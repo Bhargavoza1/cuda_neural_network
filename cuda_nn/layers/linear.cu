@@ -57,6 +57,13 @@ namespace Hex {
 	template<class T>
 	Tensor<T>& linear<T>::forward(Tensor<T>& input_tensor, bool Istraining)
 	{
+		
+		if (!Istraining)
+		{
+			input.reshape_2d_test_prediction({ 1 ,input.getShape()[1]});
+			output.reshape_2d_test_prediction({ 1,output.getShape()[1] });
+		}
+		
 		input = input_tensor;
 
 		//if (weights.getShape()[0] != input.getShape()[1]) {

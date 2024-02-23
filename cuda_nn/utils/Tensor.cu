@@ -138,11 +138,23 @@ namespace Hex {
             size *= dim; 
         }
 
+
         if (new_size != size ) { 
             assert(false && "Error: New shape's total size does not match current size.");
             return;
         }
         shape = new_shape;
+    }
+
+    template<typename T>
+    void Tensor<T>::reshape_2d_test_prediction(const std::vector<int>& new_shape)
+    {
+
+        // Check if reshaping to {1, feature}
+        if (new_shape.size() == 2 && new_shape[0] == 1) {
+            shape = new_shape;
+            return;
+        }
     }
 
 
