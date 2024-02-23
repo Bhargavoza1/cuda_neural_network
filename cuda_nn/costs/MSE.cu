@@ -20,6 +20,7 @@ namespace Hex {
             // Calculate mean
             *result = *result / size;
         }
+        __syncthreads();
     }
 
     template<typename T>
