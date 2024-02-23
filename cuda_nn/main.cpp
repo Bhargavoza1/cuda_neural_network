@@ -65,25 +65,17 @@ void predictAndPrintResults( MLP<T>& model, const Tensor<T>& input_data, const T
 template<typename T>
 void trainNeuralNetwork(MLP<T>& model, const Tensor<T>& input_data, const Tensor<T>& target_data, int num_epochs, T learning_rate) {
     // Get the number of samples
-    std::vector<int> input_shape = input_data.getShape();
-    std::vector<int> target_shape = target_data.getShape();
+    std::vector<int> input_shape = input_data.getShape(); 
 
     int num_samples = input_shape[0]; 
 
     Tensor<T> sampled_input_data = input_data;
-    
- 
     Tensor<T> sampled_target_data = target_data;
     
     Tensor<T>* predicted_output; 
-
-    std::unique_ptr<Tensor<T>> up_error;
     Tensor<T> error;
-
-    std::unique_ptr<Tensor<T>> up_output_error;
     Tensor<T> output_error;
   
- 
     sampled_input_data.reshape({ 4,2 });
     sampled_target_data.reshape({ 4,2 });
  
@@ -93,19 +85,14 @@ void trainNeuralNetwork(MLP<T>& model, const Tensor<T>& input_data, const Tensor
         T total_error = 0;
         for (int sample_index = 0; sample_index < num_samples; ++sample_index) {
 
-            predicted_output = &model.forward(sampled_input_data);
-            //predicted_output->print();
-            up_error = Hex::mse(sampled_target_data, *predicted_output);
-            error = *up_error;
-           // error.print();
-           // std::cout << error.get({ 0 }) << endl;
+            predicted_output = &model.forward(sampled_input_data); 
+
+            error = *Hex::mse(sampled_target_data, *predicted_output);
+ 
             total_error += error.get({0});  
             
-            up_output_error = Hex::mse_derivative(sampled_target_data, *predicted_output);
-            output_error = *up_output_error;
-             //output_error.print();
-            // Backward propagation
-             //output_error.print();
+            output_error = *Hex::mse_derivative(sampled_target_data, *predicted_output);
+ 
             model.backpropa(output_error, learning_rate);
         } 
         // Calculate the average error on all samples
