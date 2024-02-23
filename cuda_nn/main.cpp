@@ -112,8 +112,8 @@ int main() {
     int input_size = 2;        // Size of input layer
     int output_size = 2;       // Size of output layer
     int batchsize = 4;
-    int hiddenlayer = 1;       // Number of hidden layers
-    int h_l_dimension = 3;     // Dimension of each hidden layer
+    int hiddenlayer = 3;       // Number of hidden layers
+    int h_l_dimension = 20;     // Dimension of each hidden layer
 
     // Create an instance of the MLP class
     std::unique_ptr<Hex::MLP<float>>  mlp(new  Hex::MLP<float>(input_size, output_size, batchsize, hiddenlayer, h_l_dimension));
@@ -150,14 +150,17 @@ int main() {
         y_tensor->set({ i, 0, 1 }, y_train[i][0][1]);
     }
 
-   
-  
-    trainNeuralNetwork(*mlp, *x_tensor, *y_tensor, 1000 , 0.2f); 
-     
+    //Tensor<float> a({ 3,2 });
+    //Hex::initTensorOnGPU(a, 0.0f);
 
+    //a.print();
+    //BatchNorm<float> b1(2, TensorShape::_2D);
+    //auto b = b1.forward(a);
+    //auto c = b1.backpropagation(b);
  
-        predictAndPrintResults(*mlp, *x_tensor, *y_tensor);
- 
+    trainNeuralNetwork(*mlp, *x_tensor, *y_tensor, 1000   , 0.1f); 
+     predictAndPrintResults(*mlp, *x_tensor, *y_tensor);
+    
     
     return 0;
  
