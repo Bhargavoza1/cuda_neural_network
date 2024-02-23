@@ -14,6 +14,43 @@ namespace Hex {
     __device__ T sigmoid(T x) {
         return static_cast<T>(1) / (static_cast<T>(1) + expf(-x));
     }
+     
+    template <typename T>
+    __global__ void sigmoid_forward_kernel(const T* input, T* output, int batch_size, int feature_size) {
+        int batch_idx = blockIdx.x * blockDim.x + threadIdx.x;
+        int feature_idx = blockIdx.y * blockDim.y + threadIdx.y;
+
+        if (batch_idx < batch_size && feature_idx < feature_size) {
+            int input_index = batch_idx * feature_size + feature_idx;
+            output[input_index] = sigmoid(input[input_index]);
+        }
+    }
+     
+    template<class T>
+    Tensor<T>& Sigmoid<T>::forward(Tensor<T>& input_tensor, bool Istraining) {
+        input = input_tensor;
+        output.reset(new Tensor<T>(input_tensor.getShape()));
+
+        std::vector<int> shape = input.getShape();
+        int batch_size = shape[0];
+        int feature_size = shape[1];
+
+        dim3 blockSize(16, 16); // You can adjust this block size as needed
+        dim3 gridSize((batch_size + blockSize.x - 1) / blockSize.x, (feature_size + blockSize.y - 1) / blockSize.y);
+
+        sigmoid_forward_kernel << <gridSize, blockSize >> > (input.getData(), output->getData(), batch_size, feature_size);
+
+        cudaDeviceSynchronize();
+        cudaError_t cudaError = cudaGetLastError();
+        if (cudaError != cudaSuccess) {
+            printf("error from sigmoid forward method : %s\n", cudaGetErrorString(cudaError));
+            exit(EXIT_FAILURE);  // or handle the error appropriately
+        }
+
+        return *output;
+    }
+
+
 
     template <typename T>
     __device__ T sigmoid_derivative(T x) {
@@ -21,55 +58,16 @@ namespace Hex {
         return sigmoid_value * (static_cast<T>(1) - sigmoid_value);
     }
 
-    // Kernel for forward pass using sigmoid activation
-    template <typename T>
-    __global__ void sigmoid_forward_kernel(const T* input, T* output, int size) {
-        int idx = blockIdx.x * blockDim.x + threadIdx.x;
-        if (idx < size) {
-            output[idx] = sigmoid(input[idx]);
-        }
-    }
-
     // Kernel for backward pass using sigmoid activation
     template <typename T>
-    __global__ void sigmoid_backward_kernel(const T* input, const T* output_error, T* output, int size) {
-        int idx = blockIdx.x * blockDim.x + threadIdx.x;
-        if (idx < size) {
-            output[idx] = sigmoid_derivative(input[idx]) * output_error[idx];
-        }
-    }
+    __global__ void sigmoid_backward_kernel(const T* input, const T* output_error, T* input_error, int batch_size, int feature_size) {
+        int batch_idx = blockIdx.x * blockDim.x + threadIdx.x;
+        int feature_idx = blockIdx.y * blockDim.y + threadIdx.y;
 
-    // Update forward method with sigmoid computation
-    template<class T>
-    Tensor<T>& Sigmoid<T>::forward(Tensor<T>& input_tensor, bool Istraining) {
-        input= input_tensor;
-        output.reset(new Tensor<T>(input_tensor.getShape()));
-
-        std::vector<int> shape = input.getShape();
-        int size = 1;
-        for (int dim : shape) {
-            size *= dim;
+        if (batch_idx < batch_size && feature_idx < feature_size) {
+            int input_index = batch_idx * feature_size + feature_idx;
+            input_error[input_index] = sigmoid_derivative(input[input_index]) * output_error[input_index];
         }
-      /*  std::cout << "dbug strat of sigmoid" << std::endl;
-        std::cout << "intpu" << std::endl;
-        input.print();
-   */
-        
-        sigmoid_forward_kernel << <(size + 255) / 256, 256 >> > (input.getData(), output->getData(), size);
-        cudaDeviceSynchronize();
-        cudaError_t cudaError = cudaGetLastError();
-        if (cudaError != cudaSuccess) {
-            printf("error from sigmoid forward method : %s\n", cudaGetErrorString(cudaError));
-             exit(EXIT_FAILURE);  // or handle the error appropriately
-        }
-
-        //std::cout << "output" << std::endl;
-        //output->print();
-        //std::cout << "dbug end of sigmoid" << std::endl;
-        //std::cout <<   std::endl;
-        //std::cout <<   std::endl;
-        //std::cout <<   std::endl;
-        return *output;
     }
 
     // Update backpropagation method with sigmoid computation
@@ -78,30 +76,24 @@ namespace Hex {
         input_error.reset(new Tensor<T>(output_error.getShape()));
 
         std::vector<int> shape = output_error.getShape();
-        int size = 1;
-        for (int dim : shape) {
-            size *= dim;
-        }
-        //std::cout << "back dbug strat of sigmoid" << std::endl;
-        //std::cout << "intpu" << std::endl;
-        //input.print();
+        int batch_size = shape[0];
+        int feature_size = shape[1];
 
-        //std::cout << "back dbug end of sigmoid" << std::endl;
-        sigmoid_backward_kernel << <(size + 255) / 256, 256 >> > (input.getData(), output_error.getData(), input_error->getData(), size);
+        dim3 blockSize(16, 16); // You can adjust this block size as needed
+        dim3 gridSize((batch_size + blockSize.x - 1) / blockSize.x, (feature_size + blockSize.y - 1) / blockSize.y);
+
+        sigmoid_backward_kernel << <gridSize, blockSize >> > (input.getData(), output_error.getData(), input_error->getData(), batch_size, feature_size);
+
         cudaDeviceSynchronize();
-        //std::cout << "output" << std::endl;
-        //output->print();
-        //std::cout << "dbug end of relu" << std::endl;
         cudaError_t cudaError = cudaGetLastError();
         if (cudaError != cudaSuccess) {
-            printf("error from sigmoid backword method : %s\n", cudaGetErrorString(cudaError));
+            printf("error from sigmoid backward method : %s\n", cudaGetErrorString(cudaError));
             exit(EXIT_FAILURE);  // or handle the error appropriately
         }
-/*        std::cout << std::endl;
-        std::cout << std::endl;*/   
+
         return *input_error;
     }
-    // Explicit instantiation of the template class for supported types
+
     template class Sigmoid<float>;
     template class Sigmoid<int>;
     template class Sigmoid<double>;
