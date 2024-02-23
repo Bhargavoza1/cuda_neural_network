@@ -16,13 +16,10 @@ namespace Hex {
     }
      
     template <typename T>
-    __global__ void sigmoid_forward_kernel(const T* input, T* output, int batch_size, int feature_size) {
-        int batch_idx = blockIdx.x * blockDim.x + threadIdx.x;
-        int feature_idx = blockIdx.y * blockDim.y + threadIdx.y;
-
-        if (batch_idx < batch_size && feature_idx < feature_size) {
-            int input_index = batch_idx * feature_size + feature_idx;
-            output[input_index] = sigmoid(input[input_index]);
+    __global__ void sigmoid_forward_kernel(const T* input, T* output, int size) {
+        int idx = blockIdx.x * blockDim.x + threadIdx.x;
+        if (idx < size) {
+            output[idx] = sigmoid(input[idx]);
         }
     }
      
@@ -32,14 +29,12 @@ namespace Hex {
         output.reset(new Tensor<T>(input_tensor.getShape()));
 
         std::vector<int> shape = input.getShape();
-        int batch_size = shape[0];
-        int feature_size = shape[1];
-
-        dim3 blockSize(16, 16); // You can adjust this block size as needed
-        dim3 gridSize((batch_size + blockSize.x - 1) / blockSize.x, (feature_size + blockSize.y - 1) / blockSize.y);
-
-        sigmoid_forward_kernel << <gridSize, blockSize >> > (input.getData(), output->getData(), batch_size, feature_size);
-
+        int size = 1;
+        for (int dim : shape) {
+            size *= dim;
+        }
+ 
+        sigmoid_forward_kernel << <(size + 255) / 256, 256 >> > (input.getData(), output->getData(), size);
         cudaDeviceSynchronize();
         cudaError_t cudaError = cudaGetLastError();
         if (cudaError != cudaSuccess) {
@@ -60,13 +55,10 @@ namespace Hex {
 
     // Kernel for backward pass using sigmoid activation
     template <typename T>
-    __global__ void sigmoid_backward_kernel(const T* input, const T* output_error, T* input_error, int batch_size, int feature_size) {
-        int batch_idx = blockIdx.x * blockDim.x + threadIdx.x;
-        int feature_idx = blockIdx.y * blockDim.y + threadIdx.y;
-
-        if (batch_idx < batch_size && feature_idx < feature_size) {
-            int input_index = batch_idx * feature_size + feature_idx;
-            input_error[input_index] = sigmoid_derivative(input[input_index]) * output_error[input_index];
+    __global__ void sigmoid_backward_kernel(const T* input, const T* output_error, T* output, int size) {
+        int idx = blockIdx.x * blockDim.x + threadIdx.x;
+        if (idx < size) {
+            output[idx] = sigmoid_derivative(input[idx]) * output_error[idx];
         }
     }
 
@@ -76,13 +68,13 @@ namespace Hex {
         input_error.reset(new Tensor<T>(output_error.getShape()));
 
         std::vector<int> shape = output_error.getShape();
-        int batch_size = shape[0];
-        int feature_size = shape[1];
+     
+        int size = 1;
+        for (int dim : shape) {
+            size *= dim;
+        }
 
-        dim3 blockSize(16, 16); // You can adjust this block size as needed
-        dim3 gridSize((batch_size + blockSize.x - 1) / blockSize.x, (feature_size + blockSize.y - 1) / blockSize.y);
-
-        sigmoid_backward_kernel << <gridSize, blockSize >> > (input.getData(), output_error.getData(), input_error->getData(), batch_size, feature_size);
+        sigmoid_backward_kernel << <(size + 255) / 256, 256 >> > (input.getData(), output_error.getData(), input_error->getData(), size);
 
         cudaDeviceSynchronize();
         cudaError_t cudaError = cudaGetLastError();
