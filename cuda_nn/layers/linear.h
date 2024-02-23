@@ -1,6 +1,6 @@
 #pragma once
 #include "layer.h"
- 
+#include <iostream>
 namespace Hex {
     template<class T>
     class linear : public layer<T>
@@ -10,11 +10,17 @@ namespace Hex {
         bool _bias_as_zero;
         float _w_b_range;
         int _batch_size;
+        int _output_size;
         Tensor<T> weights;
         Tensor<T> bias; 
-        Tensor<T> output;
+
+
         Tensor<T> input;
-        Tensor<T> input_error;
+
+
+        std::unique_ptr<Tensor<T>> input_error;
+
+        std::unique_ptr<Tensor<T>> output;
 
     public:
         // Constructor

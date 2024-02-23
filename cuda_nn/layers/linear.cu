@@ -10,12 +10,9 @@ namespace Hex {
 
 	template<class T>
 	linear<T>::linear(int input_size, int output_size, int batch_size, bool bias_as_zero, float w_b_range)
-		: _bias_as_zero(bias_as_zero), _w_b_range(w_b_range), _batch_size(batch_size),
+		: _bias_as_zero(bias_as_zero), _w_b_range(w_b_range), _batch_size(batch_size), _output_size(output_size),
 		weights(std::vector<int>{input_size, output_size}),
-		bias(std::vector<int>{1, output_size}),
-		output(std::vector<int>{batch_size, output_size}),
-		input(std::vector<int>{batch_size, input_size}),
-		input_error(std::vector<int>{batch_size, input_size})
+		bias(std::vector<int>{1, output_size}) 
 	{
 		init_weight_n_bias();
 
@@ -25,9 +22,9 @@ namespace Hex {
 	template<class T>
 	linear<T>::~linear()
 	{
-		output.cudafree();
+		output->cudafree();
 		input.cudafree();
-		input_error.cudafree();
+		input_error->cudafree();
 	}
 
 	template<class T>
@@ -58,13 +55,9 @@ namespace Hex {
 	Tensor<T>& linear<T>::forward(Tensor<T>& input_tensor, bool Istraining)
 	{
 		
-		if (!Istraining)
-		{
-			input.reshape_2d_test_prediction({ 1 ,input.getShape()[1]});
-			output.reshape_2d_test_prediction({ 1,output.getShape()[1] });
-		}
-		
+ 
 		input = input_tensor;
+		output.reset(new Tensor<T>({ input_tensor.getShape()[0] , _output_size}));
 
 		//if (weights.getShape()[0] != input.getShape()[1]) {
 		//	std::cerr << "Error: Tensor shapes must be compatible for matrix multiplication. Shape of weights: "
@@ -87,17 +80,17 @@ namespace Hex {
 		//bias.print();
 		//std::cout << std::endl;
 		dim3 threadsPerBlock(16, 16);
-		dim3 numBlocks((output.getShape()[0] + threadsPerBlock.x - 1) / threadsPerBlock.x,
-			(output.getShape()[1] + threadsPerBlock.y - 1) / threadsPerBlock.y);
+		dim3 numBlocks((output->getShape()[0] + threadsPerBlock.x - 1) / threadsPerBlock.x,
+			(output->getShape()[1] + threadsPerBlock.y - 1) / threadsPerBlock.y);
 
 		// Launch the forward kernel
-		linearLayerForward << <numBlocks, threadsPerBlock >> > (weights.getData(), input.getData(), output.getData(), bias.getData(),
+		linearLayerForward << <numBlocks, threadsPerBlock >> > (weights.getData(), input.getData(), output->getData(), bias.getData(),
 			weights.getShape()[0], weights.getShape()[1],
 			input.getShape()[0], input.getShape()[1]);
 		cudaDeviceSynchronize();
 
 		//std::cout << "output" << std::endl;
-		//output.print(); 
+		//output->print(); 
 		//std::cout << std::endl;
 
 		cudaError_t cudaError = cudaGetLastError();
@@ -106,7 +99,7 @@ namespace Hex {
 			exit(EXIT_FAILURE);  // or handle the error appropriately
 		}
 
-		return output;
+		return *output;
 	}
 
 	template<class T>
@@ -198,12 +191,12 @@ namespace Hex {
 		// std::cout << "output_error after update" << std::endl;
 		//  output_error.print();
 
-
+		input_error.reset(new Tensor<T>({ output_error.getShape()[0] ,input.getShape()[1] }));
 		dim3 block_size(16, 16); // Adjust block size according to your GPU architecture
 		dim3 grid_size((input.getShape()[1] + block_size.x - 1) / block_size.x,
 			(input.getShape()[0] + block_size.y - 1) / block_size.y);
 
-		linear_backprop_kernel << <grid_size, block_size >> > (input_error.getData(), output_error.getData(),
+		linear_backprop_kernel << <grid_size, block_size >> > (input_error->getData(), output_error.getData(),
 			weights.getData(), input.getShape()[0], input.getShape()[1], output_error.getShape()[1]);
 
 		cudaDeviceSynchronize();
@@ -214,7 +207,7 @@ namespace Hex {
 
 			backpropagationAndUpdateKernel << <numBlocks, threadsPerBlock >> > (
 				weights.getData(), bias.getData(),
-				output_error.getData(), input.getData(), input_error.getData(),
+				output_error.getData(), input.getData(), input_error->getData(),
 				learning_rate, weights.getShape()[0], weights.getShape()[1],
 				output_error.getShape()[0], output_error.getShape()[1]);
 			cudaDeviceSynchronize();*/
@@ -241,11 +234,11 @@ namespace Hex {
 		//weights.print();
 		//std::cout << std::endl;
 		//std::cout << "input_error after update" << std::endl;
-		//input_error.print();
+		//input_error->print();
 		//std::cout << "dbug end of linear" << std::endl;
 		//std::cout << std::endl;
 
-		return input_error;
+		return *input_error;
 	}
 
 

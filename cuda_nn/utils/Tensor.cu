@@ -145,18 +145,7 @@ namespace Hex {
         }
         shape = new_shape;
     }
-
-    template<typename T>
-    void Tensor<T>::reshape_2d_test_prediction(const std::vector<int>& new_shape)
-    {
-
-        // Check if reshaping to {1, feature}
-        if (new_shape.size() == 2 && new_shape[0] == 1) {
-            shape = new_shape;
-            return;
-        }
-    }
-
+     
 
     // Helper function to calculate indices from a flat index
      template <typename T>
