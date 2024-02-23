@@ -57,23 +57,23 @@ namespace Hex {
         int row = blockIdx.x * blockDim.x + threadIdx.x;
         int col = blockIdx.y * blockDim.y + threadIdx.y;
 
-        if (row < features && col < batch_size) {
-            int input_idx = row * batch_size + col;
+        if (row < batch_size && col < features) {
+            int input_idx = row * features + col;
 
             if (Istraining) {
                 // Calculate mean
-                if (threadIdx.y == 0) {
+                if (threadIdx.x == 0) {
                     T sum = 0;
-                    for (int b = 0; b < batch_size; ++b) {
-                        int data_idx = row * batch_size + b;
+                    for (int b = 0; b < features; ++b) {
+                        int data_idx = row * features + b;
                         sum += input_data[data_idx];
                     }
                     input_mean[row] = sum / (batch_size);
 
                     T diff = 0;
                     T sum_squares = 0.0f;
-                    for (int b = 0; b < batch_size; ++b) {
-                        int data_idx = row * batch_size + b;
+                    for (int b = 0; b < features; ++b) {
+                        int data_idx = row * features + b;
                         diff = input_data[data_idx] - input_mean[row];
                         sum_squares += diff * diff;
                     }
@@ -100,17 +100,19 @@ namespace Hex {
     {
 
         input = input_tensor;
-
-
+        //std::cout << "input" << std::endl; 
+        //input.print();
+        //std::cout   << std::endl;
         output.reset(new Tensor<T>({ input_tensor.getShape() }));
         x_normalized.reset(new Tensor<T>({ input_tensor.getShape() }));
 
-        int _fetures = input.getShape()[1];
         int _batch_size = input.getShape()[0];
+        int _fetures = input.getShape()[1];
+        
 
         dim3 threadsPerBlock(16, 16);
-        dim3 numBlocks((_fetures + threadsPerBlock.x - 1) / threadsPerBlock.x,
-            (_batch_size + threadsPerBlock.y - 1) / threadsPerBlock.y);
+        dim3 numBlocks((_batch_size + threadsPerBlock.x - 1) / threadsPerBlock.x,
+            (_fetures + threadsPerBlock.y - 1) / threadsPerBlock.y);
         // input.print();
         batchnorm_forward_2d_kernel << < numBlocks, threadsPerBlock >> > (input.getData(),
             output->getData(),
@@ -131,7 +133,9 @@ namespace Hex {
          //input_mean.print();
          //input_var.print();
          //x_normalized.print();
-         //output->print();
+        //std::cout << "output" << std::endl;
+        //  output->print();
+        //   std::cout   << std::endl;
          //running_mean.print();
          //running_var.print();
          //x_normalized->print();
@@ -305,8 +309,8 @@ namespace Hex {
         int row = blockIdx.x * blockDim.x + threadIdx.x;
         int col = blockIdx.y * blockDim.y + threadIdx.y;
 
-        if (row < features && col < batch_size) {
-            int input_idx = row * batch_size + col;
+        if (row < batch_size && col < features) {
+            int input_idx = row * features + col;
             T grad_gamma = 0.0;
             T grad_beta = 0.0;
 
@@ -318,10 +322,10 @@ namespace Hex {
              // Calculate dvar
 
             T dvar = 0.0f;
-            if (threadIdx.y == 0) {
+            if (threadIdx.x == 0) {
 
-                for (int b = 0; b < batch_size; ++b) {
-                    int data_idx = row * batch_size + b;
+                for (int b = 0; b < features; ++b) {
+                    int data_idx = row * features + b;
                     T r = (input_data[data_idx] - input_mean[row]);
                     T t = pow(input_var[row] + eps, -1.5);
                     dvar += grad_normalized[data_idx] * r * -0.5 * t;
@@ -334,12 +338,12 @@ namespace Hex {
             // Calculate dmean
 
             T dmean = 0.0f;
-            if (threadIdx.y == 0) {
+            if (threadIdx.x == 0) {
 
                 T a = 0.0;
                 T d = 0.0;
-                for (int b = 0; b < batch_size; ++b) {
-                    int data_idx = row * batch_size + b;
+                for (int b = 0; b < features; ++b) {
+                    int data_idx = row * features + b;
                     a += grad_normalized[data_idx] * (-1 / sqrt(input_var[row] + eps));
                     d += (-2 * (input_data[data_idx] - input_mean[row])) / batch_size;
                 }
@@ -347,18 +351,18 @@ namespace Hex {
             }
             __syncthreads();
 
-            for (int b = 0; b < batch_size; ++b) {
-                int data_idx = row * batch_size + b;
+            for (int b = 0; b < features; ++b) {
+                int data_idx = row * features + b;
 
                 input_error[data_idx] = grad_normalized[data_idx] / sqrt(input_var[row] + eps) + dvar * 2.0 * (input_data[data_idx] - input_mean[row]) / batch_size + dmean / batch_size;
 
             }
 
-            if (threadIdx.y == 0) {
+            if (threadIdx.x == 0) {
 
 
-                for (int b = 0; b < batch_size; ++b) {
-                    int data_idx = row * batch_size + b;
+                for (int b = 0; b < features; ++b) {
+                    int data_idx = row * features + b;
                     grad_gamma += output_error[data_idx] * x_normalized[data_idx];
                     grad_beta += output_error[data_idx];
                 }
@@ -377,11 +381,12 @@ namespace Hex {
     {
         input_error.reset(new Tensor<T>({ input.getShape() }));
         grad_normalized.reset(new Tensor<T>({ input.getShape() }));
-        const int features = input.getShape()[1];
         const int batch_size = input.getShape()[0];
+        const int features = input.getShape()[1];
+       
         // input.print();
         const dim3 blockSize(16, 16); // Adjust block size as needed
-        const dim3 gridSize((features + blockSize.x - 1) / blockSize.x, (batch_size + blockSize.y - 1) / blockSize.y); // Adjust grid size as needed
+        const dim3 gridSize((batch_size + blockSize.x - 1) / blockSize.x, (features + blockSize.y - 1) / blockSize.y); // Adjust grid size as needed
         // x_normalized->print();
          // Invoke the CUDA kernel for backpropagation
         batchnorm_backward_2d_kernel << <gridSize, blockSize >> > (input.getData(),

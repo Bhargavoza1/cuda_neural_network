@@ -29,10 +29,10 @@ namespace Hex
 		//input_tensor.print();
 		//std::cout << std::endl;
 		X = linear1.forward(input_tensor , Istraining);
-	//	X = bn1.forward(X, Istraining);
+	 	
 		//X.print();
 		X = relu1.forward(X , Istraining);
-
+		//X = bn1.forward(X, Istraining);
 		//////// hidden layer
 		for (int i = 0; i < _hiddenlayer; ++i) {
 			X = linear2.forward(X , Istraining);
@@ -69,9 +69,10 @@ namespace Hex
 		}
 		//X.print();
 		// Backpropagate through the first hidden layer
+		//X = bn1.backpropagation(X, learning_rate);
 		X = relu1.backpropagation(X, learning_rate);
 		//X.print();
-		//X = bn1.backpropagation(X, learning_rate);
+	
 		  linear1.backpropagation(X, learning_rate);
 		//X.print();
 		 

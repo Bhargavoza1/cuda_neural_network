@@ -152,11 +152,11 @@ int main() {
 
    
   
-    trainNeuralNetwork(*mlp, *x_tensor, *y_tensor, 1000  , 0.2f); 
+    trainNeuralNetwork(*mlp, *x_tensor, *y_tensor, 1000 , 0.2f); 
      
 
  
-       predictAndPrintResults(*mlp, *x_tensor, *y_tensor);
+        predictAndPrintResults(*mlp, *x_tensor, *y_tensor);
  
     
     return 0;
