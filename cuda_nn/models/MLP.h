@@ -4,6 +4,7 @@
 #include "../layers/linear.h"
 #include "../layers/ReLU.h"
 #include "../layers/Sigmoid.h"
+#include "../layers/BatchNorm.h"
 #include "../utils/Tensor.h"
 namespace Hex {
 	template <class T>
@@ -15,6 +16,7 @@ namespace Hex {
         Tensor<T> X;
        
         linear<T>  linear1;
+        BatchNorm<T> bn1;
         ReLU<T>  relu1;
         linear<T>  linear2;
         ReLU<T>  relu2;
@@ -23,7 +25,7 @@ namespace Hex {
 
 	public:
         // Constructor
-        MLP(int input_size, int output_size, int hiddenlayer = 1, int h_l_dimension = 10);
+        MLP(int input_size, int output_size,  int batch_size = 1 , int hiddenlayer = 1, int h_l_dimension = 10);
         ~MLP();
 
         // Override forward method

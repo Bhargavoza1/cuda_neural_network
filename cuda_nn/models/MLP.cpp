@@ -4,13 +4,14 @@
 namespace Hex
 {
 	template <class T>
-	MLP<T>::MLP(int input_size, int output_size, int hiddenlayer  , int h_l_dimension  ):
+	MLP<T>::MLP(int input_size, int output_size, int batch_size, int hiddenlayer, int h_l_dimension) :
 		_hiddenlayer(hiddenlayer),
-		linear1(input_size, h_l_dimension),
+		linear1(input_size, h_l_dimension, batch_size),
+		bn1(h_l_dimension , TensorShape::_2D),
 		relu1(),
-		linear2(h_l_dimension, h_l_dimension),
+		linear2(h_l_dimension, h_l_dimension, batch_size),
 		relu2(),
-		linear3(h_l_dimension, output_size, false),
+		linear3(h_l_dimension, output_size, batch_size ),
 		sigmoid1()
 	{}
 
@@ -28,7 +29,7 @@ namespace Hex
 		//input_tensor.print();
 		//std::cout << std::endl;
 		X = linear1.forward(input_tensor , Istraining);
-
+	//	X = bn1.forward(X, Istraining);
 		//X.print();
 		X = relu1.forward(X , Istraining);
 
@@ -43,7 +44,7 @@ namespace Hex
 		X = linear3.forward(X , Istraining);
 		//X.print();
 		X = sigmoid1.forward(X , Istraining);
-		//X.print();
+		// X.print();
 		return X;
 	}
 
@@ -52,7 +53,8 @@ namespace Hex
 
 	template<class T>
 	void MLP<T>::backpropa(Tensor<T>& output_error, float learning_rate  )
-	{
+	{	
+	 
 		// Calculate gradients for the output layer
 		X= sigmoid1.backpropagation(output_error, learning_rate);
 		//X.print();
@@ -69,6 +71,7 @@ namespace Hex
 		// Backpropagate through the first hidden layer
 		X = relu1.backpropagation(X, learning_rate);
 		//X.print();
+		//X = bn1.backpropagation(X, learning_rate);
 		  linear1.backpropagation(X, learning_rate);
 		//X.print();
 		 
