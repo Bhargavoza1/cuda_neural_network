@@ -5,6 +5,7 @@
 #include "../layers/ReLU.h"
 #include "../layers/Sigmoid.h"
 #include "../utils/Tensor.h"
+#include "../layers/BatchNorm.h"
 namespace Hex {
 	template <class T>
 	class MLP : public layer<T>
@@ -15,7 +16,7 @@ namespace Hex {
         Tensor<T> X;
        
         linear<T>  linear1;
-    
+        BatchNorm<T> bn1;
         ReLU<T>  relu1;
         linear<T>  linear2;
         ReLU<T>  relu2;

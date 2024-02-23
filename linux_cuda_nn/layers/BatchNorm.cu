@@ -62,35 +62,38 @@ namespace Hex {
 
             if (Istraining) {
                 // Calculate mean
-                if (threadIdx.x == 0) {
+                if (threadIdx.x == 0 ) {
                     T sum = 0;
-                    for (int b = 0; b < features; ++b) {
-                        int data_idx = row * features + b;
+                    for (int b = 0; b < batch_size; ++b) {
+                        int data_idx = b * features + col;
                         sum += input_data[data_idx];
+                       
                     }
-                    input_mean[row] = sum / (batch_size);
-
+                    input_mean[col] = sum / (batch_size);
+                   
+                   // 
                     T diff = 0;
                     T sum_squares = 0.0f;
-                    for (int b = 0; b < features; ++b) {
-                        int data_idx = row * features + b;
-                        diff = input_data[data_idx] - input_mean[row];
+                    for (int b = 0; b < batch_size; ++b) {
+                        int data_idx = b * features + col;
+                        diff = input_data[data_idx] - input_mean[col];
                         sum_squares += diff * diff;
                     }
-                    input_var[row] = sum_squares / (batch_size);
+                    input_var[col] = sum_squares / (batch_size);
+                   // printf(" input_var[col] %f \n", input_var[col]);
                 }
                 __syncthreads();
 
-                x_normalized[input_idx] = (input_data[input_idx] - input_mean[row]) / sqrtf(input_var[row] + eps);
-                output_data[input_idx] = gamma_data[row] * x_normalized[input_idx] + beta_data[row];
+                x_normalized[input_idx] = (input_data[input_idx] - input_mean[col]) / sqrtf(input_var[col] + eps); 
+                output_data[input_idx] = gamma_data[col] * x_normalized[input_idx] + beta_data[col];
 
-                running_mean[row] = momentum * running_mean[row] + (1 - momentum) * input_mean[row];
-                running_variance[row] = momentum * running_variance[row] + (1 - momentum) * input_var[row];
+                running_mean[col] = momentum * running_mean[col] + (1 - momentum) * input_mean[col];
+                running_variance[col] = momentum * running_variance[col] + (1 - momentum) * input_var[col];
 
             }
             else {
-                x_normalized[input_idx] = (input_data[input_idx] - running_mean[row]) / sqrtf(running_variance[row] + eps);
-                output_data[input_idx] = gamma_data[row] * x_normalized[input_idx] + beta_data[row];
+                x_normalized[input_idx] = (input_data[input_idx] - running_mean[col]) / sqrtf(running_variance[col] + eps);
+                output_data[input_idx] = gamma_data[col] * x_normalized[input_idx] + beta_data[col];
             }
         }
     }
@@ -100,9 +103,9 @@ namespace Hex {
     {
 
         input = input_tensor;
-        //std::cout << "input" << std::endl; 
-        //input.print();
-        //std::cout   << std::endl;
+       //  std::cout << "input" << std::endl; 
+         //input.print();
+        // std::cout   << std::endl;
         output.reset(new Tensor<T>({ input_tensor.getShape() }));
         x_normalized.reset(new Tensor<T>({ input_tensor.getShape() }));
 
@@ -130,8 +133,8 @@ namespace Hex {
             Istraining);
         cudaDeviceSynchronize();
         //input.print();
-         //input_mean.print();
-         //input_var.print();
+        // input_mean.print();
+        //  input_var.print();
          //x_normalized.print();
         //std::cout << "output" << std::endl;
         //  output->print();
@@ -139,6 +142,7 @@ namespace Hex {
          //running_mean.print();
          //running_var.print();
          //x_normalized->print();
+        //gamma.print();
         return *output;
     }
 
@@ -304,7 +308,8 @@ namespace Hex {
         T* __restrict__ grad_normalized,
         const int features,
         const int batch_size,
-        const float eps)
+        const float eps,
+        const float learning_rate)
     {
         int row = blockIdx.x * blockDim.x + threadIdx.x;
         int col = blockIdx.y * blockDim.y + threadIdx.y;
@@ -317,17 +322,17 @@ namespace Hex {
             // Calculate gradient of beta and gamma
 
 
-            grad_normalized[input_idx] = output_error[input_idx] * gamma_gradient[row];
-            //  printf("dmean %f \n", grad_normalized[input_idx]);
+            grad_normalized[input_idx] = output_error[input_idx] * gamma_gradient[col];
+           
              // Calculate dvar
 
             T dvar = 0.0f;
             if (threadIdx.x == 0) {
 
-                for (int b = 0; b < features; ++b) {
-                    int data_idx = row * features + b;
-                    T r = (input_data[data_idx] - input_mean[row]);
-                    T t = pow(input_var[row] + eps, -1.5);
+                for (int b = 0; b < batch_size; ++b) {
+                    int data_idx = b * features + col;
+                    T r = (input_data[data_idx] - input_mean[col]);
+                    T t = pow(input_var[col] + eps, -1.5);
                     dvar += grad_normalized[data_idx] * r * -0.5 * t;
 
                 }
@@ -342,33 +347,33 @@ namespace Hex {
 
                 T a = 0.0;
                 T d = 0.0;
-                for (int b = 0; b < features; ++b) {
-                    int data_idx = row * features + b;
-                    a += grad_normalized[data_idx] * (-1 / sqrt(input_var[row] + eps));
-                    d += (-2 * (input_data[data_idx] - input_mean[row])) / batch_size;
+                for (int b = 0; b < batch_size; ++b) {
+                    int data_idx = b * features + col;
+                    a += grad_normalized[data_idx] * (-1 / sqrt(input_var[col] + eps));
+                    d += (-2 * (input_data[data_idx] - input_mean[col])) / batch_size;
                 }
                 dmean = a * dvar + d;
             }
             __syncthreads();
+           
+            for (int b = 0; b < batch_size; ++b) {
+                int data_idx = b * features + col;
 
-            for (int b = 0; b < features; ++b) {
-                int data_idx = row * features + b;
-
-                input_error[data_idx] = grad_normalized[data_idx] / sqrt(input_var[row] + eps) + dvar * 2.0 * (input_data[data_idx] - input_mean[row]) / batch_size + dmean / batch_size;
+                input_error[data_idx] = grad_normalized[data_idx] / sqrt(input_var[col] + eps) + dvar * 2.0 * (input_data[data_idx] - input_mean[col]) / batch_size + dmean / batch_size;
 
             }
 
             if (threadIdx.x == 0) {
 
 
-                for (int b = 0; b < features; ++b) {
-                    int data_idx = row * features + b;
+                for (int b = 0; b < batch_size; ++b) {
+                    int data_idx = b * features + col;
                     grad_gamma += output_error[data_idx] * x_normalized[data_idx];
                     grad_beta += output_error[data_idx];
                 }
 
-                gamma_gradient[row] = grad_gamma;
-                beta_gradient[row] = grad_beta;
+                gamma_gradient[col] -=  grad_gamma;
+                beta_gradient[col] -=   grad_beta;
             }
             __syncthreads();
 
@@ -383,7 +388,7 @@ namespace Hex {
         grad_normalized.reset(new Tensor<T>({ input.getShape() }));
         const int batch_size = input.getShape()[0];
         const int features = input.getShape()[1];
-       
+       // gamma.print();
         // input.print();
         const dim3 blockSize(16, 16); // Adjust block size as needed
         const dim3 gridSize((batch_size + blockSize.x - 1) / blockSize.x, (features + blockSize.y - 1) / blockSize.y); // Adjust grid size as needed
@@ -400,13 +405,15 @@ namespace Hex {
             grad_normalized->getData(),
             features,
             batch_size,
-            eps);
+            eps, learning_rate);
 
         // Synchronize to ensure the kernel is finished
         cudaDeviceSynchronize();
         //std::cout << " aaaaaaaaaaaaaaa" << std::endl;
         // gamma.print();
+
         // beta.print();
+        //input_error->print();
         return *input_error;
     }
 
@@ -502,8 +509,8 @@ namespace Hex {
                 }
             }
 
-            gamma_gradient[channel_idx] = grad_gamma;
-            beta_gradient[channel_idx] = grad_beta;
+            gamma_gradient[channel_idx] -= grad_gamma;
+            beta_gradient[channel_idx] -= grad_beta;
         }
         __syncthreads();
 

@@ -3,10 +3,11 @@
  
 namespace Hex
 {
-template <class T>
+	template <class T>
 	MLP<T>::MLP(int input_size, int output_size, int batch_size, int hiddenlayer, int h_l_dimension) :
 		_hiddenlayer(hiddenlayer),
 		linear1(input_size, h_l_dimension, batch_size),
+		bn1(h_l_dimension , TensorShape::_2D  ),
 		relu1(),
 		linear2(h_l_dimension, h_l_dimension, batch_size),
 		relu2(),
@@ -31,13 +32,14 @@ template <class T>
 	 	
 		//X.print();
 		X = relu1.forward(X , Istraining);
-		//X = bn1.forward(X, Istraining);
+		X = bn1.forward(X, Istraining);
 		//////// hidden layer
 		for (int i = 0; i < _hiddenlayer; ++i) {
 			X = linear2.forward(X , Istraining);
 			//X.print();
 			X = relu2.forward(X , Istraining);
 			//X.print();
+		//
 		}
 		
 		X = linear3.forward(X , Istraining);
@@ -59,16 +61,18 @@ template <class T>
 		//X.print();
 		X = linear3.backpropagation(X, learning_rate);
 		//X.print();
-	 
+		
 		for (int i = 0; i < _hiddenlayer; ++i) {
+		//	
 			X = relu2.backpropagation(X, learning_rate);
 			//X.print();
 			X = linear2.backpropagation(X, learning_rate);
 			//X.print();
 		}
+		X = bn1.backpropagation(X, learning_rate);
 		//X.print();
 		// Backpropagate through the first hidden layer
-		//X = bn1.backpropagation(X, learning_rate);
+		
 		X = relu1.backpropagation(X, learning_rate);
 		//X.print();
 	
@@ -76,6 +80,7 @@ template <class T>
 		//X.print();
 		 
 	}
+
 
 	// Explicit instantiation of the template class for supported types
 	template class MLP<float>;
