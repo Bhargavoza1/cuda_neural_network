@@ -13,13 +13,10 @@ namespace Hex {
     }
 
     template <typename T>
-    __global__ void relu_forward_kernel(const T* input, T* output, int batch_size, int feature_size) {
-        int batch_idx = blockIdx.x * blockDim.x + threadIdx.x;
-        int feature_idx = blockIdx.y * blockDim.y + threadIdx.y;
-
-        if (batch_idx < batch_size && feature_idx < feature_size) {
-            int input_index = batch_idx * feature_size + feature_idx;
-            output[input_index] = max(input[input_index], static_cast<T>(0));
+    __global__ void relu_forward_kernel(const T* input, T* output, int size ) {
+        int idx = blockIdx.x * blockDim.x + threadIdx.x;
+        if (idx < size) {
+            output[idx] = max(input[idx], static_cast<T>(0));
         }
     }
 
@@ -30,13 +27,14 @@ namespace Hex {
         output.reset(new Tensor<T>(input_tensor.getShape()));
 
         std::vector<int> shape = input.getShape();
-        int batch_size = shape[0];
-        int feature_size = shape[1];
+ 
 
-        dim3 blockSize(16, 16);  
-        dim3 gridSize((batch_size + blockSize.x - 1) / blockSize.x, (feature_size + blockSize.y - 1) / blockSize.y);
+        int size = 1;
+        for (int dim : shape) {
+            size *= dim;
+        }
 
-        relu_forward_kernel << <gridSize, blockSize >> > (input.getData(), output->getData(), batch_size, feature_size);
+        relu_forward_kernel << <(size + 255) / 256, 256 >> > (input.getData(), output->getData(), size); 
 
         cudaDeviceSynchronize();
         cudaError_t cudaError = cudaGetLastError();
@@ -50,13 +48,11 @@ namespace Hex {
 
      
     template <typename T>
-    __global__ void relu_backward_kernel(const T* input, const T* output_error, T* input_error, int batch_size, int feature_size) {
-        int batch_idx = blockIdx.x * blockDim.x + threadIdx.x;
-        int feature_idx = blockIdx.y * blockDim.y + threadIdx.y;
-
-        if (batch_idx < batch_size && feature_idx < feature_size) {
-            int input_index = batch_idx * feature_size + feature_idx;
-            input_error[input_index] = (input[input_index] > static_cast<T>(0)) ? output_error[input_index] : static_cast<T>(0);
+    __global__ void relu_backward_kernel(const T* input, const T* output_error, T* output, int size) {
+        int idx = blockIdx.x * blockDim.x + threadIdx.x;
+        if (idx < size) {
+            // If the input value is greater than 0, set the gradient to 1, otherwise set it to 0
+            output[idx] = (input[idx] > static_cast<T>(0)) ? output_error[idx] : static_cast<T>(0);
         }
     }
 
@@ -66,13 +62,13 @@ namespace Hex {
         input_error.reset(new Tensor<T>(output_error.getShape()));
 
         std::vector<int> shape = output_error.getShape();
-        int batch_size = shape[0];
-        int feature_size = shape[1];
+ 
+        int size = 1;
+        for (int dim : shape) {
+            size *= dim;
+        }
 
-        dim3 blockSize(16, 16); // You can adjust this block size as needed
-        dim3 gridSize((batch_size + blockSize.x - 1) / blockSize.x, (feature_size + blockSize.y - 1) / blockSize.y);
-
-        relu_backward_kernel << <gridSize, blockSize >> > (input.getData(), output_error.getData(), input_error->getData(), batch_size, feature_size);
+        relu_backward_kernel << <(size + 255) / 256, 256 >> > (input.getData(), output_error.getData(), input_error->getData(), size);
 
         cudaDeviceSynchronize();
 
