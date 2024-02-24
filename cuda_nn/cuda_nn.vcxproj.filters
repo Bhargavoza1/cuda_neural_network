@@ -29,6 +29,9 @@
     <CudaCompile Include="layers\flatten_layer.cu">
       <Filter>layers</Filter>
     </CudaCompile>
+    <CudaCompile Include="example\XOR.cu">
+      <Filter>example</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="layers">
@@ -42,6 +45,9 @@
     </Filter>
     <Filter Include="models">
       <UniqueIdentifier>{d07e8d32-e84e-4069-b745-949bf1041351}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="example">
+      <UniqueIdentifier>{9bf7e481-8b9d-4e02-96a2-e5dc4aadd57a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -80,6 +86,9 @@
     </ClInclude>
     <ClInclude Include="layers\flatten_layer.h">
       <Filter>layers</Filter>
+    </ClInclude>
+    <ClInclude Include="example\XOR.h">
+      <Filter>example</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

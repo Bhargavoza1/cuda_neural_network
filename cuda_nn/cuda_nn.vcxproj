@@ -78,6 +78,7 @@
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <CudaCompile Include="example\XOR.cu" />
     <CudaCompile Include="layers\BatchNorm.cu" />
     <CudaCompile Include="layers\CNN2D.cu" />
     <CudaCompile Include="costs\MSE.cu">
@@ -356,6 +357,7 @@ set CUDAFE_FLAGS=--sdk_dir "C:\Program Files (x86)\Windows Kits\10\"
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="costs\MSE.h" />
+    <ClInclude Include="example\XOR.h" />
     <ClInclude Include="layers\BatchNorm.h" />
     <ClInclude Include="layers\CNN2D.h" />
     <ClInclude Include="layers\flatten_layer.h" />
