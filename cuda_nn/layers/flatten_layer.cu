@@ -16,7 +16,7 @@ namespace Hex {
             flattened_size = input_channels * input_width * input_height;
 
             // Reshape the tensor to a flat vector while preserving the batch dimension
-            input_tensor.reshape({ flattened_size , batch_size });
+            input_tensor.reshape({ batch_size, flattened_size });
 
             return input_tensor;
         }

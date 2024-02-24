@@ -90,6 +90,9 @@
     <ClInclude Include="example\XOR.h">
       <Filter>example</Filter>
     </ClInclude>
+    <ClInclude Include="models\Image_CF.h">
+      <Filter>models</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="utils\Errorhelper.cpp">
@@ -100,6 +103,9 @@
     </ClCompile>
     <ClCompile Include="utils\tensor_oprations.cu">
       <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="models\Image_CF.cpp">
+      <Filter>models</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

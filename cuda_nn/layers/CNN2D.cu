@@ -65,8 +65,8 @@ namespace Hex
     }
 
     template<class T>
-    CNN2D<T>::CNN2D(const std::vector<int>& batch_width_height, const std::vector<int>& in_out_channels, int kernel_size, int padding,int stride,float w_b_range) :
-        _batch_size(batch_width_height[0]), _in_channels(in_out_channels[0]), _out_channels(in_out_channels[1]), _kernel_size(kernel_size),
+    CNN2D<T>::CNN2D(const int batch_size, const std::vector<int>& in_out_channels, int kernel_size, int padding,int stride,float w_b_range) :
+        _batch_size(batch_size), _in_channels(in_out_channels[0]), _out_channels(in_out_channels[1]), _kernel_size(kernel_size),
         _padding(padding), _stride(stride), _w_b_range(w_b_range),
         weights(std::vector<int>{_out_channels, _in_channels, _kernel_size, _kernel_size  }),
         bias(std::vector<int>{_out_channels})

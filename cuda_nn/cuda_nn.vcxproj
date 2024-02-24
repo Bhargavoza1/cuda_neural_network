@@ -366,11 +366,13 @@ set CUDAFE_FLAGS=--sdk_dir "C:\Program Files (x86)\Windows Kits\10\"
     <ClInclude Include="layers\MaxPool2d.h" />
     <ClInclude Include="layers\ReLU.h" />
     <ClInclude Include="layers\Sigmoid.h" />
+    <ClInclude Include="models\Image_CF.h" />
     <ClInclude Include="models\MLP.h" />
     <ClInclude Include="utils\Tensor.h" />
     <ClInclude Include="utils\tensor_oprations.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="models\Image_CF.cpp" />
     <ClCompile Include="utils\Errorhelper.cpp">
       <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
