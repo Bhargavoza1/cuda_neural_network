@@ -19,6 +19,7 @@ include_directories(
 set(SOURCES
     main.cpp
     costs/MSE.cu
+    example/XOR.cu
     layers/linear.cu
     layers/ReLU.cu
     layers/CNN2D.cu
