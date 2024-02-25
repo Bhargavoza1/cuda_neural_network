@@ -13,40 +13,40 @@ namespace Hex
 {
     template<class T>
     __global__ void cnn2d_W_B_init(T* weights, T* bias, int out_channels, int in_channels, int kernel_size, float w_b_range) {
-        //int row = blockIdx.y * blockDim.y + threadIdx.y;
-        //int col = blockIdx.x * blockDim.x + threadIdx.x;
-
-        //if (row < out_channels && col < in_channels * kernel_size * kernel_size) {
-        //    int index = row * (in_channels * kernel_size * kernel_size) + col;
-        //    curandState state;
-        //    curand_init(clock64(), index, 0, &state); // Initialize random number generator for each thread
-
-        //    weights[index] = curand_uniform(&state) * (2 * w_b_range) - w_b_range; // Generate random number in range [-w_b_range, w_b_range]
-        //}
-
-        //if (row < out_channels && col == 0) {
-        //    curandState state;
-        //    curand_init(clock64(), row, 0, &state); // Initialize random number generator for each thread
-
-        //    bias[row] = curand_uniform(&state) * (2 * w_b_range) - w_b_range; // Generate random number in range [-w_b_range, w_b_range]
-        //}
-
-
         int row = blockIdx.y * blockDim.y + threadIdx.y;
         int col = blockIdx.x * blockDim.x + threadIdx.x;
 
         if (row < out_channels && col < in_channels * kernel_size * kernel_size) {
             int index = row * (in_channels * kernel_size * kernel_size) + col;
- 
-            weights[index] = static_cast<T>(index  );
+            curandState state;
+            curand_init(clock64(), index, 0, &state); // Initialize random number generator for each thread
+
+            weights[index] = curand_uniform(&state) * (2 * w_b_range) - w_b_range; // Generate random number in range [-w_b_range, w_b_range]
         }
 
         if (row < out_channels && col == 0) {
             curandState state;
-            curand_init(clock64(), row, 0, &state);  
+            curand_init(clock64(), row, 0, &state); // Initialize random number generator for each thread
 
-            bias[row] = static_cast<T>(row +1 );  
+            bias[row] = curand_uniform(&state) * (2 * w_b_range) - w_b_range; // Generate random number in range [-w_b_range, w_b_range]
         }
+
+
+        //int row = blockIdx.y * blockDim.y + threadIdx.y;
+        //int col = blockIdx.x * blockDim.x + threadIdx.x;
+
+        //if (row < out_channels && col < in_channels * kernel_size * kernel_size) {
+        //    int index = row * (in_channels * kernel_size * kernel_size) + col;
+ 
+        //    weights[index] = static_cast<T>(index  );
+        //}
+
+        //if (row < out_channels && col == 0) {
+        //    curandState state;
+        //    curand_init(clock64(), row, 0, &state);  
+
+        //    bias[row] = static_cast<T>(row +1 );  
+        //}
 
         
     }
@@ -234,7 +234,7 @@ namespace Hex
 
         input_error.reset(new Tensor<T>({ _batch_size , _in_channels ,_in_width , _in_height }));
         dim3 threadsPerBlock(8 ,8, 8);
-        dim3 numBlocks(_batch_size * _out_channels,
+        dim3 numBlocks(_batch_size * _in_channels,
             (_in_width + threadsPerBlock.x - 1) / threadsPerBlock.x,
             (_in_height + threadsPerBlock.y - 1) / threadsPerBlock.y
         );
