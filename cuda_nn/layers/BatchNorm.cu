@@ -147,7 +147,7 @@ namespace Hex {
     }
 
     template<class T>
-    __global__ void batchnorm_forward_4d_kernel(const T* __restrict__ input_data,
+    __global__ void batchnorm_forwa23rd_4d_kernel(const T* __restrict__ input_data,
         T* __restrict__ output_data,
         const T* __restrict__ gamma_data,
         const T* __restrict__ beta_data,
@@ -223,6 +223,61 @@ namespace Hex {
 
         }
     }
+    template<class T>
+    __global__ void batchnorm_forward_4d_kernel(const T* __restrict__ input_data,
+        T* __restrict__ output_data,
+        const T* __restrict__ gamma_data,
+        const T* __restrict__ beta_data,
+        T* __restrict__ running_mean,
+        T* __restrict__ running_variance,
+        T* __restrict__  x_normalized,
+        T* __restrict__  input_mean,
+        T* __restrict__  input_var,
+        const int batch_size,
+        const int out_channels,
+        const int input_width,
+        const int input_height,
+        const float momentum,
+        const float eps,
+        const bool Istraining) {
+
+        int idx_x = blockIdx.x * blockDim.x + threadIdx.x;
+        int idx_y = blockIdx.y * blockDim.y + threadIdx.y;
+        int idx_z = blockIdx.z * blockDim.z + threadIdx.z;
+        __shared__ T sdata[128];
+        __shared__ T svardata[128];
+
+
+        sdata[threadIdx.z] = 0.0f;
+        svardata[threadIdx.z] = 0.0f;
+        if (idx_x < input_width && idx_y < input_height && idx_z < batch_size * out_channels) {
+            int b = idx_z / out_channels;
+            int c = idx_z % out_channels;
+            int index = (b * out_channels + c) * input_width * input_height + idx_y * input_width + idx_x;
+
+            if (Istraining) {
+
+                atomicAdd(&sdata[threadIdx.z], input_data[index]);
+                input_mean[c] = sdata[threadIdx.z] / (batch_size * input_height * input_width);
+
+                atomicAdd(&svardata[threadIdx.z], (input_data[index] - input_mean[c]) * (input_data[index] - input_mean[c]));
+                input_var[c] = svardata[threadIdx.z] / (batch_size * input_height * input_width);
+                __syncthreads();
+
+
+                x_normalized[index] = (input_data[index] - input_mean[c]) / sqrtf(input_var[c] + eps);
+                output_data[index] = gamma_data[c] * x_normalized[index] + beta_data[c];
+                 
+
+                running_mean[c] = momentum * running_mean[c] + (1 - momentum) * input_mean[c];
+                running_variance[c] = momentum * running_variance[c] + (1 - momentum) * input_var[c];
+            }
+            else {
+                x_normalized[index] = (input_data[index] - running_mean[c]) / sqrtf(running_variance[c] + eps);
+                output_data[index] = gamma_data[c] * x_normalized[index] + beta_data[c];
+            }
+        }
+    }
 
     template<class T>
     Tensor<T>& BatchNorm<T>::forward_4d(Tensor<T>& input_tensor, bool Istraining)
@@ -237,11 +292,10 @@ namespace Hex {
         int  _in_width = input.getShape()[2];
         int  _in_height = input.getShape()[3];
 
-
         dim3 threadsPerBlock(8, 8, 8);
-        dim3 numBlocks(_batch_size * _out_channels,
-            (_in_width + threadsPerBlock.x - 1) / threadsPerBlock.x,
-            (_in_height + threadsPerBlock.y - 1) / threadsPerBlock.y);
+        dim3 numBlocks((_in_width + threadsPerBlock.x - 1) / threadsPerBlock.x,
+            (_in_height + threadsPerBlock.y - 1) / threadsPerBlock.y,
+            (_batch_size * _out_channels + threadsPerBlock.z - 1) / threadsPerBlock.z);
 
 
         //// Compute mean and variance
@@ -267,7 +321,11 @@ namespace Hex {
             eps,
             Istraining);
         cudaDeviceSynchronize();
-
+        cudaError_t cudaError = cudaGetLastError();
+        if (cudaError != cudaSuccess) {
+            printf("Error from batchnorm 4d forward method: %s\n", cudaGetErrorString(cudaError));
+            exit(EXIT_FAILURE);  // or handle the error appropriately
+        }
         //input_mean.print();
         //input_var.print();
         //x_normalized.print();
@@ -276,6 +334,7 @@ namespace Hex {
         //running_var.print();
         return *output;
     }
+
 
 
 
