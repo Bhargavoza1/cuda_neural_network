@@ -35,7 +35,7 @@ namespace Hex {
 
         void cudafree();
 
-     
+        void printshape() const  ;
         void reshape(const std::vector<int>& new_shape); 
     private:
         int calculateIndex(const std::vector<int>& indices) const;

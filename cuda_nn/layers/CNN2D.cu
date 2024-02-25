@@ -32,21 +32,21 @@ namespace Hex
         }
 
 
-        //int row = blockIdx.y * blockDim.y + threadIdx.y;
-        //int col = blockIdx.x * blockDim.x + threadIdx.x;
+     /*   int row = blockIdx.y * blockDim.y + threadIdx.y;
+        int col = blockIdx.x * blockDim.x + threadIdx.x;
 
-        //if (row < out_channels && col < in_channels * kernel_size * kernel_size) {
-        //    int index = row * (in_channels * kernel_size * kernel_size) + col;
+        if (row < out_channels && col < in_channels * kernel_size * kernel_size) {
+            int index = row * (in_channels * kernel_size * kernel_size) + col;
  
-        //    weights[index] = static_cast<T>(index  );
-        //}
+            weights[index] = static_cast<T>(index  );
+        }
 
-        //if (row < out_channels && col == 0) {
-        //    curandState state;
-        //    curand_init(clock64(), row, 0, &state);  
+        if (row < out_channels && col == 0) {
+            curandState state;
+            curand_init(clock64(), row, 0, &state);  
 
-        //    bias[row] = static_cast<T>(row +1 );  
-        //}
+            bias[row] = static_cast<T>(row +1 );  
+        }*/
 
         
     }

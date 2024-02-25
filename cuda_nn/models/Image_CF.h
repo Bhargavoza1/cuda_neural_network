@@ -16,17 +16,26 @@ namespace Hex {
     private:
 
         
-        Tensor<T> X;
+        Tensor<T> x;
 
         CNN2D<T>  conv1;
-        BatchNorm<T> bn1;
-        CNN2D<T> conv2;
-        MaxPool2d<T> pool; 
         ReLU<T>  relu1;
+        BatchNorm<T> bn1;
+        MaxPool2d<T> pool1;
+
+        CNN2D<T> conv2;
+        ReLU<T>  relu2;
+        BatchNorm<T> bn2;
+        MaxPool2d<T> pool2;
+
         flatten_layer<T> fl;
-        linear<T>  linear1; 
+
+
+        linear<T>  linear1;
+        ReLU<T>  relu3;
+        BatchNorm<T> bn3;
+       
         linear<T>  linear2;
-        linear<T>  linear3;
         Sigmoid<T>  sigmoid1;
 
     public:

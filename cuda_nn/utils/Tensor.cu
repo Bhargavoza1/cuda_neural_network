@@ -58,6 +58,18 @@ namespace Hex {
     }
 
     template <typename T>
+    void Tensor<T>::printshape() const {
+        std::cout << "Tensor (Shape: ";
+        for (size_t i = 0; i < shape.size(); ++i) {
+            std::cout << shape[i];
+            if (i < shape.size() - 1) {
+                std::cout << "x";
+            }
+        }
+        std::cout << ", Type: " << typeid(T).name() << "):" << std::endl;
+    }
+
+    template <typename T>
     void Tensor<T>::setData(T* newData) {
         data = newData;
     }

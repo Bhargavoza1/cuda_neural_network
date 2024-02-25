@@ -147,7 +147,7 @@ namespace Hex {
     }
 
     template<class T>
-    __global__ void batchnorm_forwa23rd_4d_kernel(const T* __restrict__ input_data,
+    __global__ void old_batchnorm_forward_4d_kernel(const T* __restrict__ input_data,
         T* __restrict__ output_data,
         const T* __restrict__ gamma_data,
         const T* __restrict__ beta_data,
@@ -244,11 +244,11 @@ namespace Hex {
         int idx_x = blockIdx.x * blockDim.x + threadIdx.x;
         int idx_y = blockIdx.y * blockDim.y + threadIdx.y;
         int idx_z = blockIdx.z * blockDim.z + threadIdx.z;
-        __shared__ T sdata[128];
+        __shared__ T smeandata[128];
         __shared__ T svardata[128];
 
 
-        sdata[threadIdx.z] = 0.0f;
+        smeandata[threadIdx.z] = 0.0f;
         svardata[threadIdx.z] = 0.0f;
         if (idx_x < input_width && idx_y < input_height && idx_z < batch_size * out_channels) {
             int b = idx_z / out_channels;
@@ -257,8 +257,8 @@ namespace Hex {
 
             if (Istraining) {
 
-                atomicAdd(&sdata[threadIdx.z], input_data[index]);
-                input_mean[c] = sdata[threadIdx.z] / (batch_size * input_height * input_width);
+                atomicAdd(&smeandata[threadIdx.z], input_data[index]);
+                input_mean[c] = smeandata[threadIdx.z] / (batch_size * input_height * input_width);
 
                 atomicAdd(&svardata[threadIdx.z], (input_data[index] - input_mean[c]) * (input_data[index] - input_mean[c]));
                 input_var[c] = svardata[threadIdx.z] / (batch_size * input_height * input_width);
@@ -478,7 +478,7 @@ namespace Hex {
 
 
     template<class T>
-    __global__ void batchnorm_backward_4d_kernel(const T* __restrict__ input_data,
+    __global__ void old_batchnorm_backward_4d_kernel(const T* __restrict__ input_data,
         const T* __restrict__ output_error,
         const T* __restrict__ x_normalized,
         const T* __restrict__ input_mean,
@@ -576,11 +576,76 @@ namespace Hex {
     }
 
     template<class T>
+    __global__ void  batchnorm_backward_4d_kernel(const T* __restrict__ input_data,
+        const T* __restrict__ output_error,
+        const T* __restrict__ x_normalized,
+        const T* __restrict__ input_mean,
+        const T* __restrict__ input_var,
+        T* __restrict__ input_error,
+        T* __restrict__ gamma_gradient,
+        T* __restrict__ beta_gradient,
+        T* __restrict__ grad_normalized,
+        const int batch_size,
+        const int out_channels,
+        const int input_width,
+        const int input_height,
+        const float eps)
+    {
+        int idx_x = blockIdx.x * blockDim.x + threadIdx.x;
+        int idx_y = blockIdx.y * blockDim.y + threadIdx.y;
+        int idx_z = blockIdx.z * blockDim.z + threadIdx.z;
+        __shared__ T dmeandata[128];
+        __shared__ T dvardata[128];
+   
+        __shared__ T a[128];
+        __shared__ T k[128];
+        __shared__ T grad_gamma[128];
+        __shared__ T grad_beta[128];
+
+
+        dmeandata[threadIdx.z] = 0.0f;
+        dvardata[threadIdx.z] = 0.0f;  
+        a[threadIdx.z] = 0.0f;
+        k[threadIdx.z] = 0.0f;
+        grad_gamma[threadIdx.z] = 0.0f;
+        grad_beta[threadIdx.z] = 0.0f;
+        if (idx_x < input_width && idx_y < input_height && idx_z < batch_size * out_channels) {
+            int b = idx_z / out_channels;
+            int c = idx_z % out_channels;
+            int index = (b * out_channels + c) * input_width * input_height + idx_y * input_width + idx_x;
+
+            grad_normalized[index] = output_error[index] * gamma_gradient[c];
+ 
+            T r = (input_data[index] - input_mean[c]);
+            T t = pow(input_var[c] + eps, -1.5);
+            atomicAdd(&dvardata[threadIdx.z], grad_normalized[index] * r * -0.5 * t);
+
+       
+            atomicAdd(&a[threadIdx.z], grad_normalized[index] * (-1 / sqrt(input_var[c] + eps)));
+            atomicAdd(&k[threadIdx.z], -2 * (input_data[index] - input_mean[c]) / (batch_size * input_height * input_width));
+            dmeandata[threadIdx.z] = a[threadIdx.z] * dvardata[threadIdx.z] + k[threadIdx.z];
+          
+            
+            input_error[index] = grad_normalized[index] / sqrt(input_var[c] + eps) + dvardata[threadIdx.z] * 2.0 * (input_data[index] - input_mean[c]) / (batch_size * input_height * input_width) + dmeandata[threadIdx.z] / (batch_size * input_height * input_width);
+          
+            atomicAdd(&grad_gamma[threadIdx.z], output_error[index] * x_normalized[index]);
+            atomicAdd(&grad_beta[threadIdx.z], output_error[index]);
+
+            gamma_gradient[c] -= grad_gamma[threadIdx.z];
+            beta_gradient[c] -= grad_beta[threadIdx.z];
+             
+            __syncthreads();
+        }
+
+    }
+
+
+    template<class T>
     Tensor<T>& BatchNorm<T>::backpropagation_4d(Tensor<T>& output_error, float learning_rate)
     {
         input_error.reset(new Tensor<T>({ input.getShape() }));
         grad_normalized.reset(new Tensor<T>({ input.getShape() }));
-        const int _batch_size = input.getShape()[0];
+ /*       const int _batch_size = input.getShape()[0];
         const int _out_channels = input.getShape()[1];
         const int _in_width = input.getShape()[2];
         const int _in_height = input.getShape()[3];
@@ -588,9 +653,21 @@ namespace Hex {
         dim3 threadsPerBlock(8, 8, 8);
         dim3 numBlocks(_batch_size * _out_channels,
             (_in_width + threadsPerBlock.x - 1) / threadsPerBlock.x,
-            (_in_height + threadsPerBlock.y - 1) / threadsPerBlock.y);
+            (_in_height + threadsPerBlock.y - 1) / threadsPerBlock.y);*/
 
-        batchnorm_backward_4d_kernel << <numBlocks, threadsPerBlock >> > (input.getData(),
+
+
+        int  _batch_size = input.getShape()[0];
+        int  _out_channels = input.getShape()[1];
+        int  _in_width = input.getShape()[2];
+        int  _in_height = input.getShape()[3];
+
+        dim3 threadsPerBlock(8, 8, 8);
+        dim3 numBlocks((_in_width + threadsPerBlock.x - 1) / threadsPerBlock.x,
+            (_in_height + threadsPerBlock.y - 1) / threadsPerBlock.y,
+            (_batch_size * _out_channels + threadsPerBlock.z - 1) / threadsPerBlock.z);
+
+         batchnorm_backward_4d_kernel << <numBlocks, threadsPerBlock >> > (input.getData(),
             output_error.getData(),
             x_normalized->getData(),
             input_mean.getData(),
@@ -606,8 +683,8 @@ namespace Hex {
             eps);
         cudaDeviceSynchronize();
 
-        //gamma.print();
-         //beta.print();
+        // gamma.print();
+         // beta.print();
         return *input_error;
     }
 
