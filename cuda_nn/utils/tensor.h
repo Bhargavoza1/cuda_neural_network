@@ -1,6 +1,6 @@
 #pragma once
 #include <vector>
-
+#include <iostream>
 namespace Hex {
     template <typename T>
     class ITensor {
@@ -18,12 +18,14 @@ namespace Hex {
     template <typename T>
     class Tensor : public ITensor<T> {
     private:
-        T* data;
+        std::unique_ptr<T[]> data;
         std::vector<int> shape;
 
     public:
         Tensor() : shape(std::vector<int>{}) {}
         Tensor(const std::vector<int>& shape);
+        Tensor(const Tensor<T>& other);
+        Tensor<T>& operator=(const Tensor<T>& other);
         ~Tensor() override;
         void set(const std::vector<int>& indices, T value) override;
         T get(const std::vector<int>& indices) const override;

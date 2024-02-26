@@ -12,24 +12,68 @@ namespace Hex {
         for (int dim : shape) {
             size *= dim;
         }
-        cudaMalloc((void**)&data, size * sizeof(T));
+        T* cudaData;
+        cudaMalloc((void**)&cudaData, size * sizeof(T));
+        data.reset(cudaData);  // Transfer ownership to the unique_ptr
     }
 
     // Destructor
     template <typename T>
     Tensor<T>::~Tensor() {
-       // if (this != nullptr) { cudafree(data); }
-       
+        cudafree();
     }
+    template <typename T>
+    void Tensor<T>::cudafree() { if (this != nullptr) { cudaFree(data.get()); data.release(); } }
 
     template <typename T>
-    void Tensor<T>::cudafree() { if (this != nullptr) { cudaFree(data); } }
+    Tensor<T>::Tensor(const Tensor<T>& other) : shape(other.getShape()) {
+        // Allocate memory for the data pointer
+        int size = 1;
+        for (int dim : shape) {
+            size *= dim;
+        }
+        cudaMalloc((void**)&data, size * sizeof(T));
+
+        // Copy data from the other tensor if it's not null
+        if (other.getData() != nullptr) {
+            cudaMemcpy(data.get(), other.getData(), size * sizeof(T), cudaMemcpyDeviceToDevice);
+        }
+    }
+
+    // Assignment operator overloading
+    template <typename T>
+    Tensor<T>& Tensor<T>::operator=(const Tensor<T>& other) {
+        if (this != &other) { // Check for self-assignment
+            // Compare shapes to determine if reallocation is necessary
+            if (other.getShape() != shape || data == nullptr) {
+                // Deallocate current memory
+                
+                cudaFree(data.get());
+                // Allocate new memory
+                int size = 1;
+                for (int dim : other.getShape()) {
+                    size *= dim;
+                }
+                cudaMalloc((void**)&data, size * sizeof(T));
+                // Update shape
+                shape = other.getShape();
+            }
+            // Copy data from the other tensor
+            int size = 1;
+            for (int dim : shape) {
+                size *= dim;
+            }
+            cudaMemcpy(data.get(), other.getData(), size * sizeof(T), cudaMemcpyDeviceToDevice);
+        }
+        return *this;
+    }
+
 
     // Set element at index
     template <typename T>
     void Tensor<T>::set(const std::vector<int>& indices, T value) {
         int index = calculateIndex(indices);
-        cudaMemcpy(data + index, &value, sizeof(T), cudaMemcpyHostToDevice);
+        cudaMemcpy(data.get() + index, &value, sizeof(T), cudaMemcpyHostToDevice);
     }
 
     // Get element at index
@@ -37,7 +81,7 @@ namespace Hex {
     T Tensor<T>::get(const std::vector<int>& indices) const {
         int index = calculateIndex(indices);
         T value;
-        cudaMemcpy(&value, data + index, sizeof(T), cudaMemcpyDeviceToHost);
+        cudaMemcpy(&value, data.get() + index, sizeof(T), cudaMemcpyDeviceToHost);
         return value;
     }
 
@@ -53,7 +97,7 @@ namespace Hex {
         }
         std::cout << ", Type: " << typeid(T).name() << "):" << std::endl;
 
-        printHelper(data, shape, 0, {});
+        printHelper(data.get(), shape, 0, {});
         //std::cout << std::endl;
     }
 
@@ -71,7 +115,7 @@ namespace Hex {
 
     template <typename T>
     void Tensor<T>::setData(T* newData) {
-        data = newData;
+        data.reset(newData);
     }
 
     // Getter for shape
@@ -82,12 +126,12 @@ namespace Hex {
 
     template <typename T>
     const T* Tensor<T>::getData() const {
-        return data;
+        return data.get();
     }
 
     template <typename T>
     T* Tensor<T>::getData() {
-        return data;
+        return data.get();
     }
 
 
