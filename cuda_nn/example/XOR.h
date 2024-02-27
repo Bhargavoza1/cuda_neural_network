@@ -30,12 +30,11 @@ namespace Hex {
         // Define the parameters for your MLP
         int input_size = 2;        // Size of input layer
         int output_size = 2;       // Size of output layer
-        int batchsize = 4;
-        int hiddenlayer = 3;       // Number of hidden layers
+        int batchsize = 4; 
         int h_l_dimension = 15;     // Dimension of each hidden layer
 
         // Create an instance of the MLP class
-        std::unique_ptr<Hex::MLP<float>>  mlp(new  Hex::MLP<float>(input_size, output_size, batchsize, h_l_dimension));
+        std::unique_ptr<Hex::MLP<float>>  mlp(new  Hex::MLP<float>(input_size, output_size, batchsize,  h_l_dimension));
 
 
         // Define your input data
@@ -70,7 +69,7 @@ namespace Hex {
         }
 
 
-        trainNeuralNetwork(*mlp, *x_tensor, *y_tensor, 100  , 0.001f);
+        trainNeuralNetwork(*mlp, *x_tensor, *y_tensor, 100, 0.001f);
         predictAndPrintResults(*mlp, *x_tensor, *y_tensor);
     }
 }

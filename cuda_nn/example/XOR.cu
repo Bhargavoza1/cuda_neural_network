@@ -15,14 +15,12 @@ namespace Hex {
 
         // Assuming num_samples is the first dimension of the input_data and target_data tensors
         int num_samples = input_shape[0];
-        std::unique_ptr<Tensor<T>> sliced_tensor2;
-        std::unique_ptr<Tensor<T>> transpose_tensor2;
+        std::unique_ptr<Tensor<T>> sliced_tensor2; 
         Tensor<T> inpurt_data;
         Tensor<T>* predicted_output;
         for (int sample_index = 0; sample_index < num_samples; ++sample_index) {
 
-            sliced_tensor2 = Hex::sliceFirstIndex(sample_index, input_data);
-            //  transpose_tensor2 = Hex::transpose(*sliced_tensor2);
+            sliced_tensor2 = Hex::sliceFirstIndex(sample_index, input_data); 
             inpurt_data = *sliced_tensor2;
             predicted_output = &model.forward(inpurt_data, false);
 
@@ -63,9 +61,12 @@ namespace Hex {
         Tensor<T> sampled_input_data = input_data;
         Tensor<T> sampled_target_data = target_data;
 
-        Tensor<T>* predicted_output;
-        Tensor<T> error;
-        Tensor<T> output_error;
+      
+ 
+        std::shared_ptr<Tensor<T>> predicted_output;
+
+        std::shared_ptr<Tensor<T>> error;
+        std::shared_ptr<Tensor<T>> output_error;
 
         sampled_input_data.reshape({ 4,2 });
         sampled_target_data.reshape({ 4,2 });
@@ -75,16 +76,16 @@ namespace Hex {
 
             T total_error = 0;
             for (int sample_index = 0; sample_index < num_samples; ++sample_index) {
+             
+                predicted_output = std::make_shared<Tensor<T>>(model.forward(sampled_input_data));
+                
+                error =  mse(sampled_target_data, *predicted_output);
 
-                predicted_output = &model.forward(sampled_input_data);
-
-                error = *mse(sampled_target_data, *predicted_output);
-
-                total_error += error.get({ 0 });
-
-                output_error = *mse_derivative(sampled_target_data, *predicted_output);
-
-                model.backpropa(output_error, learning_rate);
+                total_error += error->get({ 0 });
+                //std::cout << total_error << std::endl;
+                output_error =  mse_derivative(sampled_target_data, *predicted_output);
+             
+                model.backpropa(*output_error, learning_rate);
             }
             // Calculate the average error on all samples
             T average_error = (total_error / num_samples);

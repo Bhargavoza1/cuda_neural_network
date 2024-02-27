@@ -24,8 +24,8 @@ namespace Hex {
     }
 
     template<typename T>
-    std::unique_ptr<Tensor<T>> mse(Tensor<T>& y_true, Tensor<T>& y_pred) {
-        std::unique_ptr<Tensor<T>> result(new Tensor<T>({ 1 }));
+    std::shared_ptr<Tensor<T>> mse(Tensor<T>& y_true, Tensor<T>& y_pred) {
+        std::shared_ptr<Tensor<T>> result(new Tensor<T>({ 1 }));
 
         std::vector<int> shape = y_true.getShape();
         int batch_size = shape[0];
@@ -53,8 +53,8 @@ namespace Hex {
     }
 
     template<typename T>
-    std::unique_ptr<Tensor<T>> mse_derivative(Tensor<T>& y_true, Tensor<T>& y_pred) {
-        std::unique_ptr<Tensor<T>> derivative(new Tensor<T>(y_true.getShape()));
+    std::shared_ptr<Tensor<T>> mse_derivative(Tensor<T>& y_true, Tensor<T>& y_pred) {
+        std::shared_ptr<Tensor<T>> derivative(new Tensor<T>(y_true.getShape()));
 
         std::vector<int> shape = y_true.getShape();
         int batch_size = shape[0];

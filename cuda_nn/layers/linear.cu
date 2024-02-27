@@ -210,7 +210,7 @@ namespace Hex {
 		if (i < input_size && j < output_size) {
 			// Random initialization of weights within the specified range
 			curandState state;
-			curand_init(clock64(), i * output_size + j, 0, &state);
+			curand_init(777, i * output_size + j, 0, &state);
 
 			float float_weight = (2 * curand_uniform(&state) - 1) * w_b_range;
 			weights[i * output_size + j] = static_cast<T>(float_weight);
@@ -227,7 +227,7 @@ namespace Hex {
 			}
 			else {
 				curandState state_bias;
-				curand_init(clock64(), j, 0, &state_bias);
+				curand_init(777, j, 0, &state_bias);
 
 				float float_bias = (2 * curand_uniform(&state_bias) - 1) * w_b_range;
 				bias[j] = static_cast<T>(float_bias);
