@@ -7,15 +7,15 @@ namespace Hex {
     template <class T>
     BatchNorm<T>::BatchNorm(int features_or_channels, TensorShape tensorshape, float momentum, float eps)
         : momentum(momentum), eps(eps), _Tshape(tensorshape),
-        gamma(tensorshape == TensorShape::_4D ? Tensor<T>({ 1, features_or_channels, 1, 1 }) : Tensor<T>({ 1, features_or_channels })),
-        beta(tensorshape == TensorShape::_4D ? Tensor<T>({ 1, features_or_channels, 1, 1 }) : Tensor<T>({ 1, features_or_channels })),
-        running_mean(tensorshape == TensorShape::_4D ? Tensor<T>({ 1, features_or_channels, 1, 1 }) : Tensor<T>({ 1, features_or_channels })),
-        running_var(tensorshape == TensorShape::_4D ? Tensor<T>({ 1, features_or_channels, 1, 1 }) : Tensor<T>({ 1, features_or_channels })),
+        gamma(tensorshape == TensorShape::_4D ? std::make_shared<Tensor<T>>(std::vector<int>{ 1, features_or_channels, 1, 1 }, false) : std::make_shared<Tensor<T>>(std::vector<int>{ 1, features_or_channels }, false)),
+        beta(tensorshape == TensorShape::_4D ? std::make_shared<Tensor<T>>(std::vector<int>{ 1, features_or_channels, 1, 1 }, false) : std::make_shared<Tensor<T>>(std::vector<int>{ 1, features_or_channels }, false)),
+        running_mean(tensorshape == TensorShape::_4D ? std::make_shared<Tensor<T>>(std::vector<int>{ 1, features_or_channels, 1, 1 }, false) : std::make_shared<Tensor<T>>(std::vector<int>{ 1, features_or_channels }, false)),
+        running_var(tensorshape == TensorShape::_4D ? std::make_shared<Tensor<T>>(std::vector<int>{ 1, features_or_channels, 1, 1 }, false) : std::make_shared<Tensor<T>>(std::vector<int>{ 1, features_or_channels }, false)),
         input_mean(tensorshape == TensorShape::_4D ? Tensor<T>({ 1, features_or_channels, 1, 1 }) : Tensor<T>({ 1, features_or_channels })),
         input_var(tensorshape == TensorShape::_4D ? Tensor<T>({ 1, features_or_channels, 1, 1 }) : Tensor<T>({ 1, features_or_channels }))
     {
-        initTensorToOneOnGPU(gamma);
-        initTensorToOneOnGPU(running_var);
+        initTensorToOneOnGPU(*gamma);
+        initTensorToOneOnGPU(*running_var);
     }
 
     template <class T>
@@ -29,7 +29,7 @@ namespace Hex {
         size_t tensor_dimensions = input_tensor.getShape().size();
         //std::cout << " size from batch norm forward : " << tensor_dimensions << std::endl;
         if (tensor_dimensions == 4 && _Tshape == TensorShape::_4D) {
-            //gamma.print();
+            //gamma->print();
             return forward_4d(input_tensor, Istraining);
         }
         else if (tensor_dimensions == 2 && _Tshape == TensorShape::_2D) {
@@ -102,27 +102,27 @@ namespace Hex {
     Tensor<T>& BatchNorm<T>::forward_2d(Tensor<T>& input_tensor, bool Istraining)
     {
 
-        input = input_tensor;
+        input = std::make_shared<Tensor<T>>(input_tensor);
        //  std::cout << "input" << std::endl; 
-         //input.print();
+         //input->print();
         // std::cout   << std::endl;
         output.reset(new Tensor<T>({ input_tensor.getShape() }));
         x_normalized.reset(new Tensor<T>({ input_tensor.getShape() }));
 
-        int _batch_size = input.getShape()[0];
-        int _fetures = input.getShape()[1];
+        int _batch_size = input->getShape()[0];
+        int _fetures = input->getShape()[1];
         
 
         dim3 threadsPerBlock(16, 16);
         dim3 numBlocks((_batch_size + threadsPerBlock.x - 1) / threadsPerBlock.x,
             (_fetures + threadsPerBlock.y - 1) / threadsPerBlock.y);
-        // input.print();
-        batchnorm_forward_2d_kernel << < numBlocks, threadsPerBlock >> > (input.getData(),
+        // input->print();
+        batchnorm_forward_2d_kernel << < numBlocks, threadsPerBlock >> > (input->getData(),
             output->getData(),
-            gamma.getData(),
-            beta.getData(),
-            running_mean.getData(),
-            running_var.getData(),
+            gamma->getData(),
+            beta->getData(),
+            running_mean->getData(),
+            running_var->getData(),
             x_normalized->getData(),
             input_mean.getData(),
             input_var.getData(),
@@ -132,17 +132,17 @@ namespace Hex {
             eps,
             Istraining);
         cudaDeviceSynchronize();
-        //input.print();
+        //input->print();
         // input_mean.print();
         //  input_var.print();
          //x_normalized.print();
         //std::cout << "output" << std::endl;
         //  output->print();
         //   std::cout   << std::endl;
-         //running_mean.print();
-         //running_var.print();
+         //running_mean->print();
+         //running_var->print();
          //x_normalized->print();
-        //gamma.print();
+        //gamma->print();
         return *output;
     }
 
@@ -282,15 +282,15 @@ namespace Hex {
     template<class T>
     Tensor<T>& BatchNorm<T>::forward_4d(Tensor<T>& input_tensor, bool Istraining)
     {
-        input = input_tensor;
+        input = std::make_shared<Tensor<T>>(input_tensor);
 
-        output.reset(new Tensor<T>({ input.getShape() }));
-        x_normalized.reset(new Tensor<T>({ input.getShape() }));
+        output.reset(new Tensor<T>({ input->getShape() }));
+        x_normalized.reset(new Tensor<T>({ input->getShape() }));
 
-        int  _batch_size = input.getShape()[0];
-        int  _out_channels = input.getShape()[1];
-        int  _in_width = input.getShape()[2];
-        int  _in_height = input.getShape()[3];
+        int  _batch_size = input->getShape()[0];
+        int  _out_channels = input->getShape()[1];
+        int  _in_width = input->getShape()[2];
+        int  _in_height = input->getShape()[3];
 
         dim3 threadsPerBlock(8, 8, 8);
         dim3 numBlocks((_in_width + threadsPerBlock.x - 1) / threadsPerBlock.x,
@@ -304,12 +304,12 @@ namespace Hex {
 
 
 
-        batchnorm_forward_4d_kernel << <numBlocks, threadsPerBlock >> > (input.getData(),
+        batchnorm_forward_4d_kernel << <numBlocks, threadsPerBlock >> > (input->getData(),
             output->getData(),
-            gamma.getData(),
-            beta.getData(),
-            running_mean.getData(),
-            running_var.getData(),
+            gamma->getData(),
+            beta->getData(),
+            running_mean->getData(),
+            running_var->getData(),
             x_normalized->getData(),
             input_mean.getData(),
             input_var.getData(),
@@ -330,8 +330,8 @@ namespace Hex {
         //input_var.print();
         //x_normalized.print();
         //output->print();
-        //running_mean.print();
-        //running_var.print();
+        //running_mean->print();
+        //running_var->print();
         return *output;
     }
 
@@ -344,7 +344,7 @@ namespace Hex {
         size_t tensor_dimensions = output_error.getShape().size();
         //std::cout << " size from batch norm forward : " << tensor_dimensions << std::endl;
         if (tensor_dimensions == 4 && _Tshape == TensorShape::_4D) {
-            //gamma.print();
+            //gamma->print();
             return backpropagation_4d(output_error, learning_rate);
         }
         else if (tensor_dimensions == 2 && _Tshape == TensorShape::_2D) {
@@ -443,24 +443,24 @@ namespace Hex {
     template<class T>
     Tensor<T>& BatchNorm<T>::backpropagation_2d(Tensor<T>& output_error, float learning_rate)
     {
-        input_error.reset(new Tensor<T>({ input.getShape() }));
-        grad_normalized.reset(new Tensor<T>({ input.getShape() }));
-        const int batch_size = input.getShape()[0];
-        const int features = input.getShape()[1];
-       // gamma.print();
-        // input.print();
+        input_error.reset(new Tensor<T>({ input->getShape() }));
+        grad_normalized.reset(new Tensor<T>({ input->getShape() }));
+        const int batch_size = input->getShape()[0];
+        const int features = input->getShape()[1];
+       // gamma->print();
+        // input->print();
         const dim3 blockSize(16, 16); // Adjust block size as needed
         const dim3 gridSize((batch_size + blockSize.x - 1) / blockSize.x, (features + blockSize.y - 1) / blockSize.y); // Adjust grid size as needed
         // x_normalized->print();
          // Invoke the CUDA kernel for backpropagation
-        batchnorm_backward_2d_kernel << <gridSize, blockSize >> > (input.getData(),
+        batchnorm_backward_2d_kernel << <gridSize, blockSize >> > (input->getData(),
             output_error.getData(),
             x_normalized->getData(),
             input_mean.getData(),
             input_var.getData(),
             input_error->getData(),
-            gamma.getData(),
-            beta.getData(),
+            gamma->getData(),
+            beta->getData(),
             grad_normalized->getData(),
             features,
             batch_size,
@@ -469,9 +469,9 @@ namespace Hex {
         // Synchronize to ensure the kernel is finished
         cudaDeviceSynchronize();
         //std::cout << " aaaaaaaaaaaaaaa" << std::endl;
-        // gamma.print();
+        // gamma->print();
 
-        // beta.print();
+        // beta->print();
         //input_error->print();
         return *input_error;
     }
@@ -643,12 +643,12 @@ namespace Hex {
     template<class T>
     Tensor<T>& BatchNorm<T>::backpropagation_4d(Tensor<T>& output_error, float learning_rate)
     {
-        input_error.reset(new Tensor<T>({ input.getShape() }));
-        grad_normalized.reset(new Tensor<T>({ input.getShape() }));
- /*       const int _batch_size = input.getShape()[0];
-        const int _out_channels = input.getShape()[1];
-        const int _in_width = input.getShape()[2];
-        const int _in_height = input.getShape()[3];
+        input_error.reset(new Tensor<T>({ input->getShape() }));
+        grad_normalized.reset(new Tensor<T>({ input->getShape() }));
+ /*       const int _batch_size = input->getShape()[0];
+        const int _out_channels = input->getShape()[1];
+        const int _in_width = input->getShape()[2];
+        const int _in_height = input->getShape()[3];
 
         dim3 threadsPerBlock(8, 8, 8);
         dim3 numBlocks(_batch_size * _out_channels,
@@ -657,24 +657,24 @@ namespace Hex {
 
 
 
-        int  _batch_size = input.getShape()[0];
-        int  _out_channels = input.getShape()[1];
-        int  _in_width = input.getShape()[2];
-        int  _in_height = input.getShape()[3];
+        int  _batch_size = input->getShape()[0];
+        int  _out_channels = input->getShape()[1];
+        int  _in_width = input->getShape()[2];
+        int  _in_height = input->getShape()[3];
 
         dim3 threadsPerBlock(8, 8, 8);
         dim3 numBlocks((_in_width + threadsPerBlock.x - 1) / threadsPerBlock.x,
             (_in_height + threadsPerBlock.y - 1) / threadsPerBlock.y,
             (_batch_size * _out_channels + threadsPerBlock.z - 1) / threadsPerBlock.z);
 
-         batchnorm_backward_4d_kernel << <numBlocks, threadsPerBlock >> > (input.getData(),
+         batchnorm_backward_4d_kernel << <numBlocks, threadsPerBlock >> > (input->getData(),
             output_error.getData(),
             x_normalized->getData(),
             input_mean.getData(),
             input_var.getData(),
             input_error->getData(),
-            gamma.getData(),
-            beta.getData(),
+            gamma->getData(),
+            beta->getData(),
             grad_normalized->getData(),
             _batch_size,
             _out_channels,
@@ -683,8 +683,8 @@ namespace Hex {
             eps);
         cudaDeviceSynchronize();
 
-        // gamma.print();
-         // beta.print();
+        // gamma->print();
+         // beta->print();
         return *input_error;
     }
 

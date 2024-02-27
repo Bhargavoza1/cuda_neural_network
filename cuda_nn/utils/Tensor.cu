@@ -7,68 +7,26 @@
 namespace Hex {
     // Constructor
     template <typename T>
-    Tensor<T>::Tensor(const std::vector<int>& shape) : shape(shape) {
+    Tensor<T>::Tensor(const std::vector<int>& shape, bool iscudafree) : shape(shape) {
+       
         int size = 1;
         for (int dim : shape) {
             size *= dim;
         }
         T* cudaData;
         cudaMalloc((void**)&cudaData, size * sizeof(T));
-        data.reset(cudaData);  // Transfer ownership to the unique_ptr
+        data = std::shared_ptr<T[]>(cudaData, [=](T* ptr) { if (iscudafree) { cudaFree(ptr); } }); // Custom deleter for CUDA memory
     }
 
     // Destructor
     template <typename T>
     Tensor<T>::~Tensor() {
-        cudafree();
+        //cudafree();
     }
     template <typename T>
-    void Tensor<T>::cudafree() { if (this != nullptr) { cudaFree(data.get()); data.release(); } }
-
-    template <typename T>
-    Tensor<T>::Tensor(const Tensor<T>& other) : shape(other.getShape()) {
-        // Allocate memory for the data pointer
-        int size = 1;
-        for (int dim : shape) {
-            size *= dim;
-        }
-        cudaMalloc((void**)&data, size * sizeof(T));
-
-        // Copy data from the other tensor if it's not null
-        if (other.getData() != nullptr) {
-            cudaMemcpy(data.get(), other.getData(), size * sizeof(T), cudaMemcpyDeviceToDevice);
-        }
-    }
-
-    // Assignment operator overloading
-    template <typename T>
-    Tensor<T>& Tensor<T>::operator=(const Tensor<T>& other) {
-        if (this != &other) { // Check for self-assignment
-            // Compare shapes to determine if reallocation is necessary
-            if (other.getShape() != shape || data == nullptr) {
-                // Deallocate current memory
-                
-                cudaFree(data.get());
-                // Allocate new memory
-                int size = 1;
-                for (int dim : other.getShape()) {
-                    size *= dim;
-                }
-                cudaMalloc((void**)&data, size * sizeof(T));
-                // Update shape
-                shape = other.getShape();
-            }
-            // Copy data from the other tensor
-            int size = 1;
-            for (int dim : shape) {
-                size *= dim;
-            }
-            cudaMemcpy(data.get(), other.getData(), size * sizeof(T), cudaMemcpyDeviceToDevice);
-        }
-        return *this;
-    }
-
-
+    void Tensor<T>::cudafree() { if (this != nullptr) { cudaFree(data.get()); } }
+ 
+ 
     // Set element at index
     template <typename T>
     void Tensor<T>::set(const std::vector<int>& indices, T value) {

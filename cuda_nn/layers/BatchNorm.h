@@ -25,16 +25,17 @@ namespace Hex {
         float eps;
 
         
-        Tensor<T> gamma;  
-        Tensor<T> beta;  
-        Tensor<T> running_mean;
-        Tensor<T> running_var;
+        std::shared_ptr<Tensor<T>> gamma;  
+        std::shared_ptr<Tensor<T>> beta;  
+        std::shared_ptr<Tensor<T>> running_mean;
+        std::shared_ptr<Tensor<T>> running_var;
 
-     
+        std::shared_ptr<Tensor<T>> input;
      
         Tensor<T> input_mean;
         Tensor<T> input_var;
-        Tensor<T> input;
+
+    
 
 
         std::unique_ptr<Tensor<T>> x_normalized;

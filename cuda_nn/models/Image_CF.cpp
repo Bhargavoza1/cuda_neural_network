@@ -42,7 +42,7 @@ namespace Hex {
     template<class T>
     Tensor<T>& Image_CF<T>::forward(Tensor<T>& input_tensor, bool Istraining)
     {
-        x = input_tensor;
+      
         //input_tensor.print();
         std::cout<<"init done" ;
        x = conv1.forward(input_tensor, Istraining);
@@ -106,7 +106,7 @@ namespace Hex {
         x = pool2.backpropagation(x, learning_rate);
         //x.print();
           x = bn2.backpropagation(x, learning_rate);
-          x.print();
+        //  x.print();
         x = relu2.backpropagation(x, learning_rate);
         
         x = conv2.backpropagation(x, learning_rate);

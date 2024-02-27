@@ -11,12 +11,12 @@ namespace Hex {
         float _w_b_range;
         int _batch_size;
         int _output_size;
-        Tensor<T> weights;
-        Tensor<T> bias; 
+        std::shared_ptr<Tensor<T>> weights;
+        std::shared_ptr<Tensor<T>> bias;
+        std::shared_ptr<Tensor<T>> input;
 
 
-        Tensor<T> input;
-
+       
 
         std::unique_ptr<Tensor<T>> input_error;
 

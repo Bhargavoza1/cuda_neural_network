@@ -18,14 +18,13 @@ namespace Hex {
     template <typename T>
     class Tensor : public ITensor<T> {
     private:
-        std::unique_ptr<T[]> data;
+        std::shared_ptr<T[]> data;
         std::vector<int> shape;
 
     public:
         Tensor() : shape(std::vector<int>{}) {}
-        Tensor(const std::vector<int>& shape);
-        Tensor(const Tensor<T>& other);
-        Tensor<T>& operator=(const Tensor<T>& other);
+        Tensor(const std::vector<int>& shape ,  bool iscudafree = true);
+        
         ~Tensor() override;
         void set(const std::vector<int>& indices, T value) override;
         T get(const std::vector<int>& indices) const override;

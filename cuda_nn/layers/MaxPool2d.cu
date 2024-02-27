@@ -17,7 +17,7 @@ namespace Hex {
 	MaxPool2d<T>::~MaxPool2d()
 	{
 		output->cudafree();
-		input.cudafree();
+		input->cudafree();
 		input_error->cudafree();
 	}
 
@@ -67,13 +67,13 @@ namespace Hex {
 	template<class T>
 	Tensor<T>& MaxPool2d<T>::forward(Tensor<T>& input_tensor, bool Istraining)
 	{
-		input = input_tensor;
+		input = std::make_shared<Tensor<T>>(input_tensor);
 
 
-		int  _batch_size = input.getShape()[0];
-		int  _channel_size = input.getShape()[1];
-		int  _in_width = input.getShape()[2];
-		int  _in_height = input.getShape()[3]; 
+		int  _batch_size = input->getShape()[0];
+		int  _channel_size = input->getShape()[1];
+		int  _in_width = input->getShape()[2];
+		int  _in_height = input->getShape()[3]; 
 
 		int _out_width = ((_in_width - _kernel_size + 2 * _padding) / _stride) + 1;
 		int _out_height = ((_in_height - _kernel_size + 2 * _padding) / _stride) + 1;
@@ -87,7 +87,7 @@ namespace Hex {
 			(_in_width + threadsPerBlock.x - 1) / threadsPerBlock.x,
 			(_in_height + threadsPerBlock.y - 1) / threadsPerBlock.y);  
 
-		maxpool2d_forward_kernel << <numBlocks, threadsPerBlock >> > (input.getData(), output->getData(),
+		maxpool2d_forward_kernel << <numBlocks, threadsPerBlock >> > (input->getData(), output->getData(),
 			_batch_size , _channel_size , _in_width, _in_height,
 			_out_width, _out_height,
 			_kernel_size, _stride, _padding);
@@ -163,7 +163,7 @@ namespace Hex {
 			(_in_width + threadsPerBlock.x - 1) / threadsPerBlock.x,
 			(_in_height + threadsPerBlock.y - 1) / threadsPerBlock.y);
 
-		maxpool2d_backward_kernel << <numBlocks, threadsPerBlock >> > (input.getData(), output_error.getData(), input_error->getData(),
+		maxpool2d_backward_kernel << <numBlocks, threadsPerBlock >> > (input->getData(), output_error.getData(), input_error->getData(),
 			_batch_size, _channel_size, _out_width, _out_height,
 			_in_width, _in_height,
 			_kernel_size, _stride, _padding);

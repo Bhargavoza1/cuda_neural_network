@@ -58,18 +58,18 @@ namespace Hex
         dim3 blockSize(16, 16); // Block size (16x16 threads per block)
         dim3 gridSize((_out_channels + blockSize.x - 1) / blockSize.x, (_in_channels * _kernel_size * _kernel_size + blockSize.y - 1) / blockSize.y); // Grid size
 
-        cnn2d_W_B_init << <gridSize, blockSize >> > (weights.getData(), bias.getData(), _out_channels, _in_channels, _kernel_size, _w_b_range);
+        cnn2d_W_B_init << <gridSize, blockSize >> > (weights->getData(), bias->getData(), _out_channels, _in_channels, _kernel_size, _w_b_range);
         cudaDeviceSynchronize();
-        //weights.print();
-        //bias.print();
+        //weights->print();
+        //bias->print();
     }
 
     template<class T>
     CNN2D<T>::CNN2D(const int batch_size, const std::vector<int>& in_out_channels, int kernel_size, int padding,int stride,float w_b_range) :
         _batch_size(batch_size), _in_channels(in_out_channels[0]), _out_channels(in_out_channels[1]), _kernel_size(kernel_size),
         _padding(padding), _stride(stride), _w_b_range(w_b_range),
-        weights(std::vector<int>{_out_channels, _in_channels, _kernel_size, _kernel_size  }),
-        bias(std::vector<int>{_out_channels})
+        weights(std::make_shared<Tensor<T>>(std::vector<int>{_out_channels, _in_channels, _kernel_size, _kernel_size  }   , false)),
+        bias(std::make_shared<Tensor<T>>(std::vector<int>{_out_channels}, false))
        // output(std::vector<int>{_batch_size, _out_channels, batch_width_height[2], batch_width_height[3] }),
       //  input(std::vector<int>{_batch_size, _in_channels, batch_width_height[2], batch_width_height[3] }),
        // input_error(std::vector<int>{_batch_size, _in_channels, batch_width_height[2], batch_width_height[3]  })
@@ -81,7 +81,7 @@ namespace Hex
     CNN2D<T>::~CNN2D()
     {
         output->cudafree();
-        input.cudafree();
+        input->cudafree();
         input_error->cudafree();
     }
  
@@ -132,26 +132,26 @@ namespace Hex
     Tensor<T>& CNN2D<T>::forward(Tensor<T>& input_tensor, bool Istraining)
     {
      
-        input = input_tensor;
+        input = std::make_shared<Tensor<T>>(input_tensor);
 
     
-        int  _batch_size = input.getShape()[0];
-        int  _in_width = input.getShape()[2];
-        int  _in_height = input.getShape()[3];
+        int  _batch_size = input->getShape()[0];
+        int  _in_width = input->getShape()[2];
+        int  _in_height = input->getShape()[3];
       
         int _out_width = ((_in_width - _kernel_size + 2 * _padding) / _stride) + 1;
         int _out_height = ((_in_height - _kernel_size + 2 * _padding) / _stride) + 1;
 
         //std::cout << _in_width << _in_height << _out_width << _out_height;
         output.reset(new Tensor<T>({ _batch_size , _out_channels ,_out_width , _out_height }));
-        //input.print();
+        //input->print();
         dim3 threadsPerBlock(8,8,8);
         dim3 numBlocks(_batch_size * _out_channels ,
             (_in_width + threadsPerBlock.x - 1) / threadsPerBlock.x,
             (_in_height + threadsPerBlock.y - 1) / threadsPerBlock.y);
  
         convolutionforward << <numBlocks, threadsPerBlock >> > (input_tensor.getData(), 
-            weights.getData(), bias.getData(), output->getData(),
+            weights->getData(), bias->getData(), output->getData(),
             _batch_size, _in_channels, _in_width, _in_height,
             _out_channels, _kernel_size, _padding, _stride, _out_width , _out_height);
         cudaDeviceSynchronize();
@@ -161,7 +161,7 @@ namespace Hex
             exit(EXIT_FAILURE);  // or handle the error appropriately
         }
         //std::cout << "weights" << std::endl;
-        // weights.print();
+        // weights->print();
       //  output->print();
         return *output; 
     }
@@ -223,9 +223,9 @@ namespace Hex
     template<class T>
     Tensor<T>& CNN2D<T>::backpropagation(Tensor<T>& output_error, float learning_rate)
     {
-        int  _batch_size = input.getShape()[0];
-       // int  _in_width = input.getShape()[2];
-       // int  _in_height = input.getShape()[3];
+        int  _batch_size = input->getShape()[0];
+       // int  _in_width = input->getShape()[2];
+       // int  _in_height = input->getShape()[3];
         int _out_width = output_error.getShape()[2];
         int _out_height = output_error.getShape()[3];
         int _in_width = (_out_width - 1) * _stride - 2 * _padding + _kernel_size;
@@ -240,8 +240,8 @@ namespace Hex
         );
  
         
-        convolutionBackwardInputError << <numBlocks, threadsPerBlock >> > ( output_error.getData(), input.getData() ,
-            weights.getData(), bias.getData() , input_error->getData(), _batch_size, _in_channels, _in_width, _in_height,
+        convolutionBackwardInputError << <numBlocks, threadsPerBlock >> > ( output_error.getData(), input->getData() ,
+            weights->getData(), bias->getData() , input_error->getData(), _batch_size, _in_channels, _in_width, _in_height,
             _out_channels, _kernel_size, _padding, _stride, _out_width, _out_height, learning_rate);
 
         cudaDeviceSynchronize();

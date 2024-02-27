@@ -8,7 +8,7 @@ namespace Hex {
     template<class T>
     ReLU<T>::~ReLU()
     {
-        input.cudafree();
+        input->cudafree();
         output->cudafree();
         input_error->cudafree();
     }
@@ -24,10 +24,10 @@ namespace Hex {
     template<class T>
     Tensor<T>& ReLU<T>::forward(Tensor<T>& input_tensor, bool Istraining)
     {
-        input = input_tensor;
+        input = std::make_shared<Tensor<T>>(input_tensor);
         output.reset(new Tensor<T>(input_tensor.getShape()));
 
-        std::vector<int> shape = input.getShape();
+        std::vector<int> shape = input->getShape();
  
 
         int size = 1;
@@ -35,7 +35,7 @@ namespace Hex {
             size *= dim;
         }
 
-        relu_forward_kernel << <(size + 255) / 256, 256 >> > (input.getData(), output->getData(), size); 
+        relu_forward_kernel << <(size + 255) / 256, 256 >> > (input->getData(), output->getData(), size); 
 
         cudaDeviceSynchronize();
         cudaError_t cudaError = cudaGetLastError();
@@ -69,7 +69,7 @@ namespace Hex {
             size *= dim;
         }
 
-        relu_backward_kernel << <(size + 255) / 256, 256 >> > (input.getData(), output_error.getData(), input_error->getData(), size);
+        relu_backward_kernel << <(size + 255) / 256, 256 >> > (input->getData(), output_error.getData(), input_error->getData(), size);
 
         cudaDeviceSynchronize();
 

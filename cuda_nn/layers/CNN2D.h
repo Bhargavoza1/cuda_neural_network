@@ -14,10 +14,10 @@ namespace Hex
         int _padding;
         int _stride;
         float _w_b_range;
-        Tensor<T> weights;
-        Tensor<T> bias;
-       
-        Tensor<T> input;
+        std::shared_ptr<Tensor<T>> weights;
+        std::shared_ptr<Tensor<T>> bias;
+
+        std::shared_ptr<Tensor<T>> input;
 
         std::unique_ptr<Tensor<T>> input_error;
 
