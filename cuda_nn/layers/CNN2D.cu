@@ -13,52 +13,45 @@ namespace Hex
 {
     template<class T>
     __global__ void cnn2d_W_B_init(T* weights, T* bias, int out_channels, int in_channels, int kernel_size, float w_b_range) {
-        int row = blockIdx.y * blockDim.y + threadIdx.y;
-        int col = blockIdx.x * blockDim.x + threadIdx.x;
-
-        if (row < out_channels && col < in_channels * kernel_size * kernel_size) {
-            int index = row * (in_channels * kernel_size * kernel_size) + col;
-            curandState state;
-            curand_init(clock64(), index, 0, &state); // Initialize random number generator for each thread
-
-            weights[index] = curand_uniform(&state) * (2 * w_b_range) - w_b_range; // Generate random number in range [-w_b_range, w_b_range]
-        }
-
-        if (row < out_channels && col == 0) {
-            curandState state;
-            curand_init(clock64(), row, 0, &state); // Initialize random number generator for each thread
-
-            bias[row] = curand_uniform(&state) * (2 * w_b_range) - w_b_range; // Generate random number in range [-w_b_range, w_b_range]
-        }
-
-
-     /*   int row = blockIdx.y * blockDim.y + threadIdx.y;
-        int col = blockIdx.x * blockDim.x + threadIdx.x;
-
-        if (row < out_channels && col < in_channels * kernel_size * kernel_size) {
-            int index = row * (in_channels * kernel_size * kernel_size) + col;
  
-            weights[index] = static_cast<T>(index  );
+
+        int idx = blockIdx.x * blockDim.x + threadIdx.x;
+        int stride = blockDim.x * gridDim.x;
+
+        curandState state;
+        curand_init(clock64(), idx, 0, &state); // Initialize random number generator for each thread
+
+        for (int i = idx; i < out_channels * in_channels * kernel_size * kernel_size; i += stride) {
+            int row = i / (in_channels * kernel_size * kernel_size);
+            int col = i % (in_channels * kernel_size * kernel_size);
+
+            //if (col == 0) {
+            //    bias[row] = curand_uniform(&state) * (2 * w_b_range) - w_b_range;
+            //    
+            //}
+            //weights[i] = curand_uniform(&state) * (2 * w_b_range) - w_b_range;
+           
+
+            /////// init weights and bias for test
+
+            if (col == 0) {
+               
+                bias[row] = static_cast<T>(row + 1);
+            }
+            
+            weights[i] = static_cast<T>(i);
         }
-
-        if (row < out_channels && col == 0) {
-            curandState state;
-            curand_init(clock64(), row, 0, &state);  
-
-            bias[row] = static_cast<T>(row +1 );  
-        }*/
-
-        
+ 
     }
 
 
     template<class T>
     void CNN2D<T>::init_weight_n_bias()
     {
-        dim3 blockSize(16, 16); // Block size (16x16 threads per block)
-        dim3 gridSize((_out_channels + blockSize.x - 1) / blockSize.x, (_in_channels * _kernel_size * _kernel_size + blockSize.y - 1) / blockSize.y); // Grid size
+        dim3 blockSize(256);
+        dim3 gridSize((_out_channels * _in_channels * _kernel_size * _kernel_size + blockSize.x - 1) / blockSize.x);
 
-        cnn2d_W_B_init << <gridSize, blockSize >> > (weights->getData(), bias->getData(), _out_channels, _in_channels, _kernel_size, _w_b_range);
+        cnn2d_W_B_init << <gridSize, blockSize >> > (weights->getData(), bias->getData(), _out_channels, _in_channels, _kernel_size, _w_b_range );
         cudaDeviceSynchronize();
         //weights->print();
         //bias->print();
@@ -193,18 +186,18 @@ namespace Hex
 
         //// old threads
         //input->print();
-        //dim3 threadsPerBlock(8,8,8);
-        //dim3 numBlocks(_batch_size * _out_channels ,
-        //    (_in_width + threadsPerBlock.x - 1) / threadsPerBlock.x,
-        //    (_in_height + threadsPerBlock.y - 1) / threadsPerBlock.y);
+        dim3 threadsPerBlock(8,8,8);
+        dim3 numBlocks(_batch_size * _out_channels ,
+            (_in_width + threadsPerBlock.x - 1) / threadsPerBlock.x,
+            (_in_height + threadsPerBlock.y - 1) / threadsPerBlock.y);
 
         ////// new threads
-        dim3 threadsPerBlock(8, 8, 8);
+      /*  dim3 threadsPerBlock(8, 8, 8);
         dim3 numBlocks((_in_width + threadsPerBlock.x - 1) / threadsPerBlock.x,
             (_in_height + threadsPerBlock.y - 1) / threadsPerBlock.y,
-            (_batch_size * _out_channels + threadsPerBlock.z - 1) / threadsPerBlock.z);
+            (_batch_size * _out_channels + threadsPerBlock.z - 1) / threadsPerBlock.z);*/
  
-        new_convolutionforward << <numBlocks, threadsPerBlock >> > (input_tensor.getData(),
+         convolutionforward << <numBlocks, threadsPerBlock >> > (input_tensor.getData(),
             weights->getData(), bias->getData(), output->getData(),
             _batch_size, _in_channels, _in_width, _in_height,
             _out_channels, _kernel_size, _padding, _stride, _out_width , _out_height);
