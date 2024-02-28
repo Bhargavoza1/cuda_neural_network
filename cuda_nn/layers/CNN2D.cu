@@ -132,24 +132,28 @@ namespace Hex
         int b = tz / out_channels;
         int c = tz % out_channels;
 
-        if (b < batch_size && c < out_channels && tx < out_width && ty < out_height) {
+        if (tz < batch_size * out_channels && tx < out_width && ty < out_height) {
             int input_row_start = tx * stride - padding;
             int input_col_start = ty * stride - padding;
             T value = 0;
 
-            for (int ic = 0; ic < in_channels; ++ic) {
+         
                 for (int i = 0; i < kernel_size; ++i) {
-                    for (int j = 0; j < kernel_size; ++j) {
-                        int input_row = input_row_start + i;
-                        int input_col = input_col_start + j;
-                        if (input_row >= 0 && input_row < in_height && input_col >= 0 && input_col < in_width) {
-                            int input_idx = (b * in_channels * in_height * in_width) + (ic * in_height * in_width) + (input_row * in_width) + input_col;
-                            int weight_idx = (c * in_channels * kernel_size * kernel_size) + (ic * kernel_size * kernel_size) + (i * kernel_size) + j;
-                            value += input[input_idx] * weight[weight_idx];
+                    int input_row = input_row_start + i;
+                    if (input_row >= 0 && input_row < in_width){
+                        for (int j = 0; j < kernel_size; ++j) {
+                            int input_col = input_col_start + j;
+                            if (input_col >= 0 && input_col < in_height) {
+                                for (int ic = 0; ic < in_channels; ++ic) {
+                                int input_idx = (b * in_channels * in_height * in_width) + (ic * in_height * in_width) + (input_row * in_height) + input_col;
+                                int weight_idx = (c * in_channels * kernel_size * kernel_size) + (ic * kernel_size * kernel_size) + (i * kernel_size) + j;
+                                value += input[input_idx] * weight[weight_idx];
+                                }
+                            }
                         }
                     }
                 }
-            }
+
             int output_idx = (b * out_channels * out_height * out_width) + (c * out_height * out_width) + (tx * out_width) + ty;
             output[output_idx] = value + bias[c]; // Add bias term
         }
@@ -187,10 +191,11 @@ namespace Hex
         //    (_in_height + threadsPerBlock.y - 1) / threadsPerBlock.y);
 
         ////// new threads
-         dim3 threadsPerBlock(8, 8, 8);
+
+        dim3 threadsPerBlock(8, 8, 8);
         dim3 numBlocks((_in_width + threadsPerBlock.x - 1) / threadsPerBlock.x,
             (_in_height + threadsPerBlock.y - 1) / threadsPerBlock.y,
-            (_batch_size * _out_channels + threadsPerBlock.z - 1) / threadsPerBlock.z);  
+            (_batch_size * _out_channels + threadsPerBlock.z - 1) / threadsPerBlock.z);
  
         new_convolutionforward << <numBlocks, threadsPerBlock >> > (input_tensor.getData(),
             weights->getData(), bias->getData(), output->getData(),
