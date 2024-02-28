@@ -18,12 +18,14 @@ namespace Hex
         int idx = blockIdx.x * blockDim.x + threadIdx.x;
         int stride = blockDim.x * gridDim.x;
 
-        curandState state;
-        curand_init(clock64(), idx, 0, &state); // Initialize random number generator for each thread
+        // Initialize random number generator for each thread
 
         for (int i = idx; i < out_channels * in_channels * kernel_size * kernel_size; i += stride) {
             int row = i / (in_channels * kernel_size * kernel_size);
             int col = i % (in_channels * kernel_size * kernel_size);
+
+            curandState state;
+            curand_init(clock64(), idx, 0, &state);
 
             //if (col == 0) {
             //    bias[row] = curand_uniform(&state) * (2 * w_b_range) - w_b_range;
@@ -123,44 +125,38 @@ namespace Hex
     __global__ void new_convolutionforward(const T* input, const T* weight, const T* bias, T* output,
         int batch_size, int in_channels, int in_width, int in_height,
         int out_channels, int kernel_size, int padding, int stride, int out_width, int out_height) {
-        int idx_x = blockIdx.x * blockDim.x + threadIdx.x;
-        int idx_y = blockIdx.y * blockDim.y + threadIdx.y;
-        int idx_z = blockIdx.z * blockDim.z + threadIdx.z;
 
-        if (idx_x < out_width && idx_y < out_height && idx_z < batch_size * out_channels) {
-            int b = idx_z / out_channels;
-            int c = idx_z % out_channels;
+        int tx = blockIdx.x * blockDim.x + threadIdx.x;
+        int ty = blockIdx.y * blockDim.y + threadIdx.y;
+        int tz = blockIdx.z * blockDim.z + threadIdx.z;
+        int b = tz / out_channels;
+        int c = tz % out_channels;
 
-            // Initialize output value
+        if (b < batch_size && c < out_channels && tx < out_width && ty < out_height) {
+            int input_row_start = tx * stride - padding;
+            int input_col_start = ty * stride - padding;
             T value = 0;
 
-            // Calculate input indices affected by the current output element
-            int in_row_start = idx_y * stride - padding;
-            int in_col_start = idx_x * stride - padding;
-
-            // Iterate over kernel elements
-            for (int i = 0; i < kernel_size; ++i) {
-                for (int j = 0; j < kernel_size; ++j) {
-                    int in_row = in_row_start + i;
-                    int in_col = in_col_start + j;
-                    if (in_row >= 0 && in_row < in_height && in_col >= 0 && in_col < in_width) {
-                        // Calculate input and weight indices
-                        int input_index = ((b * in_channels * in_height + c * in_height) + in_row) * in_width + in_col;
-                        int weight_index = (c * in_channels * kernel_size * kernel_size + i * kernel_size + j);
-                        // Perform convolution operation
-                        value += input[input_index] * weight[weight_index];
+            for (int ic = 0; ic < in_channels; ++ic) {
+                for (int i = 0; i < kernel_size; ++i) {
+                    for (int j = 0; j < kernel_size; ++j) {
+                        int input_row = input_row_start + i;
+                        int input_col = input_col_start + j;
+                        if (input_row >= 0 && input_row < in_height && input_col >= 0 && input_col < in_width) {
+                            int input_idx = (b * in_channels * in_height * in_width) + (ic * in_height * in_width) + (input_row * in_width) + input_col;
+                            int weight_idx = (c * in_channels * kernel_size * kernel_size) + (ic * kernel_size * kernel_size) + (i * kernel_size) + j;
+                            value += input[input_idx] * weight[weight_idx];
+                        }
                     }
                 }
             }
-
-            // Add bias
-            value += bias[c];
-
-            // Write to output
-            int output_index = (b * out_channels * out_height + c * out_height) + idx_y * out_width + idx_x;
-            output[output_index] = value;
+            int output_idx = (b * out_channels * out_height * out_width) + (c * out_height * out_width) + (tx * out_width) + ty;
+            output[output_idx] = value + bias[c]; // Add bias term
         }
     }
+
+
+
 
 
 
@@ -184,20 +180,19 @@ namespace Hex
         //std::cout << _in_width << _in_height << _out_width << _out_height;
         output.reset(new Tensor<T>({ _batch_size , _out_channels ,_out_width , _out_height }));
 
-        //// old threads
-        //input->print();
-        dim3 threadsPerBlock(8,8,8);
-        dim3 numBlocks(_batch_size * _out_channels ,
-            (_in_width + threadsPerBlock.x - 1) / threadsPerBlock.x,
-            (_in_height + threadsPerBlock.y - 1) / threadsPerBlock.y);
+        //// old threads 
+        //dim3 threadsPerBlock(8,8,8);
+        //dim3 numBlocks(_batch_size * _out_channels ,
+        //    (_in_width + threadsPerBlock.x - 1) / threadsPerBlock.x,
+        //    (_in_height + threadsPerBlock.y - 1) / threadsPerBlock.y);
 
         ////// new threads
-      /*  dim3 threadsPerBlock(8, 8, 8);
+         dim3 threadsPerBlock(8, 8, 8);
         dim3 numBlocks((_in_width + threadsPerBlock.x - 1) / threadsPerBlock.x,
             (_in_height + threadsPerBlock.y - 1) / threadsPerBlock.y,
-            (_batch_size * _out_channels + threadsPerBlock.z - 1) / threadsPerBlock.z);*/
+            (_batch_size * _out_channels + threadsPerBlock.z - 1) / threadsPerBlock.z);  
  
-         convolutionforward << <numBlocks, threadsPerBlock >> > (input_tensor.getData(),
+        new_convolutionforward << <numBlocks, threadsPerBlock >> > (input_tensor.getData(),
             weights->getData(), bias->getData(), output->getData(),
             _batch_size, _in_channels, _in_width, _in_height,
             _out_channels, _kernel_size, _padding, _stride, _out_width , _out_height);
@@ -207,8 +202,9 @@ namespace Hex
             printf("error from liner backword method : %s\n", cudaGetErrorString(cudaError));
             exit(EXIT_FAILURE);  // or handle the error appropriately
         }
-        //std::cout << "weights" << std::endl;
-        // weights->print();
+ /*        std::cout << "weights" << std::endl;
+          weights->print();
+          bias->print();*/
       //  output->print();
         return *output; 
     }
