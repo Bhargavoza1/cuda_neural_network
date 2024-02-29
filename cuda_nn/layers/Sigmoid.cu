@@ -7,9 +7,7 @@ namespace Hex {
 
     template<class T>
     Sigmoid<T>::~Sigmoid() {
-        input->cudafree();
-        output->cudafree();
-        input_error->cudafree();
+       
     }
     
     template <typename T>

@@ -7,7 +7,7 @@
 namespace Hex {
     // Constructor
     template <typename T>
-    Tensor<T>::Tensor(const std::vector<int>& shape, bool iscudafree) : shape(shape) {
+    Tensor<T>::Tensor(const std::vector<int>& shape, bool iscudafree) : shape(shape) ,_iscudafree(iscudafree) {
        
         int size = 1;
         for (int dim : shape) {
@@ -21,10 +21,10 @@ namespace Hex {
     // Destructor
     template <typename T>
     Tensor<T>::~Tensor() {
-        //cudafree();
+       //  cudafree();
     }
     template <typename T>
-    void Tensor<T>::cudafree() { if (this != nullptr) { cudaFree(data.get()); } }
+    void Tensor<T>::cudafree() { if (this != nullptr) { if (_iscudafree) { cudaFree(data.get()); }}}
  
  
     // Set element at index

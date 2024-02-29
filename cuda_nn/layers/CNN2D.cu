@@ -27,21 +27,21 @@ namespace Hex
             curandState state;
             curand_init(clock64(), idx, 0, &state);
 
-            //if (col == 0) {
-            //    bias[row] = curand_uniform(&state) * (2 * w_b_range) - w_b_range;
-            //    
-            //}
-            //weights[i] = curand_uniform(&state) * (2 * w_b_range) - w_b_range;
+            if (col == 0) {
+                bias[row] = curand_uniform(&state) * (2 * w_b_range) - w_b_range;
+                
+            }
+            weights[i] = curand_uniform(&state) * (2 * w_b_range) - w_b_range;
            
 
             /////// init weights and bias for test
 
-            if (col == 0) {
-               
-                bias[row] = static_cast<T>(row  );
-            }
-            
-            weights[i] = static_cast<T>(i);
+            //if (col == 0) {
+            //   
+            //    bias[row] = static_cast<T>(row  );
+            //}
+            //
+            //weights[i] = static_cast<T>(i);
         }
  
     }

@@ -244,8 +244,8 @@ namespace Hex {
         int idx_x = blockIdx.x * blockDim.x + threadIdx.x;
         int idx_y = blockIdx.y * blockDim.y + threadIdx.y;
         int idx_z = blockIdx.z * blockDim.z + threadIdx.z;
-        __shared__ T smeandata[128];
-        __shared__ T svardata[128];
+        __shared__ T smeandata[64];
+        __shared__ T svardata[64];
 
 
         smeandata[threadIdx.z] = 0.0f;
@@ -594,13 +594,13 @@ namespace Hex {
         int idx_x = blockIdx.x * blockDim.x + threadIdx.x;
         int idx_y = blockIdx.y * blockDim.y + threadIdx.y;
         int idx_z = blockIdx.z * blockDim.z + threadIdx.z;
-        __shared__ T dmeandata[128];
-        __shared__ T dvardata[128];
+        __shared__ T dmeandata[64];
+        __shared__ T dvardata[64];
    
-        __shared__ T a[128];
-        __shared__ T k[128];
-        __shared__ T grad_gamma[128];
-        __shared__ T grad_beta[128];
+        __shared__ T a[64];
+        __shared__ T k[64];
+        __shared__ T grad_gamma[64];
+        __shared__ T grad_beta[64];
 
 
         dmeandata[threadIdx.z] = 0.0f;

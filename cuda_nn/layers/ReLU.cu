@@ -8,9 +8,7 @@ namespace Hex {
     template<class T>
     ReLU<T>::~ReLU()
     {
-        input->cudafree();
-        output->cudafree();
-        input_error->cudafree();
+       
     }
 
     template <typename T>

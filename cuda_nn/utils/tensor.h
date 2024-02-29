@@ -20,6 +20,7 @@ namespace Hex {
     private:
         std::shared_ptr<T[]> data;
         std::vector<int> shape;
+        bool _iscudafree;
 
     public:
         Tensor() : shape(std::vector<int>{}) {}
