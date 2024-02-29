@@ -265,6 +265,8 @@ namespace Hex
         }
     }
     
+    
+ 
     template<class T>
     __global__ void new_convolutionBackwardInputError(const T* output_error, const T* input, T* weight, T* bias, T* input_error,
         int batch_size, int in_channels, int in_width, int in_height,
@@ -273,41 +275,35 @@ namespace Hex
         int tx = blockIdx.x * blockDim.x + threadIdx.x;
         int ty = blockIdx.y * blockDim.y + threadIdx.y;
         int tz = blockIdx.z * blockDim.z + threadIdx.z;
-   
 
-        if ( tx < in_width && ty < in_height && tz < batch_size * in_channels) {
+
+        if (tx < in_width && ty < in_height && tz < batch_size * in_channels) {
             int b = tz / in_channels;
-            int c = tz % in_channels;
-            T value = 0;
+            int channel_idx = tz % in_channels;
+           
+            int input_idx = (b * in_channels * in_height * in_width) + (channel_idx * in_height * in_width) + (tx * in_height) + ty;
 
-            int input_idx = (b * in_channels * in_height * in_width) + (c * in_height * in_width) + (tx * in_height) + ty;
-            
             for (int i = 0; i < kernel_size; ++i) {
                 int output_row = (tx + padding - i) / stride;
                 if (output_row >= 0 && output_row < out_height){
                     for (int j = 0; j < kernel_size; ++j) {
                         int output_col = (ty + padding - j) / stride;
                         if (output_col >= 0 && output_col < out_width) {
-                            for (int oc = 0; oc < out_channels; ++oc) {
-                                int output_idx = (b * out_channels * out_height * out_width) + (c * out_height * out_width) + (output_row * out_width) + output_col;
-                                int weight_idx = (oc * in_channels * kernel_size * kernel_size) + (c * kernel_size * kernel_size) + (i * kernel_size) + j;
-                                value += output_error[output_idx] * weight[weight_idx];
+                            for (int c = 0; c < out_channels; ++c) {
+                             
+                                    int output_idx = (b * out_channels * out_height * out_width) + (c * out_height * out_width) + (output_row * out_width) + output_col;
+                                    int weight_idx = (c * in_channels * kernel_size * kernel_size) + (channel_idx * kernel_size * kernel_size) + (i * kernel_size) + j;
+                                    input_error[input_idx] += output_error[output_idx] * weight[weight_idx];
 
-                                 weight[weight_idx]  -=learning_rate * output_error[output_idx] * input[input_idx] ;
-                                 bias[oc]  -=learning_rate * output_error[output_idx] ;
+                                    weight[weight_idx] -= learning_rate * output_error[output_idx] * input[input_idx];
+                                    bias[c] -= learning_rate * output_error[output_idx];
                             }
                         }
                     }
                 }
             }
-           
-             
-            input_error[input_idx] = value;
         }
     }
-
-
- 
 
 
     template<class T>
@@ -342,13 +338,13 @@ namespace Hex
             _out_channels, _kernel_size, _padding, _stride, _out_width, _out_height, learning_rate);
 
         cudaDeviceSynchronize();
-        //cudaError_t cudaError = cudaGetLastError();
-        //if (cudaError != cudaSuccess) {
-        //    printf("error from liner backword method : %s\n", cudaGetErrorString(cudaError));
-        //    exit(EXIT_FAILURE);  // or handle the error appropriately
-        //}
+        cudaError_t cudaError = cudaGetLastError();
+        if (cudaError != cudaSuccess) {
+            printf("error from liner backword method : %s\n", cudaGetErrorString(cudaError));
+            exit(EXIT_FAILURE);  // or handle the error appropriately
+        }
        // bias->print();
-        //weights->print();
+      //  weights->print();
         return *input_error;
     }
 
