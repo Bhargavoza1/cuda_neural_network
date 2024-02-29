@@ -38,7 +38,7 @@ namespace Hex
 
             if (col == 0) {
                
-                bias[row] = static_cast<T>(row + 1);
+                bias[row] = static_cast<T>(row  );
             }
             
             weights[i] = static_cast<T>(i);
@@ -239,7 +239,7 @@ namespace Hex
                             int weight_idx = (c * in_channels * kernel_size * kernel_size) + (channel_idx * kernel_size * kernel_size) + (i * kernel_size) + j;
                             value += output_error[output_idx] * weight[weight_idx];
 
-
+                            printf("weight[weight_idx] %d \n", weight_idx);
                             ////////////////////// Update weight only if within bounds
                             // printf("before weight[weight_idx] %d = %f \n", weight_idx, weight[weight_idx]);
                             //if (input_row - padding + i * stride >= 0 && input_col - padding + j * stride >= 0) {
@@ -264,6 +264,48 @@ namespace Hex
             }
         }
     }
+    
+    template<class T>
+    __global__ void new_convolutionBackwardInputError(const T* output_error, const T* input, T* weight, T* bias, T* input_error,
+        int batch_size, int in_channels, int in_width, int in_height,
+        int out_channels, int kernel_size, int padding, int stride, int out_width, int out_height, float learning_rate) {
+
+        int tx = blockIdx.x * blockDim.x + threadIdx.x;
+        int ty = blockIdx.y * blockDim.y + threadIdx.y;
+        int tz = blockIdx.z * blockDim.z + threadIdx.z;
+   
+
+        if ( tx < in_width && ty < in_height && tz < batch_size * in_channels) {
+            int b = tz / in_channels;
+            int c = tz % in_channels;
+            T value = 0;
+
+            int input_idx = (b * in_channels * in_height * in_width) + (c * in_height * in_width) + (tx * in_height) + ty;
+            
+            for (int i = 0; i < kernel_size; ++i) {
+                int output_row = (tx + padding - i) / stride;
+                if (output_row >= 0 && output_row < out_height){
+                    for (int j = 0; j < kernel_size; ++j) {
+                        int output_col = (ty + padding - j) / stride;
+                        if (output_col >= 0 && output_col < out_width) {
+                            for (int oc = 0; oc < out_channels; ++oc) {
+                                int output_idx = (b * out_channels * out_height * out_width) + (c * out_height * out_width) + (output_row * out_width) + output_col;
+                                int weight_idx = (oc * in_channels * kernel_size * kernel_size) + (c * kernel_size * kernel_size) + (i * kernel_size) + j;
+                                value += output_error[output_idx] * weight[weight_idx];
+
+                                 weight[weight_idx]  -=learning_rate * output_error[output_idx] * input[input_idx] ;
+                                 bias[oc]  -=learning_rate * output_error[output_idx] ;
+                            }
+                        }
+                    }
+                }
+            }
+           
+             
+            input_error[input_idx] = value;
+        }
+    }
+
 
  
 
@@ -281,14 +323,21 @@ namespace Hex
        // output_error.print();
 
         input_error.reset(new Tensor<T>({ _batch_size , _in_channels ,_in_width , _in_height }));
-        dim3 threadsPerBlock(8 ,8, 8);
-        dim3 numBlocks(_batch_size * _in_channels,
-            (_in_width + threadsPerBlock.x - 1) / threadsPerBlock.x,
-            (_in_height + threadsPerBlock.y - 1) / threadsPerBlock.y
-        );
+       // bias->print();
+        //dim3 threadsPerBlock(8 ,8, 8);
+        //dim3 numBlocks(_batch_size * _in_channels,
+        //    (_in_width + threadsPerBlock.x - 1) / threadsPerBlock.x,
+        //    (_in_height + threadsPerBlock.y - 1) / threadsPerBlock.y
+        //);
  
-        
-        convolutionBackwardInputError << <numBlocks, threadsPerBlock >> > ( output_error.getData(), input->getData() ,
+       /////// new kernel setting
+        dim3 threadsPerBlock(8, 8, 8);
+        dim3 numBlocks((_in_width + threadsPerBlock.x - 1) / threadsPerBlock.x,
+            (_in_height + threadsPerBlock.y - 1) / threadsPerBlock.y,
+            (_batch_size * _in_channels + threadsPerBlock.z - 1) / threadsPerBlock.z);
+
+
+       new_convolutionBackwardInputError << <numBlocks, threadsPerBlock >> > ( output_error.getData(), input->getData() ,
             weights->getData(), bias->getData() , input_error->getData(), _batch_size, _in_channels, _in_width, _in_height,
             _out_channels, _kernel_size, _padding, _stride, _out_width, _out_height, learning_rate);
 
@@ -298,6 +347,8 @@ namespace Hex
         //    printf("error from liner backword method : %s\n", cudaGetErrorString(cudaError));
         //    exit(EXIT_FAILURE);  // or handle the error appropriately
         //}
+       // bias->print();
+        //weights->print();
         return *input_error;
     }
 
