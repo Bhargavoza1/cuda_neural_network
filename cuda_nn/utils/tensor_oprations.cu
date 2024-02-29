@@ -146,7 +146,7 @@ namespace Hex {
     __global__ void initializeTensor(T* data, int size, float multiplier) {
         int index = blockIdx.x * blockDim.x + threadIdx.x;
         if (index < size) {
-            data[index] = customRandom<T>(clock64(), index);
+           // data[index] = customRandom<T>(clock64(), index);
 
             curandState state;
             curand_init(clock64(), index, 0, &state); // Initialize random number generator for each thread
