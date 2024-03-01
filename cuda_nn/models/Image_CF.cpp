@@ -16,17 +16,17 @@ namespace Hex {
         // input channel = 16  
         
         // kernel size = 2 is 2x2 , stride is = 2
-        pool1(2,2),
+        pool1(2,4),
 
         // input channel = 16 , output channel = 32 , kernel size = 3 is 3x3
         conv2(batch_size, {16,32}, 3),
         relu2(),
-        
-        pool2(2, 2),
+        bn2(32 , TensorShape::_4D) ,
+        pool2(2, 4),
 
         fl(),
 
-        linear1( 32 * 128 * 128, 128, batch_size),
+        linear1( 32 * 32 * 32, 128, batch_size),
         relu3(),
         bn3(128, TensorShape::_2D),
 
@@ -61,7 +61,7 @@ namespace Hex {
     //   std::cout << "test forward relu2  " << std::endl;
        x = relu2.forward(x, Istraining);
         //x.print();
-     //   x = bn2.forward(x, Istraining);
+         x = bn2.forward(x, Istraining);
        //  x.print();
        x = pool2.forward(x, Istraining);
         //x.print();
@@ -110,7 +110,7 @@ namespace Hex {
         x = pool2.backpropagation(x, learning_rate);
       //  std::cout << "test pool2  " << std::endl;
         //x.print();
-       // x = bn2.backpropagation(x, learning_rate);
+          x = bn2.backpropagation(x, learning_rate);
        //   std::cout << "test bn2" << std::endl;
        //    x.print();
         x = relu2.backpropagation(x, learning_rate);

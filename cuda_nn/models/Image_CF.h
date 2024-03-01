@@ -25,7 +25,7 @@ namespace Hex {
 
         CNN2D<T> conv2;
         ReLU<T>  relu2;
-     
+        BatchNorm<T> bn2;
         MaxPool2d<T> pool2;
 
         flatten_layer<T> fl;
