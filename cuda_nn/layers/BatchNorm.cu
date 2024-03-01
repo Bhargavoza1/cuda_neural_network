@@ -594,6 +594,7 @@ namespace Hex {
         const int input_height,
         const float eps)
     {
+        const  T clip_threshold = static_cast<T>(1);
         int idx_x = blockIdx.x * blockDim.x + threadIdx.x;
         int idx_y = blockIdx.y * blockDim.y + threadIdx.y;
         int idx_z = blockIdx.z * blockDim.z + threadIdx.z;
@@ -633,8 +634,29 @@ namespace Hex {
                 ((static_cast<T>(1) / (batch_size * input_height * input_width)) * (input_data[index] - input_mean[c])) +
                 ((static_cast<T>(1) / (batch_size * input_height * input_width)) * dmeandata[threadIdx.z]);
 
+            if (input_error[index] > clip_threshold) {
+                input_error[index] = clip_threshold;
+            }
+            else if (input_error[index] < -clip_threshold) {
+                input_error[index] = -clip_threshold;
+            }
+
             atomicAdd(&grad_gamma[threadIdx.z], output_error[index] * x_normalized[index]);
             atomicAdd(&grad_beta[threadIdx.z], output_error[index]);
+
+            if (grad_gamma[threadIdx.z] > clip_threshold) {
+                grad_gamma[threadIdx.z] = clip_threshold;
+            }
+            else if (grad_gamma[threadIdx.z] < -clip_threshold) {
+                grad_gamma[threadIdx.z] = -clip_threshold;
+            }
+
+            if (grad_beta[threadIdx.z] > clip_threshold) {
+                grad_beta[threadIdx.z] = clip_threshold;
+            }
+            else if (grad_beta[threadIdx.z] < -clip_threshold) {
+                grad_beta[threadIdx.z] = -clip_threshold;
+            }
 
             gamma_gradient[c] -= grad_gamma[threadIdx.z];
             beta_gradient[c] -= grad_beta[threadIdx.z];
