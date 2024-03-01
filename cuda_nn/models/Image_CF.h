@@ -20,12 +20,12 @@ namespace Hex {
 
         CNN2D<T>  conv1;
         ReLU<T>  relu1;
-      
+        BatchNorm<T> bn1;
         MaxPool2d<T> pool1;
 
         CNN2D<T> conv2;
         ReLU<T>  relu2;
-        //BatchNorm<T> bn2;
+        BatchNorm<T> bn2;
         MaxPool2d<T> pool2;
 
         flatten_layer<T> fl;

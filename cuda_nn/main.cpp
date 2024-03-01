@@ -56,17 +56,18 @@ void xor_withcnn() {
         error = Hex::mse(*y_tensor, a);
 
 
-        a.print();
+       // a.print();
         output_error = Hex::mse_derivative(*y_tensor, a);
         // output_error->print();
         Image_CF->backpropa(*output_error, 0.0001f);
 
-        std::cout << " epoch " << i << " done" << std::endl;
+        std::cout << " epoch " << i+1 << " done" << std::endl;
 
-        std::cout << "Epoch " << (i) << "/" << epoch << "   Mean Squared Error: " << error->get({ 0 }) << std::endl;
+        std::cout << "Epoch " << (i+1) << "/" << epoch << "   Mean Squared Error: " << error->get({ 0 }) << std::endl;
         std::cout << std::endl;
         std::cout << std::endl;
     }
+    a.print();
 }
 
 
@@ -75,6 +76,22 @@ int main() {
     //Hex::xor_example();
 
    xor_withcnn();
+
+
+    //int batchsize = 64;
+    //int input_channels = 3;
+    //int output_class = 1; 
+
+    //std::vector<int> x_shape = { batchsize,input_channels,512 ,512 }; // Shape: (4, 1, 2)
+
+    //std::unique_ptr<Tensor<float>> x_tensor(new Tensor<float>(x_shape));
+    //initTensorOnGPU(*x_tensor, 0.0f);
+
+
+    //BatchNorm<float> bc1(input_channels, TensorShape::_4D);
+    //auto a = bc1.forward(*x_tensor);
+    // bc1.backpropagation(*x_tensor); 
+   // a.print();
     return 0;
 
 }

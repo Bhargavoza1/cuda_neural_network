@@ -62,16 +62,16 @@ namespace Hex {
 
             if (Istraining) {
                 // Calculate mean
-                if (threadIdx.x == 0 ) {
+                if (threadIdx.x == 0) {
                     T sum = 0;
                     for (int b = 0; b < batch_size; ++b) {
                         int data_idx = b * features + col;
                         sum += input_data[data_idx];
-                       
+
                     }
                     input_mean[col] = sum / (batch_size);
-                   
-                   // 
+
+                    // 
                     T diff = 0;
                     T sum_squares = 0.0f;
                     for (int b = 0; b < batch_size; ++b) {
@@ -80,11 +80,11 @@ namespace Hex {
                         sum_squares += diff * diff;
                     }
                     input_var[col] = sum_squares / (batch_size);
-                   // printf(" input_var[col] %f \n", input_var[col]);
+                    // printf(" input_var[col] %f \n", input_var[col]);
                 }
                 __syncthreads();
 
-                x_normalized[input_idx] = (input_data[input_idx] - input_mean[col]) / sqrtf(input_var[col] + eps); 
+                x_normalized[input_idx] = (input_data[input_idx] - input_mean[col]) * (static_cast<T>(1) / sqrtf(input_var[col] + eps));
                 output_data[input_idx] = gamma_data[col] * x_normalized[input_idx] + beta_data[col];
 
                 running_mean[col] = momentum * running_mean[col] + (1 - momentum) * input_mean[col];
@@ -103,15 +103,15 @@ namespace Hex {
     {
 
         input = std::make_shared<Tensor<T>>(input_tensor);
-       //  std::cout << "input" << std::endl; 
-         //input->print();
-        // std::cout   << std::endl;
+        //  std::cout << "input" << std::endl; 
+          //input->print();
+         // std::cout   << std::endl;
         output.reset(new Tensor<T>({ input_tensor.getShape() }));
         x_normalized.reset(new Tensor<T>({ input_tensor.getShape() }));
 
         int _batch_size = input->getShape()[0];
         int _fetures = input->getShape()[1];
-        
+
 
         dim3 threadsPerBlock(16, 16);
         dim3 numBlocks((_batch_size + threadsPerBlock.x - 1) / threadsPerBlock.x,
@@ -258,22 +258,22 @@ namespace Hex {
             if (Istraining) {
 
                 atomicAdd(&smeandata[threadIdx.z], input_data[index]);
-                input_mean[c] = smeandata[threadIdx.z] / (batch_size * input_height * input_width);
+                input_mean[c] = (static_cast<T>(1) / (batch_size * input_height * input_width)) * smeandata[threadIdx.z];
 
                 atomicAdd(&svardata[threadIdx.z], (input_data[index] - input_mean[c]) * (input_data[index] - input_mean[c]));
-                input_var[c] = svardata[threadIdx.z] / (batch_size * input_height * input_width);
+                input_var[c] = (static_cast<T>(1) / (batch_size * input_height * input_width)) * svardata[threadIdx.z];
                 __syncthreads();
 
 
-                x_normalized[index] = (input_data[index] - input_mean[c]) / sqrtf(input_var[c] + eps);
+                x_normalized[index] = (input_data[index] - input_mean[c]) * (static_cast<T>(1) / sqrtf(input_var[c] + eps));
                 output_data[index] = gamma_data[c] * x_normalized[index] + beta_data[c];
-                 
+
 
                 running_mean[c] = momentum * running_mean[c] + (1 - momentum) * input_mean[c];
                 running_variance[c] = momentum * running_variance[c] + (1 - momentum) * input_var[c];
             }
             else {
-                x_normalized[index] = (input_data[index] - running_mean[c]) / sqrtf(running_variance[c] + eps);
+                x_normalized[index] = (input_data[index] - running_mean[c]) * (static_cast<T>(1) / sqrtf(running_variance[c] + eps));
                 output_data[index] = gamma_data[c] * x_normalized[index] + beta_data[c];
             }
         }
@@ -326,12 +326,15 @@ namespace Hex {
             printf("Error from batchnorm 4d forward method: %s\n", cudaGetErrorString(cudaError));
             exit(EXIT_FAILURE);  // or handle the error appropriately
         }
-        //input_mean.print();
-        //input_var.print();
-        //x_normalized.print();
-        //output->print();
-        //running_mean->print();
-        //running_var->print();
+        // input->print();
+         // input_mean.print();
+         //input_var.print();
+         //input_mean.print();
+         //input_var.print();
+         //x_normalized.print();
+         //output->print();
+         //running_mean->print();
+         //running_var->print();
         return *output;
     }
 
@@ -382,8 +385,8 @@ namespace Hex {
 
 
             grad_normalized[input_idx] = output_error[input_idx] * gamma_gradient[col];
-           
-             // Calculate dvar
+
+            // Calculate dvar
 
             T dvar = 0.0f;
             if (threadIdx.x == 0) {
@@ -414,7 +417,7 @@ namespace Hex {
                 dmean = a * dvar + d;
             }
             __syncthreads();
-           
+
             for (int b = 0; b < batch_size; ++b) {
                 int data_idx = b * features + col;
 
@@ -431,8 +434,8 @@ namespace Hex {
                     grad_beta += output_error[data_idx];
                 }
 
-                gamma_gradient[col] -=  grad_gamma;
-                beta_gradient[col] -=   grad_beta;
+                gamma_gradient[col] -= grad_gamma;
+                beta_gradient[col] -= grad_beta;
             }
             __syncthreads();
 
@@ -447,8 +450,8 @@ namespace Hex {
         grad_normalized.reset(new Tensor<T>({ input->getShape() }));
         const int batch_size = input->getShape()[0];
         const int features = input->getShape()[1];
-       // gamma->print();
-        // input->print();
+        // gamma->print();
+         // input->print();
         const dim3 blockSize(16, 16); // Adjust block size as needed
         const dim3 gridSize((batch_size + blockSize.x - 1) / blockSize.x, (features + blockSize.y - 1) / blockSize.y); // Adjust grid size as needed
         // x_normalized->print();
@@ -596,7 +599,7 @@ namespace Hex {
         int idx_z = blockIdx.z * blockDim.z + threadIdx.z;
         __shared__ T dmeandata[64];
         __shared__ T dvardata[64];
-   
+
         __shared__ T a[64];
         __shared__ T k[64];
         __shared__ T grad_gamma[64];
@@ -604,7 +607,7 @@ namespace Hex {
 
 
         dmeandata[threadIdx.z] = 0.0f;
-        dvardata[threadIdx.z] = 0.0f;  
+        dvardata[threadIdx.z] = 0.0f;
         a[threadIdx.z] = 0.0f;
         k[threadIdx.z] = 0.0f;
         grad_gamma[threadIdx.z] = 0.0f;
@@ -615,25 +618,27 @@ namespace Hex {
             int index = (b * out_channels + c) * input_width * input_height + idx_y * input_width + idx_x;
 
             grad_normalized[index] = output_error[index] * gamma_gradient[c];
- 
+
             T r = (input_data[index] - input_mean[c]);
             T t = pow(input_var[c] + eps, -1.5);
             atomicAdd(&dvardata[threadIdx.z], grad_normalized[index] * r * -0.5 * t);
 
-       
+
             atomicAdd(&a[threadIdx.z], grad_normalized[index] * (-1 / sqrt(input_var[c] + eps)));
-            atomicAdd(&k[threadIdx.z], -2 * (input_data[index] - input_mean[c]) / (batch_size * input_height * input_width));
+            atomicAdd(&k[threadIdx.z], -2 * ((static_cast<T>(1) / (batch_size * input_height * input_width)) * (input_data[index] - input_mean[c])));
             dmeandata[threadIdx.z] = a[threadIdx.z] * dvardata[threadIdx.z] + k[threadIdx.z];
-          
-            
-            input_error[index] = grad_normalized[index] / sqrt(input_var[c] + eps) + dvardata[threadIdx.z] * 2.0 * (input_data[index] - input_mean[c]) / (batch_size * input_height * input_width) + dmeandata[threadIdx.z] / (batch_size * input_height * input_width);
-          
+
+
+            input_error[index] = grad_normalized[index] * (static_cast<T>(1) / sqrt(input_var[c] + eps)) + dvardata[threadIdx.z] * 2.0 *
+                ((static_cast<T>(1) / (batch_size * input_height * input_width)) * (input_data[index] - input_mean[c])) +
+                ((static_cast<T>(1) / (batch_size * input_height * input_width)) * dmeandata[threadIdx.z]);
+
             atomicAdd(&grad_gamma[threadIdx.z], output_error[index] * x_normalized[index]);
             atomicAdd(&grad_beta[threadIdx.z], output_error[index]);
 
             gamma_gradient[c] -= grad_gamma[threadIdx.z];
             beta_gradient[c] -= grad_beta[threadIdx.z];
-             
+
             __syncthreads();
         }
 
@@ -645,15 +650,15 @@ namespace Hex {
     {
         input_error.reset(new Tensor<T>({ input->getShape() }));
         grad_normalized.reset(new Tensor<T>({ input->getShape() }));
- /*       const int _batch_size = input->getShape()[0];
-        const int _out_channels = input->getShape()[1];
-        const int _in_width = input->getShape()[2];
-        const int _in_height = input->getShape()[3];
+        /*       const int _batch_size = input->getShape()[0];
+               const int _out_channels = input->getShape()[1];
+               const int _in_width = input->getShape()[2];
+               const int _in_height = input->getShape()[3];
 
-        dim3 threadsPerBlock(8, 8, 8);
-        dim3 numBlocks(_batch_size * _out_channels,
-            (_in_width + threadsPerBlock.x - 1) / threadsPerBlock.x,
-            (_in_height + threadsPerBlock.y - 1) / threadsPerBlock.y);*/
+               dim3 threadsPerBlock(8, 8, 8);
+               dim3 numBlocks(_batch_size * _out_channels,
+                   (_in_width + threadsPerBlock.x - 1) / threadsPerBlock.x,
+                   (_in_height + threadsPerBlock.y - 1) / threadsPerBlock.y);*/
 
 
 
@@ -667,7 +672,7 @@ namespace Hex {
             (_in_height + threadsPerBlock.y - 1) / threadsPerBlock.y,
             (_batch_size * _out_channels + threadsPerBlock.z - 1) / threadsPerBlock.z);
 
-         batchnorm_backward_4d_kernel << <numBlocks, threadsPerBlock >> > (input->getData(),
+        batchnorm_backward_4d_kernel << <numBlocks, threadsPerBlock >> > (input->getData(),
             output_error.getData(),
             x_normalized->getData(),
             input_mean.getData(),

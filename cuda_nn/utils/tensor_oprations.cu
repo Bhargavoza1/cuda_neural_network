@@ -149,7 +149,7 @@ namespace Hex {
            // data[index] = customRandom<T>(clock64(), index);
 
             curandState state;
-            curand_init(clock64(), index, 0, &state); // Initialize random number generator for each thread
+            curand_init(777, index, 0, &state); // Initialize random number generator for each thread
 
             data[index] = curand_uniform(&state) * (2 * 0.5f) - 0.5f;
 

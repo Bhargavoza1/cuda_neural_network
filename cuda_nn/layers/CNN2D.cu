@@ -25,7 +25,7 @@ namespace Hex
             int col = i % (in_channels * kernel_size * kernel_size);
 
             curandState state;
-            curand_init(clock64(), idx, 0, &state);
+            curand_init(777, idx, 0, &state);
 
             if (col == 0) {
                 bias[row] = curand_uniform(&state) * (2 * w_b_range) - w_b_range;

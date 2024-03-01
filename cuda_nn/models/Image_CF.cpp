@@ -14,14 +14,14 @@ namespace Hex {
         conv1(batch_size, { input_channels,16}, 3) ,
         relu1(),
         // input channel = 16  
-        
+        bn1(16, TensorShape::_4D , 0.7 , 1e-1),
         // kernel size = 2 is 2x2 , stride is = 2
         pool1(2,4),
 
         // input channel = 16 , output channel = 32 , kernel size = 3 is 3x3
         conv2(batch_size, {16,32}, 3),
         relu2(),
-       // bn2(32 , TensorShape::_4D) ,
+        bn2(32 , TensorShape::_4D , 0.7, 1e-1) ,
         pool2(2, 4),
 
         fl(),
@@ -51,17 +51,17 @@ namespace Hex {
        x = relu1.forward(x, Istraining);
       
        // x.print();
-       //  x = bn1.forward(x, Istraining);
+         x = bn1.forward(x, Istraining);
        // x.print();
        x = pool1.forward(x, Istraining);
        // x.print();
       // std::cout << "test forward cnn2  " << std::endl;
        x = conv2.forward(x, Istraining);
-       
+       // x = bn2.forward(x, Istraining);
     //   std::cout << "test forward relu2  " << std::endl;
        x = relu2.forward(x, Istraining);
         //x.print();
-        // x = bn2.forward(x, Istraining);
+        x = bn2.forward(x, Istraining);
        //  x.print();
        x = pool2.forward(x, Istraining);
         //x.print();
@@ -110,18 +110,20 @@ namespace Hex {
         x = pool2.backpropagation(x, learning_rate);
       //  std::cout << "test pool2  " << std::endl;
         //x.print();
-        // x = bn2.backpropagation(x, learning_rate);
+        x = bn2.backpropagation(x, learning_rate);
        //   std::cout << "test bn2" << std::endl;
        //    x.print();
         x = relu2.backpropagation(x, learning_rate);
+        //  x = bn2.backpropagation(x, learning_rate);
        // std::cout << "test relu2" << std::endl;
         x = conv2.backpropagation(x, learning_rate);
+
       //  std::cout << "test cnn2" << std::endl;
         //  x.print();
         
         x = pool1.backpropagation(x, learning_rate);
       //  std::cout << "test pool1  " << std::endl;
-     // x = bn1.backpropagation(x, learning_rate);
+       x = bn1.backpropagation(x, learning_rate);
          
         x = relu1.backpropagation(x, learning_rate);
       //  std::cout << "test relu1" << std::endl;
