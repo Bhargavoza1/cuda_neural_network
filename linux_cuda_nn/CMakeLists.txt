@@ -28,6 +28,7 @@ set(SOURCES
     layers/flatten_layer.cu
     layers/BatchNorm.cu
     models/MLP.cpp
+    models/Image_CF.cpp
     utils/Errorhelper.cpp
     utils/Tensor.cu
     utils/tensor_oprations.cu

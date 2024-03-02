@@ -2,14 +2,13 @@
 #include "layer.h"
 #include <iostream>
  #include <memory>
- #include <cuda_runtime.h> 
 namespace Hex{
 	template <class T>
 	class ReLU : public layer<T>
 	{
     private:
  
-        Tensor<T>  input;
+        std::shared_ptr<Tensor<T>> input;
         std::unique_ptr<Tensor<T>> output;
         std::unique_ptr<Tensor<T>> input_error;
 

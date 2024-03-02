@@ -5,31 +5,33 @@
 #include <cuda_runtime.h>
 #include <cassert>
 namespace Hex {
-       // Constructor
+    // Constructor
     template <typename T>
-    Tensor<T>::Tensor(const std::vector<int>& shape) : shape(shape) {
+    Tensor<T>::Tensor(const std::vector<int>& shape, bool iscudafree) : shape(shape) ,_iscudafree(iscudafree) {
+       
         int size = 1;
         for (int dim : shape) {
             size *= dim;
         }
-        cudaMalloc((void**)&data, size * sizeof(T));
+        T* cudaData;
+        cudaMalloc((void**)&cudaData, size * sizeof(T));
+        data = std::shared_ptr<T[]>(cudaData, [=](T* ptr) { if (iscudafree) { cudaFree(ptr); } }); // Custom deleter for CUDA memory
     }
 
     // Destructor
     template <typename T>
     Tensor<T>::~Tensor() {
-       // if (this != nullptr) { cudafree(data); }
-       
+       //  cudafree();
     }
-
     template <typename T>
-    void Tensor<T>::cudafree() { if (this != nullptr) { cudaFree(data); } }
-
+    void Tensor<T>::cudafree() { if (this != nullptr) { if (_iscudafree) { cudaFree(data.get()); }}}
+ 
+ 
     // Set element at index
     template <typename T>
     void Tensor<T>::set(const std::vector<int>& indices, T value) {
         int index = calculateIndex(indices);
-        cudaMemcpy(data + index, &value, sizeof(T), cudaMemcpyHostToDevice);
+        cudaMemcpy(data.get() + index, &value, sizeof(T), cudaMemcpyHostToDevice);
     }
 
     // Get element at index
@@ -37,7 +39,7 @@ namespace Hex {
     T Tensor<T>::get(const std::vector<int>& indices) const {
         int index = calculateIndex(indices);
         T value;
-        cudaMemcpy(&value, data + index, sizeof(T), cudaMemcpyDeviceToHost);
+        cudaMemcpy(&value, data.get() + index, sizeof(T), cudaMemcpyDeviceToHost);
         return value;
     }
 
@@ -53,13 +55,25 @@ namespace Hex {
         }
         std::cout << ", Type: " << typeid(T).name() << "):" << std::endl;
 
-        printHelper(data, shape, 0, {});
+        printHelper(data.get(), shape, 0, {});
         //std::cout << std::endl;
     }
 
     template <typename T>
+    void Tensor<T>::printshape() const {
+        std::cout << "Tensor (Shape: ";
+        for (size_t i = 0; i < shape.size(); ++i) {
+            std::cout << shape[i];
+            if (i < shape.size() - 1) {
+                std::cout << "x";
+            }
+        }
+        std::cout << ", Type: " << typeid(T).name() << "):" << std::endl;
+    }
+
+    template <typename T>
     void Tensor<T>::setData(T* newData) {
-        data = newData;
+        data.reset(newData);
     }
 
     // Getter for shape
@@ -70,12 +84,12 @@ namespace Hex {
 
     template <typename T>
     const T* Tensor<T>::getData() const {
-        return data;
+        return data.get();
     }
 
     template <typename T>
     T* Tensor<T>::getData() {
-        return data;
+        return data.get();
     }
 
 

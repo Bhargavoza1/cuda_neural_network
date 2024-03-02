@@ -1,11 +1,10 @@
 #pragma once
 #include "../layers/layer.h"
-#include "MLP.h"
 #include "../layers/linear.h"
 #include "../layers/ReLU.h"
 #include "../layers/Sigmoid.h"
-#include "../utils/Tensor.h"
 #include "../layers/BatchNorm.h"
+#include "../utils/Tensor.h"
 namespace Hex {
 	template <class T>
 	class MLP : public layer<T>
@@ -16,16 +15,23 @@ namespace Hex {
         Tensor<T> X;
        
         linear<T>  linear1;
-        BatchNorm<T> bn1;
         ReLU<T>  relu1;
+        BatchNorm<T> bn1;
+
         linear<T>  linear2;
-        ReLU<T>  relu2;
+        ReLU<T>  relu2;  
+       // BatchNorm<T> bn2;
+
         linear<T>  linear3;
+        ReLU<T>  relu3;
+        //BatchNorm<T> bn3;
+
+        linear<T>  linear4;
         Sigmoid<T>  sigmoid1;
 
 	public:
         // Constructor
-        MLP(int input_size, int output_size,  int batch_size = 1 , int hiddenlayer = 1, int h_l_dimension = 10);
+        MLP(int input_size, int output_size,  int batch_size = 1 ,  int h_l_dimension = 10);
         ~MLP();
 
         // Override forward method

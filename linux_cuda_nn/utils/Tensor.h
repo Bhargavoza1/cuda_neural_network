@@ -1,8 +1,9 @@
 #pragma once
 #include <vector>
- 
+#include <iostream>
+#include <memory>
 namespace Hex {
-     template <typename T>
+    template <typename T>
     class ITensor {
     public: 
         virtual ~ITensor() {}
@@ -18,12 +19,14 @@ namespace Hex {
     template <typename T>
     class Tensor : public ITensor<T> {
     private:
-        T* data;
+        std::shared_ptr<T[]> data;
         std::vector<int> shape;
+        bool _iscudafree;
 
     public:
         Tensor() : shape(std::vector<int>{}) {}
-        Tensor(const std::vector<int>& shape);
+        Tensor(const std::vector<int>& shape ,  bool iscudafree = true);
+        
         ~Tensor() override;
         void set(const std::vector<int>& indices, T value) override;
         T get(const std::vector<int>& indices) const override;
@@ -35,7 +38,7 @@ namespace Hex {
 
         void cudafree();
 
-     
+        void printshape() const  ;
         void reshape(const std::vector<int>& new_shape); 
     private:
         int calculateIndex(const std::vector<int>& indices) const;

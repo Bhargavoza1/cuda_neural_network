@@ -594,7 +594,7 @@ namespace Hex {
         const int input_height,
         const float eps)
     {
-        const  T clip_threshold = static_cast<T>(1);
+        const  T clip_threshold = static_cast<T>(0.1);
         int idx_x = blockIdx.x * blockDim.x + threadIdx.x;
         int idx_y = blockIdx.y * blockDim.y + threadIdx.y;
         int idx_z = blockIdx.z * blockDim.z + threadIdx.z;
@@ -641,6 +641,8 @@ namespace Hex {
                 input_error[index] = -clip_threshold;
             }
 
+         
+
             atomicAdd(&grad_gamma[threadIdx.z], output_error[index] * x_normalized[index]);
             atomicAdd(&grad_beta[threadIdx.z], output_error[index]);
 
@@ -656,7 +658,7 @@ namespace Hex {
             }
             else if (grad_beta[threadIdx.z] < -clip_threshold) {
                 grad_beta[threadIdx.z] = -clip_threshold;
-            }
+            } 
 
             gamma_gradient[c] -= grad_gamma[threadIdx.z];
             beta_gradient[c] -= grad_beta[threadIdx.z];

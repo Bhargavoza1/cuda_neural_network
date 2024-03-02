@@ -1,14 +1,14 @@
 #pragma once
 #include "layer.h"
 #include <iostream>
- 
-#include <memory>
+ #include <memory>
+
 namespace Hex {
     template <class T>
     class Sigmoid : public layer<T> {
     private:
 
-        Tensor<T> input;
+        std::shared_ptr<Tensor<T>> input;
         std::unique_ptr<Tensor<T>> output;
         std::unique_ptr<Tensor<T>> input_error;
 

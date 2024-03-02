@@ -8,7 +8,7 @@
 #include <vector>
  namespace Hex{ 
  
-       template<class T, class U>
+    template<class T, class U>
     __global__ void addKernel(const T* a, const U* b, typename std::common_type<T, U>::type* c, int size) {
         int idx = threadIdx.x + blockDim.x * blockIdx.x;
         if (idx < size) {
@@ -53,8 +53,7 @@
  
         return result;
     }
-
-// CUDA kernel for tensor initialization with multiplication
+ // CUDA kernel for tensor initialization with multiplication
     template <typename T>
     __global__ void initializeTensortoOne(T* data, int size ) {
         int index = blockIdx.x * blockDim.x + threadIdx.x;
@@ -93,28 +92,53 @@
     }
 
 
-     // CUDA kernel for tensor initialization with multiplication
+  template <typename T>
+    __device__ T customRandom(int seed, int index) {
+        // Linear congruential generator parameters
+        const int a = 16645;
+        const int c = 10139;
+        const int m = 21474; // 2^31
+
+        // Update seed based on thread index
+        seed = a * seed + c + index;
+
+        // Generate pseudorandom number in [0, 1]
+        int random_int = seed % m;
+        T random_float = static_cast<T>(random_int) / static_cast<T>(m);
+
+
+        return (random_float * (-static_cast<T>(0.5)));
+    }
+
+ 
+
+   // CUDA kernel for tensor initialization with multiplication
     template <typename T>
     __global__ void initializeTensor(T* data, int size, float multiplier) {
         int index = blockIdx.x * blockDim.x + threadIdx.x;
         if (index < size) {
-            //curandState state;
-            //curand_init(clock64(), index, 0, &state); // Initialize random number generator for each thread
+           // data[index] = customRandom<T>(clock64(), index);
 
-            //data[index] = curand_uniform(&state) * (2 * 0.5f) - 0.5f;
-            T value = static_cast<T>(index+1)  ;
+            curandState state;
+            curand_init(777, index, 0, &state); // Initialize random number generator for each thread
 
-            if (multiplier != 0) {
-                value *= multiplier;
-            }
+            data[index] = curand_uniform(&state) * (2 * 0.5f) - 0.5f;
 
-            data[index] = value;
+
+            //T value = static_cast<T>(index )  ;
+
+            //if (multiplier != 0) {
+            //    value *= multiplier;
+            //}
+
+            //data[index] = value;
         }
     }
 
 
 
-    template<typename T>
+
+   template<typename T>
     void initTensorOnGPU(Tensor<T>& tensor, float multiplier)
     {
         std::vector<int> shape = tensor.getShape();

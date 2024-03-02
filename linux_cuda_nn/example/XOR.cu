@@ -8,21 +8,19 @@
 
 namespace Hex {
 
-    template<typename T>
+ template<typename T>
     void predictAndPrintResults(MLP<T>& model, const Tensor<T>& input_data, const Tensor<T>& target_data) {
         std::vector<int> input_shape = input_data.getShape();
         std::vector<int> target_shape = target_data.getShape();
 
         // Assuming num_samples is the first dimension of the input_data and target_data tensors
         int num_samples = input_shape[0];
-        std::unique_ptr<Tensor<T>> sliced_tensor2;
-        std::unique_ptr<Tensor<T>> transpose_tensor2;
+        std::unique_ptr<Tensor<T>> sliced_tensor2; 
         Tensor<T> inpurt_data;
         Tensor<T>* predicted_output;
         for (int sample_index = 0; sample_index < num_samples; ++sample_index) {
 
-            sliced_tensor2 = Hex::sliceFirstIndex(sample_index, input_data);
-            //  transpose_tensor2 = Hex::transpose(*sliced_tensor2);
+            sliced_tensor2 = Hex::sliceFirstIndex(sample_index, input_data); 
             inpurt_data = *sliced_tensor2;
             predicted_output = &model.forward(inpurt_data, false);
 
@@ -63,9 +61,12 @@ namespace Hex {
         Tensor<T> sampled_input_data = input_data;
         Tensor<T> sampled_target_data = target_data;
 
-        Tensor<T>* predicted_output;
-        Tensor<T> error;
-        Tensor<T> output_error;
+      
+ 
+        std::shared_ptr<Tensor<T>> predicted_output;
+
+        std::shared_ptr<Tensor<T>> error;
+        std::shared_ptr<Tensor<T>> output_error;
 
         sampled_input_data.reshape({ 4,2 });
         sampled_target_data.reshape({ 4,2 });
@@ -75,16 +76,16 @@ namespace Hex {
 
             T total_error = 0;
             for (int sample_index = 0; sample_index < num_samples; ++sample_index) {
+             
+                predicted_output = std::make_shared<Tensor<T>>(model.forward(sampled_input_data));
+                
+                error =  mse(sampled_target_data, *predicted_output);
 
-                predicted_output = &model.forward(sampled_input_data);
-
-                error = *mse(sampled_target_data, *predicted_output);
-
-                total_error += error.get({ 0 });
-
-                output_error = *mse_derivative(sampled_target_data, *predicted_output);
-
-                model.backpropa(output_error, learning_rate);
+                total_error += error->get({ 0 });
+                //std::cout << total_error << std::endl;
+                output_error =  mse_derivative(sampled_target_data, *predicted_output);
+             
+                model.backpropa(*output_error, learning_rate);
             }
             // Calculate the average error on all samples
             T average_error = (total_error / num_samples);
@@ -94,52 +95,51 @@ namespace Hex {
     }
 
 
-    void xor_example() {
-       // Define the parameters for your MLP
-       int input_size = 2;        // Size of input layer
-       int output_size = 2;       // Size of output layer
-       int batchsize = 4;
-       int hiddenlayer = 3;       // Number of hidden layers
-       int h_l_dimension = 10;     // Dimension of each hidden layer
+     void xor_example() {
+        // Define the parameters for your MLP
+        int input_size = 2;        // Size of input layer
+        int output_size = 2;       // Size of output layer
+        int batchsize = 4; 
+        int h_l_dimension = 15;     // Dimension of each hidden layer
 
-       // Create an instance of the MLP class
-       std::unique_ptr<Hex::MLP<float>>  mlp(new  Hex::MLP<float>(input_size, output_size, batchsize, hiddenlayer, h_l_dimension));
-
-
-       // Define your input data
-       std::vector<std::vector<std::vector<float>>> x_train = {
-           {{0, 0}},
-           {{0, 1}},
-           {{1, 0}},
-           {{1, 1}}
-       };
-
-       std::vector<std::vector<std::vector<float>>> y_train = {
-           {{1, 0}},   // Class 0
-           {{0, 1}},   // Class 1
-           {{0, 1}},   // Class 1
-            {{1, 0}}  // Class 0
-       };
-
-       // Create a Tensor for x_train
-       std::vector<int> x_shape = { 4, 1, 2 }; // Shape: (4, 1, 2)
-       std::unique_ptr<Tensor<float>> x_tensor(new Tensor<float>(x_shape));
-
-       // Create a Tensor for y_train
-       std::vector<int> y_shape = { 4, 1, 2 }; // Shape: (4, 1, 2)
-       std::unique_ptr<Tensor<float>> y_tensor(new Tensor<float>(y_shape));
-       // Set data for x_tensor
-       for (int i = 0; i < 4; ++i) {
-           x_tensor->set({ i, 0, 0 }, x_train[i][0][0]);
-           x_tensor->set({ i, 0, 1 }, x_train[i][0][1]);
-
-           y_tensor->set({ i, 0, 0 }, y_train[i][0][0]);
-           y_tensor->set({ i, 0, 1 }, y_train[i][0][1]);
-       }
+        // Create an instance of the MLP class
+        std::unique_ptr<Hex::MLP<float>>  mlp(new  Hex::MLP<float>(input_size, output_size, batchsize,  h_l_dimension));
 
 
-       trainNeuralNetwork(*mlp, *x_tensor, *y_tensor, 100, 0.1f);
-       predictAndPrintResults(*mlp, *x_tensor, *y_tensor);
+        // Define your input data
+        std::vector<std::vector<std::vector<float>>> x_train = {
+            {{0, 0}},
+            {{0, 1}},
+            {{1, 0}},
+            {{1, 1}}
+        };
+
+        std::vector<std::vector<std::vector<float>>> y_train = {
+            {{1, 0}},   // Class 0
+            {{0, 1}},   // Class 1
+            {{0, 1}},   // Class 1
+             {{1, 0}}  // Class 0
+        };
+
+        // Create a Tensor for x_train
+        std::vector<int> x_shape = { 4, 1, 2 }; // Shape: (4, 1, 2)
+        std::unique_ptr<Tensor<float>> x_tensor(new Tensor<float>(x_shape));
+
+        // Create a Tensor for y_train
+        std::vector<int> y_shape = { 4, 1, 2 }; // Shape: (4, 1, 2)
+        std::unique_ptr<Tensor<float>> y_tensor(new Tensor<float>(y_shape));
+        // Set data for x_tensor
+        for (int i = 0; i < 4; ++i) {
+            x_tensor->set({ i, 0, 0 }, x_train[i][0][0]);
+            x_tensor->set({ i, 0, 1 }, x_train[i][0][1]);
+
+            y_tensor->set({ i, 0, 0 }, y_train[i][0][0]);
+            y_tensor->set({ i, 0, 1 }, y_train[i][0][1]);
+        }
+
+
+        trainNeuralNetwork(*mlp, *x_tensor, *y_tensor, 100, 0.001f);
+        predictAndPrintResults(*mlp, *x_tensor, *y_tensor);
     }
 
 

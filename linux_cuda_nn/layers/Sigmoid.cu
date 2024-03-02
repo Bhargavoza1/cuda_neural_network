@@ -2,14 +2,12 @@
 #include <cuda_runtime.h> 
 #include <iostream>
 namespace Hex {
-   template<class T>
+    template<class T>
     Sigmoid<T>::Sigmoid() {}
 
     template<class T>
     Sigmoid<T>::~Sigmoid() {
-        input.cudafree();
-        output->cudafree();
-        input_error->cudafree();
+       
     }
     
     template <typename T>
@@ -27,16 +25,16 @@ namespace Hex {
      
     template<class T>
     Tensor<T>& Sigmoid<T>::forward(Tensor<T>& input_tensor, bool Istraining) {
-        input = input_tensor;
+        input = std::make_shared<Tensor<T>>(input_tensor);
         output.reset(new Tensor<T>(input_tensor.getShape()));
 
-        std::vector<int> shape = input.getShape();
+        std::vector<int> shape = input->getShape();
         int size = 1;
         for (int dim : shape) {
             size *= dim;
         }
  
-        sigmoid_forward_kernel << <(size + 255) / 256, 256 >> > (input.getData(), output->getData(), size);
+        sigmoid_forward_kernel << <(size + 255) / 256, 256 >> > (input->getData(), output->getData(), size);
         cudaDeviceSynchronize();
         cudaError_t cudaError = cudaGetLastError();
         if (cudaError != cudaSuccess) {
@@ -76,7 +74,7 @@ namespace Hex {
             size *= dim;
         }
 
-        sigmoid_backward_kernel << <(size + 255) / 256, 256 >> > (input.getData(), output_error.getData(), input_error->getData(), size);
+        sigmoid_backward_kernel << <(size + 255) / 256, 256 >> > (input->getData(), output_error.getData(), input_error->getData(), size);
 
         cudaDeviceSynchronize();
         cudaError_t cudaError = cudaGetLastError();
@@ -87,7 +85,7 @@ namespace Hex {
 
         return *input_error;
     }
-    // Explicit instantiation of the template class for supported types
+
     template class Sigmoid<float>;
     template class Sigmoid<int>;
     template class Sigmoid<double>;

@@ -11,7 +11,7 @@ namespace Hex {
 		int _padding;
 		int _stride;
 
-		Tensor<T> input;
+		std::shared_ptr<Tensor<T>> input;
 
 		std::unique_ptr<Tensor<T>> output;
 		std::unique_ptr<Tensor<T>> input_error;

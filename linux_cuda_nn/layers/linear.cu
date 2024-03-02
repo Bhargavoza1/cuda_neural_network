@@ -4,15 +4,15 @@
 #include <random>
 #include<iostream>
 #include "../utils/Errorhelper.cpp"
-namespace Hex{
+namespace Hex {
 
 
 
 	template<class T>
 	linear<T>::linear(int input_size, int output_size, int batch_size, bool bias_as_zero, float w_b_range)
 		: _bias_as_zero(bias_as_zero), _w_b_range(w_b_range), _batch_size(batch_size), _output_size(output_size),
-		weights(std::vector<int>{input_size, output_size}),
-		bias(std::vector<int>{1, output_size}) 
+		weights(std::make_shared<Tensor<T>>(std::vector<int>{ input_size, output_size } ,false)),
+		bias(std::make_shared<Tensor<T>>(std::vector<int>{ 1, output_size }, false))
 	{
 		init_weight_n_bias();
 
@@ -23,7 +23,7 @@ namespace Hex{
 	linear<T>::~linear()
 	{
 		output->cudafree();
-		input.cudafree();
+		input->cudafree();
 		input_error->cudafree();
 	}
 
@@ -55,14 +55,16 @@ namespace Hex{
 	Tensor<T>& linear<T>::forward(Tensor<T>& input_tensor, bool Istraining)
 	{
 		
- 
-		input = input_tensor;
+	
+		input = std::make_shared<Tensor<T>>(input_tensor);
 		output.reset(new Tensor<T>({ input_tensor.getShape()[0] , _output_size}));
-
-		//if (weights.getShape()[0] != input.getShape()[1]) {
+	/*	std::cout << "input from forward" << std::endl;
+		input->print();
+		std::cout << std::endl;*/
+		//if (weights.getShape()[0] != input->getShape()[1]) {
 		//	std::cerr << "Error: Tensor shapes must be compatible for matrix multiplication. Shape of weights: "
 		//		<< weights.getShape()[0] << "x" << weights.getShape()[1]
-		//		<< ", Shape of input: " << input.getShape()[0] << "x" << input.getShape()[1] << std::endl;
+		//		<< ", Shape of input: " << input->getShape()[0] << "x" << input->getShape()[1] << std::endl;
 		//	throw std::runtime_error("Tensor shape mismatch");
 		//}
 
@@ -70,7 +72,7 @@ namespace Hex{
 		//std::cout << "dbug strat of linear" << std::endl;
 
 		//std::cout << "intpu" << std::endl;
-		//input.print();
+		//input->print();
 		//std::cout << std::endl;
 
 		//std::cout << "weight" << std::endl;
@@ -84,9 +86,9 @@ namespace Hex{
 			(output->getShape()[1] + threadsPerBlock.y - 1) / threadsPerBlock.y);
 
 		// Launch the forward kernel
-		linearLayerForward << <numBlocks, threadsPerBlock >> > (weights.getData(), input.getData(), output->getData(), bias.getData(),
-			weights.getShape()[0], weights.getShape()[1],
-			input.getShape()[0], input.getShape()[1]);
+		linearLayerForward << <numBlocks, threadsPerBlock >> > (weights->getData(), input->getData(), output->getData(), bias->getData(),
+			weights->getShape()[0], weights->getShape()[1],
+			input->getShape()[0], input->getShape()[1]);
 		cudaDeviceSynchronize();
 
 		//std::cout << "output" << std::endl;
@@ -154,22 +156,22 @@ namespace Hex{
 		// std::cout << "output_error after update" << std::endl;
 		//  output_error.print();
 
-		input_error.reset(new Tensor<T>({ output_error.getShape()[0] ,input.getShape()[1] }));
+		input_error.reset(new Tensor<T>({ output_error.getShape()[0] ,input->getShape()[1] }));
 		dim3 block_size(16, 16); // Adjust block size according to your GPU architecture
-		dim3 grid_size((input.getShape()[1] + block_size.x - 1) / block_size.x,
-			(input.getShape()[0] + block_size.y - 1) / block_size.y);
+		dim3 grid_size((input->getShape()[1] + block_size.x - 1) / block_size.x,
+			(input->getShape()[0] + block_size.y - 1) / block_size.y);
 
 		linear_backprop_kernel << <grid_size, block_size >> > (input_error->getData(), output_error.getData(),
-			weights.getData(), input.getShape()[0], input.getShape()[1], output_error.getShape()[1]);
+			weights->getData(), input->getShape()[0], input->getShape()[1], output_error.getShape()[1]);
 
 		cudaDeviceSynchronize();
 
  
 
 		dim3 blockDim(16, 16);
-		dim3 gridDim((weights.getShape()[0] + blockDim.x - 1) / blockDim.x, (weights.getShape()[1] + blockDim.y - 1) / blockDim.y);
-		linear_update_weights_and_bias_kernel << <gridDim, blockDim >> > (weights.getData(), bias.getData(),
-			input.getData(), output_error.getData(), _batch_size, weights.getShape()[0], weights.getShape()[1], learning_rate);
+		dim3 gridDim((weights->getShape()[0] + blockDim.x - 1) / blockDim.x, (weights->getShape()[1] + blockDim.y - 1) / blockDim.y);
+		linear_update_weights_and_bias_kernel << <gridDim, blockDim >> > (weights->getData(), bias->getData(),
+			input->getData(), output_error.getData(), _batch_size, weights->getShape()[0], weights->getShape()[1], learning_rate);
 
 		cudaDeviceSynchronize();
 		cudaError_t cudaError = cudaGetLastError();
@@ -191,7 +193,10 @@ namespace Hex{
 		//input_error->print();
 		//std::cout << "dbug end of linear" << std::endl;
 		//std::cout << std::endl;
-
+		//std::cout << "input from backword" << std::endl;
+	
+		//input->print();
+		//std::cout << std::endl;
 		return *input_error;
 	}
 
@@ -205,7 +210,7 @@ namespace Hex{
 		if (i < input_size && j < output_size) {
 			// Random initialization of weights within the specified range
 			curandState state;
-			curand_init(clock64(), i * output_size + j, 0, &state);
+			curand_init(777, i * output_size + j, 0, &state);
 
 			float float_weight = (2 * curand_uniform(&state) - 1) * w_b_range;
 			weights[i * output_size + j] = static_cast<T>(float_weight);
@@ -222,7 +227,7 @@ namespace Hex{
 			}
 			else {
 				curandState state_bias;
-				curand_init(clock64(), j, 0, &state_bias);
+				curand_init(777, j, 0, &state_bias);
 
 				float float_bias = (2 * curand_uniform(&state_bias) - 1) * w_b_range;
 				bias[j] = static_cast<T>(float_bias);
@@ -257,12 +262,12 @@ namespace Hex{
 	template<class T>
 	void linear<T>::init_weight_n_bias() {
 		dim3 threadsPerBlock(16, 16);
-		dim3 numBlocks((weights.getShape()[0] + threadsPerBlock.x - 1) / threadsPerBlock.x,
-			(weights.getShape()[1] + threadsPerBlock.y - 1) / threadsPerBlock.y);
+		dim3 numBlocks((weights->getShape()[0] + threadsPerBlock.x - 1) / threadsPerBlock.x,
+			(weights->getShape()[1] + threadsPerBlock.y - 1) / threadsPerBlock.y);
 
 		// Launch the kernel to initialize weights and bias
-		initWeightKernel << <numBlocks, threadsPerBlock >> > (weights.getData(), bias.getData(), weights.getShape()[0],
-			weights.getShape()[1], _batch_size, _bias_as_zero, _w_b_range);
+		initWeightKernel << <numBlocks, threadsPerBlock >> > (weights->getData(), bias->getData(), weights->getShape()[0],
+			weights->getShape()[1], _batch_size, _bias_as_zero, _w_b_range);
 		cudaDeviceSynchronize();
 	}
 
@@ -272,18 +277,17 @@ namespace Hex{
 	template<class T>
 	Tensor<T>& linear<T>::printW()
 	{
-		return weights;
+		return *weights;
 	}
 
 	template<class T>
 	Tensor<T>& linear<T>::printB()
 	{
-		return bias;
+		return *bias;
 	}
 
- 
-    // Explicit instantiation of the template class for supported types
-    template class linear<float>;
-    template class linear<int>;
-    template class linear<double>;
+	// Explicit instantiation of the template class for supported types
+	template class linear<float>;
+	template class linear<int>;
+	template class linear<double>;
 }
