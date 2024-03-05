@@ -99,8 +99,8 @@ int main() {
     // bc1.backpropagation(*x_tensor); 
    // a.print();
      // Specify the directory paths
-    std::string normalPath = "C:/Users/Bhargav/Desktop/kidney-ct-scan-image/Normal/";
-    std::string tumorPath = "C:/Users/Bhargav/Desktop/kidney-ct-scan-image/Tumor/";
+    std::string normalPath = "../../kidney-ct-scan-image/Normal/";
+    std::string tumorPath = "../../kidney-ct-scan-image/Tumor/";
 
     // Load file paths from the Normal directory
     std::vector<cv::String> normalFilePaths;
