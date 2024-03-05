@@ -73,7 +73,14 @@ namespace Hex {
 
     template <typename T>
     void Tensor<T>::setData(T* newData) {
-        data.reset(newData);
+        int size = 1;
+        for (int dim : shape) {
+            size *= dim;
+        }
+        //  T* cudaData;
+         // cudaMalloc((void**)&cudaData, size * sizeof(T));
+         // data = std::shared_ptr<T[]>(cudaData, [=](T* ptr) { if (_iscudafree) { cudaFree(ptr); } }); // Custom deleter for CUDA memory
+        cudaMemcpy(data.get(), newData, size * sizeof(T), cudaMemcpyDeviceToDevice);
     }
 
     // Getter for shape

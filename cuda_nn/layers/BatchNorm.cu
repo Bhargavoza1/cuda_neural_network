@@ -375,7 +375,7 @@ namespace Hex {
     {
         int row = blockIdx.x * blockDim.x + threadIdx.x;
         int col = blockIdx.y * blockDim.y + threadIdx.y;
-
+        const  T clip_threshold = static_cast<T>(0.1);
         if (row < batch_size && col < features) {
             int input_idx = row * features + col;
             T grad_gamma = 0.0;
@@ -422,7 +422,12 @@ namespace Hex {
                 int data_idx = b * features + col;
 
                 input_error[data_idx] = grad_normalized[data_idx] / sqrt(input_var[col] + eps) + dvar * 2.0 * (input_data[data_idx] - input_mean[col]) / batch_size + dmean / batch_size;
-
+                if (input_error[data_idx] > clip_threshold) {
+                    input_error[data_idx] = clip_threshold;
+                }
+                else if (input_error[data_idx] < -clip_threshold) {
+                    input_error[data_idx] = -clip_threshold;
+                }
             }
 
             if (threadIdx.x == 0) {
@@ -432,6 +437,21 @@ namespace Hex {
                     int data_idx = b * features + col;
                     grad_gamma += output_error[data_idx] * x_normalized[data_idx];
                     grad_beta += output_error[data_idx];
+                }
+
+
+                if (grad_gamma  > clip_threshold) {
+                    grad_gamma  = clip_threshold;
+                }
+                else if (grad_gamma  < -clip_threshold) {
+                    grad_gamma  = -clip_threshold;
+                }
+
+                if (grad_beta  > clip_threshold) {
+                    grad_beta  = clip_threshold;
+                }
+                else if (grad_beta  < -clip_threshold) {
+                    grad_beta  = -clip_threshold;
                 }
 
                 gamma_gradient[col] -= grad_gamma;

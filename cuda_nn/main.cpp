@@ -7,10 +7,17 @@
 #include "layers/linear.h"
 #include "models/MLP.h"
 #include "costs/MSE.h"
-using namespace std;
-using namespace Hex;
+#include <opencv2/opencv.hpp>
+
 #include "layers/CNN2D.h"
 
+#include <numeric>
+#include <algorithm> // for std::shuffle
+#include <random>    // for std::default_random_engine
+#include <chrono>    // for std::chrono::system_clock
+
+using namespace std;
+using namespace Hex;
 
 void xor_withcnn() {
     int epoch = 50;
@@ -61,11 +68,10 @@ void xor_withcnn() {
         // output_error->print();
         Image_CF->backpropa(*output_error, 0.0001f);
 
-        std::cout << " epoch " << i+1 << " done" << std::endl;
+        
 
         std::cout << "Epoch " << (i+1) << "/" << epoch << "   Mean Squared Error: " << error->get({ 0 }) << std::endl;
-        std::cout << std::endl;
-        std::cout << std::endl;
+      
     }
     a.print();
 }
@@ -75,7 +81,7 @@ int main() {
 
     //Hex::xor_example();
 
-   xor_withcnn();
+   //xor_withcnn();
 
 
     //int batchsize = 64;
@@ -92,6 +98,172 @@ int main() {
     //auto a = bc1.forward(*x_tensor);
     // bc1.backpropagation(*x_tensor); 
    // a.print();
+     // Specify the directory paths
+    std::string normalPath = "C:/Users/Bhargav/Desktop/kidney-ct-scan-image/Normal/";
+    std::string tumorPath = "C:/Users/Bhargav/Desktop/kidney-ct-scan-image/Tumor/";
+
+    // Load file paths from the Normal directory
+    std::vector<cv::String> normalFilePaths;
+    cv::glob(normalPath + "*.jpg", normalFilePaths);
+
+    // Load file paths from the Tumor directory
+    std::vector<cv::String> tumorFilePaths;
+    cv::glob(tumorPath + "*.jpg", tumorFilePaths);
+
+    // Combine all file paths into one vector
+    std::vector<cv::String> allFilePaths;
+    allFilePaths.insert(allFilePaths.end(), normalFilePaths.begin(), normalFilePaths.end());
+    allFilePaths.insert(allFilePaths.end(), tumorFilePaths.begin(), tumorFilePaths.end());
+
+    std::shuffle(allFilePaths.begin(), allFilePaths.end(), std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count()));
+    // Load and resize images from file paths
+    std::vector<cv::Mat> allImages;
+    std::vector<std::vector<int>>  allLabelsOneHot;
+    int resizeWidth = 225;
+    int resizeHeight = 225;
+    int channels = 3; // Set the number of channels
+
+    for (const auto& filePath : allFilePaths) {
+        cv::Mat image = cv::imread(filePath, cv::IMREAD_GRAYSCALE);
+        if (image.empty()) {
+            std::cerr << "Failed to load image: " << filePath << std::endl;
+            return 1;
+        }
+
+        // Resize the image to the specified width and height
+        cv::resize(image, image, cv::Size(resizeWidth, resizeHeight));
+
+        // Convert single channel grayscale to 3-channel grayscale
+        cv::Mat colorImage;
+        cv::cvtColor(image, colorImage, cv::COLOR_GRAY2BGR);
+
+        // Normalize pixel values to the range [0, 1]
+        cv::Mat normalizedImage;
+        colorImage.convertTo(normalizedImage, CV_32FC3, 1.0 / 255.0);
+
+        // Determine label based on folder
+        std::string formattedPath = filePath;
+        std::replace(formattedPath.begin(), formattedPath.end(), '\\', '/');
+        int label = (formattedPath.find(normalPath) != std::string::npos) ? 0 : 1;
+
+
+        // One-hot encode the label
+        std::vector<int> labelOneHot(2, 0); // Initialize one-hot encoded label with zeros
+        labelOneHot[label] = 1; // Set the appropriate index to 1 based on the label
+        allLabelsOneHot.push_back(labelOneHot); // Push the one-hot encoded label into the vector
+
+        allImages.push_back(normalizedImage);
+  
+    }
+
+    // Create a Tensor object to store the images 
+    int numImages = allImages.size();
+    int height = allImages[0].rows;
+    int width = allImages[0].cols;
+
+
+    int batchSize = 8;
+    int numBatches = (numImages + batchSize - 1) / batchSize;
+
+    std::unique_ptr<Hex::Image_CF<float>>  Image_CF(new  Hex::Image_CF<float>(batchSize, channels, 2));
+
+    std::vector<int> shape = { batchSize , channels , height, width };
+    Hex::Tensor<float> imageTensor(shape);
+    Hex::Tensor<float> labelTensor({ batchSize,2 });
+
+    // Copy image data from CPU to GPU
+    size_t size = batchSize * height * width * channels * sizeof(float);
+    float* gpuData;
+    cudaError_t cudaStatus = cudaMalloc((void**)&gpuData, size);
+    if (cudaStatus != cudaSuccess) {
+        std::cerr << "cudaMalloc failed: " << cudaGetErrorString(cudaStatus) << std::endl;
+        return 1;
+    }
+
+    size_t labelSize = batchSize * 2 * sizeof(float);
+    float* gpuLabelData;
+    cudaError_t cudaStatusLabel = cudaMalloc((void**)&gpuLabelData, labelSize);
+    if (cudaStatusLabel != cudaSuccess) {
+        std::cerr << "cudaMalloc for label tensor failed: " << cudaGetErrorString(cudaStatusLabel) << std::endl;
+        cudaFree(gpuLabelData); // Free the previously allocated memory
+        return 1;
+    }
+    std::shared_ptr<Tensor<float>> error;
+    std::shared_ptr<Tensor<float>> output_error;
+    Tensor<float> a;
+    int epoch = 20;
+    for(int e = 0 ; e < epoch ; e++){
+        float total_error = 0;
+        for (int i = 0; i < numBatches; ++i) {
+            for (int j = 0; j < batchSize; ++j) {
+                int index = i * batchSize + j;
+                if (index < numImages) {
+                    cudaStatus = cudaMemcpy(gpuData + j * height * width * channels, allImages[index].data, size / batchSize, cudaMemcpyHostToDevice);
+                    if (cudaStatus != cudaSuccess) {
+                        std::cerr << "cudaMemcpy failed: " << cudaGetErrorString(cudaStatus) << std::endl;
+                        cudaFree(gpuData);
+                        return 1;
+                    }
+
+                    for (int k = 0; k < allLabelsOneHot[index].size(); ++k) {
+                        float labelValue = static_cast<float>(allLabelsOneHot[index][k]);
+                        cudaStatus = cudaMemcpy(gpuLabelData + j * 2 + k, &labelValue, sizeof(float), cudaMemcpyHostToDevice);
+                        if (cudaStatus != cudaSuccess) {
+                            std::cerr << "cudaMemcpy failed: " << cudaGetErrorString(cudaStatus) << std::endl;
+                            cudaFree(gpuData);
+                            cudaFree(gpuLabelData);
+                            return 1;
+                        }
+                    }
+                }
+            }
+
+            // Store image data from GPU memory into the Tensor
+            imageTensor.setData(gpuData);
+
+            // Print the tensor (This will print a lot of data)
+           // imageTensor.print();
+
+            // Store label data from GPU memory into the label Tensor
+            labelTensor.setData(gpuLabelData);
+
+            // Print the label tensor (This will print a lot of data)
+          //  labelTensor.print();
+
+            a = Image_CF->forward(imageTensor);
+         
+            
+           // a.print();
+           // labelTensor.print();
+                  error = Hex::mse(labelTensor, a);
+
+                  total_error += error->get({ 0 });
+               ////   a.print();
+               output_error = Hex::mse_derivative(labelTensor, a);
+               // // output_error->print();
+                Image_CF->backpropa(*output_error, 0.00001f);
+
+
+
+              
+
+            
+
+        }
+        float average_error = (total_error / numBatches);
+        std::cout << "Epoch " << (e + 1) << "/" << epoch << "   Mean Squared Error: " << average_error << std::endl;
+         a.print();
+         labelTensor.print();
+
+        std::cout << std::endl;
+    }
+    // Print the tensor (This will print a lot of data)
+    cudaFree(gpuData);
+    cudaFree(gpuLabelData);
+
+
+
+
     return 0;
 
 }

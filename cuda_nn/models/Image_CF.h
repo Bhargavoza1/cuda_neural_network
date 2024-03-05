@@ -20,7 +20,7 @@ namespace Hex {
 
         CNN2D<T>  conv1;
         ReLU<T>  relu1;
-        BatchNorm<T> bn1;
+       // BatchNorm<T> bn1;
         MaxPool2d<T> pool1;
 
         CNN2D<T> conv2;
