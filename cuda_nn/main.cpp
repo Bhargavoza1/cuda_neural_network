@@ -76,6 +76,55 @@ void xor_withcnn() {
     a.print();
 }
 
+void trainTestSplit(const std::vector<cv::String>& allFilePaths, float trainRatio,
+    std::vector<cv::String>& trainFilePaths, std::vector<cv::String>& testFilePaths) {
+    // Shuffle the file paths
+    std::vector<cv::String> shuffledFilePaths = allFilePaths;
+    std::shuffle(shuffledFilePaths.begin(), shuffledFilePaths.end(), std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count()));
+
+    // Calculate split indices
+    size_t splitIndex = static_cast<size_t>(trainRatio * shuffledFilePaths.size());
+
+    // Assign training and testing file paths
+    trainFilePaths.assign(shuffledFilePaths.begin(), shuffledFilePaths.begin() + splitIndex);
+    testFilePaths.assign(shuffledFilePaths.begin() + splitIndex, shuffledFilePaths.end());
+}
+
+void imagepreprocess(int width, int height, std::string normalPath, std::vector<cv::String> filepaths, std::vector<std::vector<int>>& lable, std::vector<cv::Mat>& images) {
+
+    for (const auto& filePath : filepaths) {
+        cv::Mat image = cv::imread(filePath, cv::IMREAD_GRAYSCALE);
+        if (image.empty()) {
+            std::cerr << "Failed to load image: " << filePath << std::endl;
+            return;
+        }
+
+        // Resize the image to the specified width and height
+        cv::resize(image, image, cv::Size(width, height));
+
+        // Convert single channel grayscale to 3-channel grayscale
+        cv::Mat colorImage;
+        cv::cvtColor(image, colorImage, cv::COLOR_GRAY2BGR);
+
+        // Normalize pixel values to the range [0, 1]
+        cv::Mat normalizedImage;
+        colorImage.convertTo(normalizedImage, CV_32FC3, 1.0 / 255.0);
+
+        // Determine label based on folder
+        std::string formattedPath = filePath;
+        std::replace(formattedPath.begin(), formattedPath.end(), '\\', '/');
+        int label = (formattedPath.find(normalPath) != std::string::npos) ? 0 : 1;
+        // One-hot encode the label
+        std::vector<int> labelOneHot(2, 0); // Initialize one-hot encoded label with zeros
+        labelOneHot[label] = 1; // Set the appropriate index to 1 based on the label
+        lable.push_back(labelOneHot); // Push the one-hot encoded label into the vector
+
+        images.push_back(normalizedImage);
+
+    }
+
+}
+
 
 int main() {
 
@@ -115,51 +164,38 @@ int main() {
     allFilePaths.insert(allFilePaths.end(), normalFilePaths.begin(), normalFilePaths.end());
     allFilePaths.insert(allFilePaths.end(), tumorFilePaths.begin(), tumorFilePaths.end());
 
-    std::shuffle(allFilePaths.begin(), allFilePaths.end(), std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count()));
-    // Load and resize images from file paths
-    std::vector<cv::Mat> allImages;
-    std::vector<std::vector<int>>  allLabelsOneHot;
+
+
+    float trainRatio = 0.981;
+    std::vector<cv::String> trainFilePaths;
+    std::vector<cv::String> testFilePaths;
+
+    // Perform train-test split
+    trainTestSplit(allFilePaths, trainRatio, trainFilePaths, testFilePaths);
+
+    //std::cout << allFilePaths.size() << std::endl;
+    //std::cout << trainFilePaths.size() << std::endl;
+    //std::cout << testFilePaths.size() << std::endl;
+
+
+    std::vector<cv::Mat> train_Images;
+    std::vector<std::vector<int>>  train_LabelsOneHot;
+
+    std::vector<cv::Mat> test_Images;
+    std::vector<std::vector<int>>  test_LabelsOneHot;
+
     int resizeWidth = 225;
     int resizeHeight = 225;
-    int channels = 3; // Set the number of channels
+    int channels = 3;
 
-    for (const auto& filePath : allFilePaths) {
-        cv::Mat image = cv::imread(filePath, cv::IMREAD_GRAYSCALE);
-        if (image.empty()) {
-            std::cerr << "Failed to load image: " << filePath << std::endl;
-            return 1;
-        }
+    imagepreprocess(resizeWidth, resizeHeight, normalPath, trainFilePaths, train_LabelsOneHot, train_Images);
 
-        // Resize the image to the specified width and height
-        cv::resize(image, image, cv::Size(resizeWidth, resizeHeight));
-
-        // Convert single channel grayscale to 3-channel grayscale
-        cv::Mat colorImage;
-        cv::cvtColor(image, colorImage, cv::COLOR_GRAY2BGR);
-
-        // Normalize pixel values to the range [0, 1]
-        cv::Mat normalizedImage;
-        colorImage.convertTo(normalizedImage, CV_32FC3, 1.0 / 255.0);
-
-        // Determine label based on folder
-        std::string formattedPath = filePath;
-        std::replace(formattedPath.begin(), formattedPath.end(), '\\', '/');
-        int label = (formattedPath.find(normalPath) != std::string::npos) ? 0 : 1;
-
-
-        // One-hot encode the label
-        std::vector<int> labelOneHot(2, 0); // Initialize one-hot encoded label with zeros
-        labelOneHot[label] = 1; // Set the appropriate index to 1 based on the label
-        allLabelsOneHot.push_back(labelOneHot); // Push the one-hot encoded label into the vector
-
-        allImages.push_back(normalizedImage);
-  
-    }
+    imagepreprocess(resizeWidth, resizeHeight, normalPath, testFilePaths, test_LabelsOneHot, test_Images);
 
     // Create a Tensor object to store the images 
-    int numImages = allImages.size();
-    int height = allImages[0].rows;
-    int width = allImages[0].cols;
+    int numImages = train_Images.size();
+    int height = train_Images[0].rows;
+    int width = train_Images[0].cols;
 
 
     int batchSize = 8;
@@ -198,15 +234,15 @@ int main() {
             for (int j = 0; j < batchSize; ++j) {
                 int index = i * batchSize + j;
                 if (index < numImages) {
-                    cudaStatus = cudaMemcpy(gpuData + j * height * width * channels, allImages[index].data, size / batchSize, cudaMemcpyHostToDevice);
+                    cudaStatus = cudaMemcpy(gpuData + j * height * width * channels, train_Images[index].data, size / batchSize, cudaMemcpyHostToDevice);
                     if (cudaStatus != cudaSuccess) {
                         std::cerr << "cudaMemcpy failed: " << cudaGetErrorString(cudaStatus) << std::endl;
                         cudaFree(gpuData);
                         return 1;
                     }
 
-                    for (int k = 0; k < allLabelsOneHot[index].size(); ++k) {
-                        float labelValue = static_cast<float>(allLabelsOneHot[index][k]);
+                    for (int k = 0; k < train_LabelsOneHot[index].size(); ++k) {
+                        float labelValue = static_cast<float>(train_LabelsOneHot[index][k]);
                         cudaStatus = cudaMemcpy(gpuLabelData + j * 2 + k, &labelValue, sizeof(float), cudaMemcpyHostToDevice);
                         if (cudaStatus != cudaSuccess) {
                             std::cerr << "cudaMemcpy failed: " << cudaGetErrorString(cudaStatus) << std::endl;
