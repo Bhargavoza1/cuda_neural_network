@@ -125,29 +125,100 @@ void imagepreprocess(int width, int height, std::string normalPath, std::vector<
 
 }
 
+void trainNeuralNetwork2(Image_CF<float>& model , std::vector<cv::Mat>& input , std::vector<std::vector<int>>& target,
+    int batch, int channels, int num_epochs, float learning_rate)
+{
+    // Create a Tensor object to store the images 
+    int numImages = input.size();
+    int height = input[0].rows;
+    int width = input[0].cols;
+
+    int numBatches = (numImages + batch - 1) / batch;
+
+    std::vector<int> shape = { batch , channels , height, width };
+    Hex::Tensor<float> imageTensor(shape);
+    Hex::Tensor<float> labelTensor({ batch,2 });
+
+    // Copy image data from CPU to GPU
+    size_t size = batch * height * width * channels * sizeof(float);
+    float* gpuData;
+    cudaError_t cudaStatus = cudaMalloc((void**)&gpuData, size);
+    if (cudaStatus != cudaSuccess) {
+        std::cerr << "cudaMalloc failed: " << cudaGetErrorString(cudaStatus) << std::endl;
+        return ;
+    }
+
+    size_t labelSize = batch * 2 * sizeof(float);
+    float* gpuLabelData;
+    cudaError_t cudaStatusLabel = cudaMalloc((void**)&gpuLabelData, labelSize);
+    if (cudaStatusLabel != cudaSuccess) {
+        std::cerr << "cudaMalloc for label tensor failed: " << cudaGetErrorString(cudaStatusLabel) << std::endl;
+        cudaFree(gpuLabelData); // Free the previously allocated memory
+        return  ;
+    }
+    std::shared_ptr<Tensor<float>> error;
+    std::shared_ptr<Tensor<float>> output_error;
+    Tensor<float> a;
+    
+    for (int e = 0; e < num_epochs; e++) {
+        float total_error = 0;
+        for (int i = 0; i < numBatches; ++i) {
+            for (int j = 0; j < batch; ++j) {
+                int index = i * batch + j;
+                if (index < numImages) {
+                    cudaStatus = cudaMemcpy(gpuData + j * height * width * channels, input[index].data, size / batch, cudaMemcpyHostToDevice);
+                    if (cudaStatus != cudaSuccess) {
+                        std::cerr << "cudaMemcpy failed: " << cudaGetErrorString(cudaStatus) << std::endl;
+                        cudaFree(gpuData);
+                        return  ;
+                    }
+
+                    for (int k = 0; k < target[index].size(); ++k) {
+                        float labelValue = static_cast<float>(target[index][k]);
+                        cudaStatus = cudaMemcpy(gpuLabelData + j * 2 + k, &labelValue, sizeof(float), cudaMemcpyHostToDevice);
+                        if (cudaStatus != cudaSuccess) {
+                            std::cerr << "cudaMemcpy failed: " << cudaGetErrorString(cudaStatus) << std::endl;
+                            cudaFree(gpuData);
+                            cudaFree(gpuLabelData);
+                            return ;
+                        }
+                    }
+                }
+            }
+
+
+            imageTensor.setData(gpuData);
+
+            labelTensor.setData(gpuLabelData);
+
+
+
+            a = model.forward(imageTensor);
+            error = Hex::mse(labelTensor, a);
+
+            total_error += error->get({ 0 });
+
+            output_error = Hex::mse_derivative(labelTensor, a);
+            model.backpropa(*output_error, learning_rate);
+
+        }
+        float average_error = (total_error / numBatches);
+        std::cout << "Epoch " << (e + 1) << "/" << num_epochs << "   Mean Squared Error: " << average_error << std::endl;
+       // a.print();
+        //labelTensor.print();
+
+        std::cout << std::endl;
+    }
+
+    cudaFree(gpuData);
+    cudaFree(gpuLabelData);
+
+}
 
 int main() {
 
     //Hex::xor_example();
-
-   //xor_withcnn();
-
-
-    //int batchsize = 64;
-    //int input_channels = 3;
-    //int output_class = 1; 
-
-    //std::vector<int> x_shape = { batchsize,input_channels,512 ,512 }; // Shape: (4, 1, 2)
-
-    //std::unique_ptr<Tensor<float>> x_tensor(new Tensor<float>(x_shape));
-    //initTensorOnGPU(*x_tensor, 0.0f);
-
-
-    //BatchNorm<float> bc1(input_channels, TensorShape::_4D);
-    //auto a = bc1.forward(*x_tensor);
-    // bc1.backpropagation(*x_tensor); 
-   // a.print();
-     // Specify the directory paths
+ 
     std::string normalPath = "../../kidney-ct-scan-image/Normal/";
     std::string tumorPath = "../../kidney-ct-scan-image/Tumor/";
 
@@ -169,14 +240,11 @@ int main() {
     float trainRatio = 0.981;
     std::vector<cv::String> trainFilePaths;
     std::vector<cv::String> testFilePaths;
-
+   
     // Perform train-test split
     trainTestSplit(allFilePaths, trainRatio, trainFilePaths, testFilePaths);
 
-    //std::cout << allFilePaths.size() << std::endl;
-    //std::cout << trainFilePaths.size() << std::endl;
-    //std::cout << testFilePaths.size() << std::endl;
-
+ 
 
     std::vector<cv::Mat> train_Images;
     std::vector<std::vector<int>>  train_LabelsOneHot;
@@ -188,114 +256,23 @@ int main() {
     int resizeHeight = 225;
     int channels = 3;
 
+    /////imagepreprocess for train data
     imagepreprocess(resizeWidth, resizeHeight, normalPath, trainFilePaths, train_LabelsOneHot, train_Images);
 
+    /////imagepreprocess for test data
     imagepreprocess(resizeWidth, resizeHeight, normalPath, testFilePaths, test_LabelsOneHot, test_Images);
 
-    // Create a Tensor object to store the images 
-    int numImages = train_Images.size();
-    int height = train_Images[0].rows;
-    int width = train_Images[0].cols;
-
+ 
+    cout << trainFilePaths.size() << endl;
 
     int batchSize = 8;
-    int numBatches = (numImages + batchSize - 1) / batchSize;
+    int epoch = 20;
 
     std::unique_ptr<Hex::Image_CF<float>>  Image_CF(new  Hex::Image_CF<float>(batchSize, channels, 2));
 
-    std::vector<int> shape = { batchSize , channels , height, width };
-    Hex::Tensor<float> imageTensor(shape);
-    Hex::Tensor<float> labelTensor({ batchSize,2 });
+    trainNeuralNetwork2(*Image_CF, train_Images, train_LabelsOneHot, batchSize , channels , epoch , 0.00001f);
 
-    // Copy image data from CPU to GPU
-    size_t size = batchSize * height * width * channels * sizeof(float);
-    float* gpuData;
-    cudaError_t cudaStatus = cudaMalloc((void**)&gpuData, size);
-    if (cudaStatus != cudaSuccess) {
-        std::cerr << "cudaMalloc failed: " << cudaGetErrorString(cudaStatus) << std::endl;
-        return 1;
-    }
-
-    size_t labelSize = batchSize * 2 * sizeof(float);
-    float* gpuLabelData;
-    cudaError_t cudaStatusLabel = cudaMalloc((void**)&gpuLabelData, labelSize);
-    if (cudaStatusLabel != cudaSuccess) {
-        std::cerr << "cudaMalloc for label tensor failed: " << cudaGetErrorString(cudaStatusLabel) << std::endl;
-        cudaFree(gpuLabelData); // Free the previously allocated memory
-        return 1;
-    }
-    std::shared_ptr<Tensor<float>> error;
-    std::shared_ptr<Tensor<float>> output_error;
-    Tensor<float> a;
-    int epoch = 20;
-    for(int e = 0 ; e < epoch ; e++){
-        float total_error = 0;
-        for (int i = 0; i < numBatches; ++i) {
-            for (int j = 0; j < batchSize; ++j) {
-                int index = i * batchSize + j;
-                if (index < numImages) {
-                    cudaStatus = cudaMemcpy(gpuData + j * height * width * channels, train_Images[index].data, size / batchSize, cudaMemcpyHostToDevice);
-                    if (cudaStatus != cudaSuccess) {
-                        std::cerr << "cudaMemcpy failed: " << cudaGetErrorString(cudaStatus) << std::endl;
-                        cudaFree(gpuData);
-                        return 1;
-                    }
-
-                    for (int k = 0; k < train_LabelsOneHot[index].size(); ++k) {
-                        float labelValue = static_cast<float>(train_LabelsOneHot[index][k]);
-                        cudaStatus = cudaMemcpy(gpuLabelData + j * 2 + k, &labelValue, sizeof(float), cudaMemcpyHostToDevice);
-                        if (cudaStatus != cudaSuccess) {
-                            std::cerr << "cudaMemcpy failed: " << cudaGetErrorString(cudaStatus) << std::endl;
-                            cudaFree(gpuData);
-                            cudaFree(gpuLabelData);
-                            return 1;
-                        }
-                    }
-                }
-            }
-
-            // Store image data from GPU memory into the Tensor
-            imageTensor.setData(gpuData);
-
-            // Print the tensor (This will print a lot of data)
-           // imageTensor.print();
-
-            // Store label data from GPU memory into the label Tensor
-            labelTensor.setData(gpuLabelData);
-
-            // Print the label tensor (This will print a lot of data)
-          //  labelTensor.print();
-
-            a = Image_CF->forward(imageTensor);
-         
-            
-           // a.print();
-           // labelTensor.print();
-                  error = Hex::mse(labelTensor, a);
-
-                  total_error += error->get({ 0 });
-               ////   a.print();
-               output_error = Hex::mse_derivative(labelTensor, a);
-               // // output_error->print();
-                Image_CF->backpropa(*output_error, 0.00001f);
-
-
-
-              
-
-            
-
-        }
-        float average_error = (total_error / numBatches);
-        std::cout << "Epoch " << (e + 1) << "/" << epoch << "   Mean Squared Error: " << average_error << std::endl;
-         a.print();
-         labelTensor.print();
-
-        std::cout << std::endl;
-    }
-    // Print the tensor (This will print a lot of data)
-    cudaFree(gpuData);
-    cudaFree(gpuLabelData);
+    
 
 
 
