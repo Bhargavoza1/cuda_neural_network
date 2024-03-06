@@ -207,7 +207,7 @@ void trainNeuralNetwork2(Image_CF<float>& model , std::vector<cv::Mat>& input , 
        // a.print();
         //labelTensor.print();
 
-        std::cout << std::endl;
+       // std::cout << std::endl;
     }
 
     cudaFree(gpuData);
@@ -215,7 +215,7 @@ void trainNeuralNetwork2(Image_CF<float>& model , std::vector<cv::Mat>& input , 
 
 }
 
-void testNeuralNetwork2(Image_CF<float>& model, std::vector<cv::Mat>& input, std::vector<std::vector<int>>& target)
+void testNeuralNetwork2(Image_CF<float>& model, std::vector<cv::Mat>& input, std::vector<std::vector<int>>& target , std::vector<cv::String> filepaths)
 {
     // Create a Tensor object to store the images 
     int numImages = input.size();
@@ -274,7 +274,9 @@ void testNeuralNetwork2(Image_CF<float>& model, std::vector<cv::Mat>& input, std
         //imageTensor.printshape();
          //labelTensor.print();
 
-
+         
+            std::cout << filepaths[image_x] << endl;
+         
          a = model.forward(imageTensor ,  false);
          a.print();
          labelTensor.print();
@@ -330,9 +332,7 @@ int main() {
 
     /////imagepreprocess for test data
     imagepreprocess(resizeWidth, resizeHeight, normalPath, testFilePaths, test_LabelsOneHot, test_Images);
-    for (const auto& filePath : testFilePaths) {
-        std::cout << filePath << endl;
-    }
+
     //cout << trainFilePaths.size() << endl;
    // cout << test_LabelsOneHot.size() << endl;
 
@@ -343,7 +343,8 @@ int main() {
 
      trainNeuralNetwork2(*Image_CF, train_Images, train_LabelsOneHot, batchSize , channels , epoch , 0.00001f);
 
-    testNeuralNetwork2(*Image_CF, test_Images, test_LabelsOneHot);
+
+    testNeuralNetwork2(*Image_CF, test_Images, test_LabelsOneHot , testFilePaths);
 
 
 

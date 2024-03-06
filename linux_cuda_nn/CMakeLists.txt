@@ -3,12 +3,17 @@ project(cuda_nn)
 
 # Find CUDA package
 find_package(CUDA REQUIRED)
+find_package(OpenCV REQUIRED)
 set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS})
 list(APPEND CUDA_NVCC_FLAGS -arch=sm_89)
 
-# Include directories for CUDA and other headers
+# Find OpenCV package
+
+
+# Include directories for CUDA, OpenCV, and other headers
 include_directories(
     ${CUDA_INCLUDE_DIRS}
+    ${OpenCV_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}/utils
     ${CMAKE_CURRENT_SOURCE_DIR}/costs
     ${CMAKE_CURRENT_SOURCE_DIR}/layers
@@ -34,8 +39,8 @@ set(SOURCES
     utils/tensor_oprations.cu
 )
 
- 
 # Set CUDA language for CUDA sources
 cuda_add_executable(cuda_nn ${SOURCES})
-# Link CUDA libraries
-target_link_libraries(cuda_nn ${CUDA_LIBRARIES})
+
+# Link CUDA and OpenCV libraries
+target_link_libraries(cuda_nn ${OpenCV_LIBS} ${CUDA_LIBRARIES} )
