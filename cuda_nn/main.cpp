@@ -217,6 +217,7 @@ void trainNeuralNetwork2(Image_CF<float>& model , std::vector<cv::Mat>& input , 
 
 void testNeuralNetwork2(Image_CF<float>& model, std::vector<cv::Mat>& input, std::vector<std::vector<int>>& target , std::vector<cv::String> filepaths)
 {
+
     // Create a Tensor object to store the images 
     int numImages = input.size();
     int height = input[0].rows;
@@ -275,11 +276,16 @@ void testNeuralNetwork2(Image_CF<float>& model, std::vector<cv::Mat>& input, std
          //labelTensor.print();
 
          
-            std::cout << filepaths[image_x] << endl;
-         
-         a = model.forward(imageTensor ,  false);
-         a.print();
+         std::cout << "file path of image" << endl;
+         std::cout << filepaths[image_x] << endl;
+         std::cout << "actual value : " << endl;
          labelTensor.print();
+         a = model.forward(imageTensor ,  false);
+         std::cout << "predicted value : " << endl;
+         a.print();
+        
+
+         std::cout << std::endl;
     }
 
 
@@ -342,7 +348,8 @@ int main() {
     std::unique_ptr<Hex::Image_CF<float>>  Image_CF(new  Hex::Image_CF<float>(batchSize, channels, 2));
 
      trainNeuralNetwork2(*Image_CF, train_Images, train_LabelsOneHot, batchSize , channels , epoch , 0.00001f);
-
+     std::cout << std::endl;
+     std::cout << std::endl;
 
     testNeuralNetwork2(*Image_CF, test_Images, test_LabelsOneHot , testFilePaths);
 
