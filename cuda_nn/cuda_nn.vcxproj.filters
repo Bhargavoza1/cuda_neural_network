@@ -32,6 +32,9 @@
     <CudaCompile Include="example\XOR.cu">
       <Filter>example</Filter>
     </CudaCompile>
+    <CudaCompile Include="example\kidney_cf.cu">
+      <Filter>example</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="layers">
@@ -92,6 +95,9 @@
     </ClInclude>
     <ClInclude Include="models\Image_CF.h">
       <Filter>models</Filter>
+    </ClInclude>
+    <ClInclude Include="example\kidney_cf.h">
+      <Filter>example</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
