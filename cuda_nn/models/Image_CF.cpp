@@ -21,7 +21,7 @@ namespace Hex {
         // input channel = 16 , output channel = 32 , kernel size = 3 is 3x3
         conv2(batch_size, {8,16}, 3),
         relu2(),
-         bn2(16, TensorShape::_4D, 0.7, 1e-5) ,
+         bn2(16, TensorShape::_4D, 0.9, 1e-2) ,
         pool2(2, 3),
 
         fl(),

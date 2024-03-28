@@ -271,12 +271,94 @@ namespace Hex {
         int batchSize = 8;
         int epoch = 20;
 
-        std::unique_ptr<Hex::Image_CF<float>>  Image_CF(new  Hex::Image_CF<float>(batchSize, channels, 2));
-
-        trainNeuralNetwork2(*Image_CF, train_Images, train_LabelsOneHot, batchSize, channels, epoch, 0.00001f);
+      if(!Imagecf){
+        Imagecf =  new Image_CF<float>(  batchSize, channels, 2 );
+      }
+        trainNeuralNetwork2(*Imagecf, train_Images, train_LabelsOneHot, batchSize, channels, epoch, 0.00001f);
         std::cout << std::endl;
         std::cout << std::endl;
 
-        testNeuralNetwork2(*Image_CF, test_Images, test_LabelsOneHot, testFilePaths);
+        testNeuralNetwork2(*Imagecf, test_Images, test_LabelsOneHot, testFilePaths);
+    }
+
+    void predict() {
+        string filePath = "/home/troniq/hellogo/build/kidny.jpg";
+            cv::Mat image = cv::imread(filePath, cv::IMREAD_GRAYSCALE);
+        if (image.empty()) {
+            std::cerr << "Failed to load image: " << filePath << std::endl;
+            return;
+        }
+        int width = 225;
+        int height = 225;
+        int channels = 3;
+        // Resize the image to the specified width and height
+        cv::resize(image, image, cv::Size(width, height));
+
+        // Convert single channel grayscale to 3-channel grayscale
+        cv::Mat colorImage;
+        cv::cvtColor(image, colorImage, cv::COLOR_GRAY2BGR);
+
+        // Normalize pixel values to the range [0, 1]
+        cv::Mat normalizedImage;
+        colorImage.convertTo(normalizedImage, CV_32FC3, 1.0 / 255.0);
+
+        // Determine label based on folder
+        //int height = normalizedImage.rows;
+        //int width = normalizedImage.cols;
+ 
+        int batch = 1;
+
+        std::vector<int> shape = { batch , channels , height, width };
+        Hex::Tensor<float> imageTensor(shape);
+        //normalizedImage
+
+        // Copy image data from CPU to GPU
+        size_t size = height * width * channels * sizeof(float);
+        float* gpuData;
+        cudaError_t cudaStatus = cudaMalloc((void**)&gpuData, size);
+        if (cudaStatus != cudaSuccess) {
+            std::cerr << "cudaMalloc failed: " << cudaGetErrorString(cudaStatus) << std::endl;
+            return;
+        }
+
+        size_t labelSize = batch * 2 * sizeof(float);
+        float* gpuLabelData;
+        cudaError_t cudaStatusLabel = cudaMalloc((void**)&gpuLabelData, labelSize);
+        if (cudaStatusLabel != cudaSuccess) {
+            std::cerr << "cudaMalloc for label tensor failed: " << cudaGetErrorString(cudaStatusLabel) << std::endl;
+            cudaFree(gpuLabelData); // Free the previously allocated memory
+            return;
+        }
+
+        Tensor<float> a;
+
+     
+            cudaStatus = cudaMemcpy(gpuData, normalizedImage.data, size, cudaMemcpyHostToDevice);
+            if (cudaStatus != cudaSuccess) {
+                std::cerr << "cudaMemcpy failed: " << cudaGetErrorString(cudaStatus) << std::endl;
+                cudaFree(gpuData);
+                return;
+            }
+
+            
+
+            imageTensor.setData(gpuData);
+
+         
+            //imageTensor.printshape();
+             //labelTensor.print();
+
+
+ 
+            a = Imagecf->forward(imageTensor, false);
+            std::cout << "predicted value : " << endl;
+            a.print();
+
+
+            std::cout << std::endl;
+      
+
+        
     }
 }
+ 

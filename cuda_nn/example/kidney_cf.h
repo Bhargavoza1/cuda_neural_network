@@ -16,9 +16,10 @@
 #include "../costs/MSE.h"
 #include "../layers/CNN2D.h"
 
-
+#include "kidney_cf.h"
 namespace Hex {
 
+	static Image_CF<float>*   Imagecf;
 	void trainTestSplit(const std::vector<cv::String>& allFilePaths, float trainRatio,
 		std::vector<cv::String>& trainFilePaths, std::vector<cv::String>& testFilePaths);
 
@@ -29,4 +30,6 @@ namespace Hex {
 	void testNeuralNetwork2(Image_CF<float>& model, std::vector<cv::Mat>& input, std::vector<std::vector<int>>& target, std::vector<cv::String> filepaths);
 
 	void processImagesAndRunNeuralNetwork();
+
+	void predict();
 }

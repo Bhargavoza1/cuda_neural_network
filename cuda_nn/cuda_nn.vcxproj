@@ -31,7 +31,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
-    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 12.3.props" />
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 12.2.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -130,11 +130,11 @@
 
 # Driver API (NVCC Compilation Type is .cubin, .gpu, or .ptx)
 set CUDAFE_FLAGS=--sdk_dir "C:\Program Files (x86)\Windows Kits\10\"
-"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.3\bin\nvcc.exe" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\bin\Hostx86\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions] [Defines] [CompileOut] "%(FullPath)"
+"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.2\bin\nvcc.exe" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\bin\Hostx86\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions] [Defines] [CompileOut] "%(FullPath)"
 
 # Runtime API (NVCC Compilation Type is hybrid object or .c file)
 set CUDAFE_FLAGS=--sdk_dir "C:\Program Files (x86)\Windows Kits\10\"
-"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.3\bin\nvcc.exe" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\bin\Hostx86\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions] [HostDebugInfo] [Emulation] [Defines] -Xcompiler "/EHsc [Warning] /nologo [Optimization] /FS [DebugInformationFormat] [RuntimeChecks] [Runtime] [TypeInfo]" -Xcompiler "/Fd[ProgramDataBaseFileName]" [CompileOut] "%(FullPath)"
+"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.2\bin\nvcc.exe" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\bin\Hostx86\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions] [HostDebugInfo] [Emulation] [Defines] -Xcompiler "/EHsc [Warning] /nologo [Optimization] /FS [DebugInformationFormat] [RuntimeChecks] [Runtime] [TypeInfo]" -Xcompiler "/Fd[ProgramDataBaseFileName]" [CompileOut] "%(FullPath)"
             </CommandLineTemplate>
       <ExecutionDescription>Compiling CUDA source file %(Identity)...</ExecutionDescription>
       <ExclusionDescription>Skipping CUDA source file %(Identity) (excluded from build).</ExclusionDescription>
@@ -185,11 +185,11 @@ set CUDAFE_FLAGS=--sdk_dir "C:\Program Files (x86)\Windows Kits\10\"
 
 # Driver API (NVCC Compilation Type is .cubin, .gpu, or .ptx)
 set CUDAFE_FLAGS=--sdk_dir "C:\Program Files (x86)\Windows Kits\10\"
-"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.3\bin\nvcc.exe" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\bin\Hostx86\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions] [Defines] [CompileOut] "%(FullPath)"
+"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.2\bin\nvcc.exe" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\bin\Hostx86\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions] [Defines] [CompileOut] "%(FullPath)"
 
 # Runtime API (NVCC Compilation Type is hybrid object or .c file)
 set CUDAFE_FLAGS=--sdk_dir "C:\Program Files (x86)\Windows Kits\10\"
-"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.3\bin\nvcc.exe" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\bin\Hostx86\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions] [HostDebugInfo] [Emulation] [Defines] -Xcompiler "/EHsc [Warning] /nologo [Optimization] /FS [DebugInformationFormat] [RuntimeChecks] [Runtime] [TypeInfo]" -Xcompiler "/Fd[ProgramDataBaseFileName]" [CompileOut] "%(FullPath)"
+"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.2\bin\nvcc.exe" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\bin\Hostx86\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions] [HostDebugInfo] [Emulation] [Defines] -Xcompiler "/EHsc [Warning] /nologo [Optimization] /FS [DebugInformationFormat] [RuntimeChecks] [Runtime] [TypeInfo]" -Xcompiler "/Fd[ProgramDataBaseFileName]" [CompileOut] "%(FullPath)"
             </CommandLineTemplate>
       <ExecutionDescription>Compiling CUDA source file %(Identity)...</ExecutionDescription>
       <ExclusionDescription>Skipping CUDA source file %(Identity) (excluded from build).</ExclusionDescription>
@@ -240,11 +240,11 @@ set CUDAFE_FLAGS=--sdk_dir "C:\Program Files (x86)\Windows Kits\10\"
 
 # Driver API (NVCC Compilation Type is .cubin, .gpu, or .ptx)
 set CUDAFE_FLAGS=--sdk_dir "C:\Program Files (x86)\Windows Kits\10\"
-"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.3\bin\nvcc.exe" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\bin\Hostx86\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions] [Defines] [CompileOut] "%(FullPath)"
+"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.2\bin\nvcc.exe" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\bin\Hostx86\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions] [Defines] [CompileOut] "%(FullPath)"
 
 # Runtime API (NVCC Compilation Type is hybrid object or .c file)
 set CUDAFE_FLAGS=--sdk_dir "C:\Program Files (x86)\Windows Kits\10\"
-"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.3\bin\nvcc.exe" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\bin\Hostx86\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions] [HostDebugInfo] [Emulation] [Defines] -Xcompiler "/EHsc [Warning] /nologo [Optimization] /FS [DebugInformationFormat] [RuntimeChecks] [Runtime] [TypeInfo]" -Xcompiler "/Fd[ProgramDataBaseFileName]" [CompileOut] "%(FullPath)"
+"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.2\bin\nvcc.exe" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\bin\Hostx86\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions] [HostDebugInfo] [Emulation] [Defines] -Xcompiler "/EHsc [Warning] /nologo [Optimization] /FS [DebugInformationFormat] [RuntimeChecks] [Runtime] [TypeInfo]" -Xcompiler "/Fd[ProgramDataBaseFileName]" [CompileOut] "%(FullPath)"
             </CommandLineTemplate>
       <ExecutionDescription>Compiling CUDA source file %(Identity)...</ExecutionDescription>
       <ExclusionDescription>Skipping CUDA source file %(Identity) (excluded from build).</ExclusionDescription>
@@ -294,11 +294,11 @@ set CUDAFE_FLAGS=--sdk_dir "C:\Program Files (x86)\Windows Kits\10\"
 
 # Driver API (NVCC Compilation Type is .cubin, .gpu, or .ptx)
 set CUDAFE_FLAGS=--sdk_dir "C:\Program Files (x86)\Windows Kits\10\"
-"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.3\bin\nvcc.exe" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\bin\Hostx86\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions] [Defines] [CompileOut] "%(FullPath)"
+"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.2\bin\nvcc.exe" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\bin\Hostx86\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions] [Defines] [CompileOut] "%(FullPath)"
 
 # Runtime API (NVCC Compilation Type is hybrid object or .c file)
 set CUDAFE_FLAGS=--sdk_dir "C:\Program Files (x86)\Windows Kits\10\"
-"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.3\bin\nvcc.exe" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\bin\Hostx86\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions] [HostDebugInfo] [Emulation] [Defines] -Xcompiler "/EHsc [Warning] /nologo [Optimization] /FS [DebugInformationFormat] [RuntimeChecks] [Runtime] [TypeInfo]" -Xcompiler "/Fd[ProgramDataBaseFileName]" [CompileOut] "%(FullPath)"
+"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.2\bin\nvcc.exe" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\bin\Hostx86\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions] [HostDebugInfo] [Emulation] [Defines] -Xcompiler "/EHsc [Warning] /nologo [Optimization] /FS [DebugInformationFormat] [RuntimeChecks] [Runtime] [TypeInfo]" -Xcompiler "/Fd[ProgramDataBaseFileName]" [CompileOut] "%(FullPath)"
             </CommandLineTemplate>
       <ExecutionDescription>Compiling CUDA source file %(Identity)...</ExecutionDescription>
       <ExclusionDescription>Skipping CUDA source file %(Identity) (excluded from build).</ExclusionDescription>
@@ -349,11 +349,11 @@ set CUDAFE_FLAGS=--sdk_dir "C:\Program Files (x86)\Windows Kits\10\"
 
 # Driver API (NVCC Compilation Type is .cubin, .gpu, or .ptx)
 set CUDAFE_FLAGS=--sdk_dir "C:\Program Files (x86)\Windows Kits\10\"
-"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.3\bin\nvcc.exe" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\bin\Hostx86\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions] [Defines] [CompileOut] "%(FullPath)"
+"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.2\bin\nvcc.exe" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\bin\Hostx86\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions] [Defines] [CompileOut] "%(FullPath)"
 
 # Runtime API (NVCC Compilation Type is hybrid object or .c file)
 set CUDAFE_FLAGS=--sdk_dir "C:\Program Files (x86)\Windows Kits\10\"
-"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.3\bin\nvcc.exe" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\bin\Hostx86\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions] [HostDebugInfo] [Emulation] [Defines] -Xcompiler "/EHsc [Warning] /nologo [Optimization] /FS [DebugInformationFormat] [RuntimeChecks] [Runtime] [TypeInfo]" -Xcompiler "/Fd[ProgramDataBaseFileName]" [CompileOut] "%(FullPath)"
+"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.2\bin\nvcc.exe" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\bin\Hostx86\x64" -x cu [GenerateRelocatableDeviceCode] [ExtensibleWholeProgramCompilation] [Include] [RequiredIncludes] [InterleaveSourceInPTX] [GPUDebugInfo] [GenerateLineInfo] [Keep] [KeepDir] [FastMath] [MaxRegCount] [PtxAsOptionV] [SplitCompile] [TargetMachinePlatform] [NvccCompilation] [CudaRuntime] [AdditionalOptions] [HostDebugInfo] [Emulation] [Defines] -Xcompiler "/EHsc [Warning] /nologo [Optimization] /FS [DebugInformationFormat] [RuntimeChecks] [Runtime] [TypeInfo]" -Xcompiler "/Fd[ProgramDataBaseFileName]" [CompileOut] "%(FullPath)"
             </CommandLineTemplate>
       <ExecutionDescription>Compiling CUDA source file %(Identity)...</ExecutionDescription>
       <ExclusionDescription>Skipping CUDA source file %(Identity) (excluded from build).</ExclusionDescription>
@@ -450,7 +450,7 @@ set CUDAFE_FLAGS=--sdk_dir "C:\Program Files (x86)\Windows Kits\10\"
       <TreatExternalTemplatesAsInternal>true</TreatExternalTemplatesAsInternal>
       <DisableAnalyzeExternal>false</DisableAnalyzeExternal>
       <PreprocessorDefinitions>WIN32;WIN64;_DEBUG;_CONSOLE;_MBCS;</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.3\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.2\include</AdditionalIncludeDirectories>
       <LinkCompiled>true</LinkCompiled>
     </ClCompile>
     <ClCompile Include="utils\Tensor.cu">
@@ -522,7 +522,7 @@ set CUDAFE_FLAGS=--sdk_dir "C:\Program Files (x86)\Windows Kits\10\"
       <TreatExternalTemplatesAsInternal>true</TreatExternalTemplatesAsInternal>
       <DisableAnalyzeExternal>false</DisableAnalyzeExternal>
       <PreprocessorDefinitions>WIN32;WIN64;_DEBUG;_CONSOLE;_MBCS;</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.3\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.2\include</AdditionalIncludeDirectories>
       <LinkCompiled>true</LinkCompiled>
     </ClCompile>
     <ClCompile Include="utils\tensor_oprations.cu">
@@ -594,7 +594,7 @@ set CUDAFE_FLAGS=--sdk_dir "C:\Program Files (x86)\Windows Kits\10\"
       <TreatExternalTemplatesAsInternal>true</TreatExternalTemplatesAsInternal>
       <DisableAnalyzeExternal>false</DisableAnalyzeExternal>
       <PreprocessorDefinitions>WIN32;WIN64;_DEBUG;_CONSOLE;_MBCS;</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.3\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.2\include</AdditionalIncludeDirectories>
       <LinkCompiled>true</LinkCompiled>
     </ClCompile>
   </ItemGroup>
@@ -603,6 +603,6 @@ set CUDAFE_FLAGS=--sdk_dir "C:\Program Files (x86)\Windows Kits\10\"
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 12.3.targets" />
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 12.2.targets" />
   </ImportGroup>
 </Project>
