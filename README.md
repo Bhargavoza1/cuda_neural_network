@@ -14,11 +14,11 @@ In this project, I tried to make performance similar to PyTorch. but there is st
 - [x] Sigmoid
 
 ## costs
-- [x]MSE(mean squared error)	
+- [x] MSE(mean squared error)	
 
 ## models 
-- [x]MLP(multilayer perceptron) 
-- [x]Image_CF(image classification).
+- [x] MLP(multilayer perceptron) 
+- [x] Image_CF(image classification).
 Used **opencv** lib for image processing.
   
 
