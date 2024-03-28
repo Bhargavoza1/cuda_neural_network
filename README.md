@@ -39,6 +39,7 @@ Copy **linux_cuda_nn** to your any dir.
 cd linux_cuda_nn
 mkdir build
 cd build
+cmake ..
 make
 ./cuda_nn
 ```
