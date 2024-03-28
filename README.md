@@ -1,6 +1,7 @@
 # Neural networks from scratch in CUDA C++
 
 In this project, I tried to make performance similar to PyTorch. but there is still a long way to go.  
+I was using rtx 4070ti gpu in my local computer.
 
 # Algo that I have written in this project.
 
