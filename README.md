@@ -5,13 +5,13 @@ In this project, I tried to make performance similar to PyTorch. but there is st
 # Algo that I have written in this project.
 
 ## Layers
-- [x]BatchNorm
-- [x]CNN2D
-- [x]flatten_layer
-- [x]linear
-- [x]MaxPool2d
-- [x]ReLU
-- [x]Sigmoid
+- [x] BatchNorm
+- [x] CNN2D
+- [x] flatten_layer
+- [x] linear
+- [x] MaxPool2d
+- [x] ReLU
+- [x] Sigmoid
 
 ## costs
 - [x]MSE(mean squared error)	
