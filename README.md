@@ -22,7 +22,7 @@ I was using rtx 4070ti gpu in my local computer.
 - [x] Image_CF(image classification).
 Used **opencv** lib for image processing.
   
-## Model architecture
+## Image classification Model architecture
 <p align="center">
   <img src="./gitresource/image_classification.png" />
 </p>
