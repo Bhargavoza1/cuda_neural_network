@@ -10,18 +10,18 @@ namespace Hex {
 
     template<class T>
     inline Image_CF<T>::Image_CF(int batch_size , int input_channels, int output_class):
-        // input channel = input_channels (1 or 3) , output channel = 16 , kernel size = 3 is 3x3
+        // input channel = input_channels (1 or 3) , output channel = 8 , kernel size = 3 is 3x3
         conv1(batch_size, { input_channels,8}, 3) ,
         relu1(),
         // input channel = 16  
       //  bn1(8, TensorShape::_4D , 0.8 , 1e-1),
-        // kernel size = 2 is 2x2 , stride is = 2
+        // kernel size = 2 is 2x2 , stride is = 3
         pool1(2,3),
 
-        // input channel = 16 , output channel = 32 , kernel size = 3 is 3x3
+        // input channel = 8 , output channel = 16 , kernel size = 3 is 3x3
         conv2(batch_size, {8,16}, 3),
         relu2(),
-         bn2(16, TensorShape::_4D, 0.9, 1e-2) ,
+        bn2(16, TensorShape::_4D, 0.9, 1e-2) ,
         pool2(2, 3),
 
         fl(),

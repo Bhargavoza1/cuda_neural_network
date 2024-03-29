@@ -17,11 +17,16 @@ I was using rtx 4070ti gpu in my local computer.
 ## costs
 - [x] MSE(mean squared error)	
 
-## models 
+## Models 
 - [x] MLP(multilayer perceptron) 
 - [x] Image_CF(image classification).
 Used **opencv** lib for image processing.
   
+## Model architecture
+<p align="center">
+  <img src="./gitresource/image_classification.png" />
+</p>
+
 
 # How to run this?
 
